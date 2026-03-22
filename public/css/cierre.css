@@ -1,0 +1,502 @@
+/* =============================================
+   cierre.css
+   ============================================= */
+
+/* ── Alertas ── */
+.alerta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 13.5px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+}
+
+.alerta i {
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+.alerta-exito {
+    background: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+.alerta-error {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+/* ── Etiqueta de sección ── */
+.seccion-label {
+    font-size: 12px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    color: #8A93A8;
+    letter-spacing: 0.8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.seccion-moneda {
+    font-size: 11px;
+    font-weight: 600;
+    color: #1A51C5;
+    background: #EBF1FD;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0;
+}
+
+.seccion-link {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1A51C5;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* ══════════════════════════════════════════
+   TOTAL VENDIDO CARD
+   ══════════════════════════════════════════ */
+.total-vendido-card {
+    background: linear-gradient(135deg, #1A2B6B, #2D4DB5);
+    border-radius: 18px;
+    padding: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+.total-vendido-card::before {
+    content: '';
+    position: absolute;
+    right: -20px;
+    top: -20px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .07);
+    pointer-events: none;
+}
+
+.tv-label {
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: rgba(255, 255, 255, .65);
+    margin-bottom: 6px;
+}
+
+.tv-monto {
+    font-size: 30px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -1px;
+}
+
+.tv-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, .15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: rgba(255, 255, 255, .9);
+    flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════
+   DESGLOSE CONTADO / CRÉDITO
+   ══════════════════════════════════════════ */
+.desglose-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.desglose-card {
+    background: #fff;
+    border: 1px solid #E8EAF0;
+    border-radius: 16px;
+    padding: 16px;
+    position: relative;
+    overflow: hidden;
+}
+
+.desglose-label {
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    color: #8A93A8;
+    margin-bottom: 6px;
+}
+
+.desglose-monto {
+    font-size: 17px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+}
+
+.desglose-monto.contado {
+    color: #15803d;
+}
+
+.desglose-monto.credito {
+    color: #C2651A;
+}
+
+.desglose-extra {
+    font-size: 10.5px;
+    font-family: 'DM Sans', sans-serif;
+    color: #15803d;
+    margin-top: 3px;
+    font-weight: 500;
+}
+
+.desglose-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: 0 0 16px 16px;
+}
+
+.bar-contado {
+    background: #22C55E;
+}
+
+.bar-credito {
+    background: #F59E0B;
+}
+
+/* ══════════════════════════════════════════
+   INVENTARIO RESTANTE
+   ══════════════════════════════════════════ */
+.inv-lista {
+    background: #fff;
+    border: 1px solid #E8EAF0;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.inv-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 16px;
+    border-bottom: 1px solid #F4F5F7;
+}
+
+.inv-item:last-of-type {
+    border-bottom: none;
+}
+
+.inv-img-wrap {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #F4F5F7;
+    flex-shrink: 0;
+}
+
+.inv-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.inv-img-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #CBD5E1;
+    font-size: 16px;
+}
+
+.inv-nombre {
+    flex: 1;
+    font-size: 13.5px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    color: #0F1623;
+}
+
+.inv-cant {
+    font-size: 16px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    color: #1A2B6B;
+    text-align: right;
+}
+
+.inv-cant span {
+    display: block;
+    font-size: 9px;
+    font-weight: 700;
+    color: #94A3B8;
+    letter-spacing: 0.5px;
+    margin-top: 1px;
+}
+
+.inv-mas {
+    padding: 10px 16px;
+    font-size: 11.5px;
+    color: #8A93A8;
+    font-family: 'DM Sans', sans-serif;
+    text-align: center;
+    border-top: 1px solid #F4F5F7;
+}
+
+.inv-vacio {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px;
+    background: #F0FDF4;
+    border-radius: 14px;
+    font-size: 13.5px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 600;
+    color: #15803d;
+    margin-bottom: 16px;
+}
+
+.inv-vacio i {
+    font-size: 18px;
+}
+
+/* ── Aviso sin ventas ── */
+.aviso-sin-ventas {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 14px 16px;
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+    border-radius: 12px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: #92400E;
+    margin-bottom: 4px;
+}
+
+.aviso-sin-ventas i {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+/* ── Botón generar cierre ── */
+.btn-generar-cierre {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 16px;
+    background: #1A2B6B;
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    font-size: 15px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s;
+    text-transform: uppercase;
+}
+
+.btn-generar-cierre:active {
+    transform: scale(0.98);
+}
+
+/* ══════════════════════════════════════════
+   COMPROBANTE CIERRE
+   ══════════════════════════════════════════ */
+.cierre-exito-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0 20px;
+}
+
+.cierre-check {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #F0FDF4;
+    border: 2px solid #BBF7D0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: #22C55E;
+    animation: popIn 0.4s cubic-bezier(.34, 1.4, .64, 1);
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(0.5);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.cierre-exito-titulo {
+    font-size: 24px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    color: #0F1623;
+    letter-spacing: -0.5px;
+}
+
+.cierre-exito-fecha {
+    font-size: 13px;
+    color: #8A93A8;
+    font-family: 'DM Sans', sans-serif;
+}
+
+/* Card comprobante cierre */
+.cierre-comp-card {
+    background: #fff;
+    border: 1px solid #E8EAF0;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.cierre-seccion {
+    padding: 16px 20px;
+}
+
+.cierre-sec-label {
+    font-size: 10px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    color: #8A93A8;
+    letter-spacing: 0.8px;
+    margin-bottom: 12px;
+}
+
+.cierre-sec-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 0;
+}
+
+.cierre-row-key {
+    font-size: 13.5px;
+    font-family: 'DM Sans', sans-serif;
+    color: #64748B;
+}
+
+.cierre-row-val {
+    font-size: 13.5px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    color: #0F1623;
+}
+
+.color-green {
+    color: #15803d !important;
+}
+
+.cierre-divider {
+    height: 1px;
+    background: #F0F2F7;
+    margin: 4px 20px;
+}
+
+.cierre-total-row {
+    margin-top: 6px;
+    padding-top: 6px;
+}
+
+.cierre-total-key {
+    font-size: 14px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    color: #0F1623;
+}
+
+.cierre-total-val {
+    font-size: 20px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    color: #1A2B6B;
+    letter-spacing: -0.5px;
+}
+
+/* Código de barras decorativo */
+.cierre-barcode {
+    padding: 16px 20px;
+    display: flex;
+    justify-content: center;
+    background: #FAFBFF;
+    border-top: 1px solid #F0F2F7;
+}
+
+.barcode-lines {
+    display: flex;
+    align-items: stretch;
+    height: 40px;
+    gap: 2px;
+}
+
+.barcode-line {
+    background: #0F1623;
+    border-radius: 1px;
+    min-width: 1px;
+}
+
+/* Botón finalizar */
+.btn-finalizar-jornada {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 16px;
+    background: #1A2B6B;
+    color: #fff;
+    border: none;
+    border-radius: 16px;
+    font-size: 15px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s;
+}
+
+.btn-finalizar-jornada:active {
+    transform: scale(0.98);
+}

@@ -1,0 +1,598 @@
+/* CREATE DATABASE IF NOT EXISTS pedidos_LYD;
+
+USE pedidos_LYD;
+
+CREATE TABLE IF NOT EXISTS `usuario` (
+    `id_usuario`  INTEGER      NOT NULL AUTO_INCREMENT,
+    `nombre`      VARCHAR(100) NOT NULL,
+    `correo`      VARCHAR(100)          DEFAULT NULL,
+    `contrasena`  VARCHAR(255) NOT NULL,
+    `rol`         ENUM('admin','vendedor') NOT NULL,
+    `estado`      BOOLEAN      NOT NULL DEFAULT TRUE,
+    PRIMARY KEY (`id_usuario`),
+    UNIQUE KEY `uq_usuario_correo` (`correo`)
+);
+
+CREATE TABLE IF NOT EXISTS `Cliente` (
+    `id_cliente`  INTEGER      NOT NULL AUTO_INCREMENT,
+    `nombre`      VARCHAR(100) NOT NULL,
+    `telefono`    VARCHAR(20)           DEFAULT NULL,
+    `direccion`   VARCHAR(150) NOT NULL,
+    `estado`      BOOLEAN      NOT NULL DEFAULT TRUE,
+    PRIMARY KEY (`id_cliente`)
+);
+
+CREATE TABLE IF NOT EXISTS `categorias` (
+    `id_categoria` INTEGER      NOT NULL AUTO_INCREMENT,
+    `nombre`       VARCHAR(100) NOT NULL,
+    `estado`       BOOLEAN      NOT NULL DEFAULT TRUE,
+    PRIMARY KEY (`id_categoria`)
+);
+
+
+CREATE TABLE IF NOT EXISTS `Productos` (
+    `id_producto`  INTEGER        NOT NULL AUTO_INCREMENT,
+    `id_categoria` INTEGER        NOT NULL,
+    `nombre`       VARCHAR(100)   NOT NULL,
+    `precio`       DECIMAL(10,2)  NOT NULL,
+    `estado`       BOOLEAN        NOT NULL DEFAULT TRUE,
+    PRIMARY KEY (`id_producto`),
+    CONSTRAINT `fk_producto_categoria`
+        FOREIGN KEY (`id_categoria`) REFERENCES `Categorias`(`id_categoria`)
+        ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS `cierreDiario` (
+    `id_cierre`      INTEGER       NOT NULL AUTO_INCREMENT,
+    `id_usuario`     INTEGER       NOT NULL,
+    `fecha`          DATE          NOT NULL,
+    `total_contado`  DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    `total_credito`  DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    `total_general`  DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    `estado`         BOOLEAN       NOT NULL DEFAULT TRUE,
+    PRIMARY KEY (`id_cierre`),
+    CONSTRAINT `fk_cierre_usuario`
+        FOREIGN KEY (`id_usuario`) REFERENCES `Usuario`(`id_usuario`)
+        ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE IF NOT EXISTS `Venta` (
+    `id_venta`    INTEGER        NOT NULL AUTO_INCREMENT,
+    `id_vendedor` INTEGER        NOT NULL,
+    `id_cliente`  INTEGER                 DEFAULT NULL,
+    `id_cierre`   INTEGER                 DEFAULT NULL,
+    `fecha`       DATE           NOT NULL,
+    `tipo_venta`  ENUM('contado','credito') NOT NULL,
+    `total`       DECIMAL(10,2)  NOT NULL,
+    PRIMARY KEY (`id_venta`),
+    CONSTRAINT `fk_venta_vendedor`
+        FOREIGN KEY (`id_vendedor`) REFERENCES `usuario`(`id_usuario`)
+        ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT `fk_venta_cliente`
+        FOREIGN KEY (`id_cliente`) REFERENCES `cliente`(`id_cliente`)
+        ON UPDATE CASCADE ON DELETE SET NULL,
+    CONSTRAINT `fk_venta_cierre`
+        FOREIGN KEY (`id_cierre`) REFERENCES `cierrediario`(`id_cierre`)
+        ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+CREATE TABLE IF NOT EXISTS `detalle_venta` (
+    `id_detalle`      INTEGER       NOT NULL AUTO_INCREMENT,
+    `id_venta`        INTEGER       NOT NULL,
+    `id_producto`     INTEGER       NOT NULL,
+    `cantidad`        INTEGER       NOT NULL,
+    `precio_unitario` DECIMAL(10,2) NOT NULL,
+    `subtotal`        DECIMAL(10,2) NOT NULL,
+    `estado`          BOOLEAN       NOT NULL DEFAULT TRUE,
+    PRIMARY KEY (`id_detalle`),
+    CONSTRAINT `fk_detalle_venta`
+        FOREIGN KEY (`id_venta`) REFERENCES `venta`(`id_venta`)
+        ON UPDATE CASCADE ON DELETE CASCADE,
+    CONSTRAINT `fk_detalle_producto`
+        FOREIGN KEY (`id_producto`) REFERENCES `productos`(`id_producto`)
+        ON UPDATE CASCADE ON DELETE RESTRICT
+); */
+
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Servidor: 127.0.0.1
+-- Tiempo de generación: 19-03-2026 a las 22:47:29
+-- Versión del servidor: 10.4.32-MariaDB
+-- Versión de PHP: 8.2.12
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Base de datos: `pedidos_lyd`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `abono`
+--
+
+CREATE TABLE `abono` (
+  `id_abono` int(11) NOT NULL,
+  `id_venta` int(11) NOT NULL,
+  `id_vendedor` int(11) NOT NULL,
+  `monto` decimal(10,2) NOT NULL,
+  `fecha` date NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `abono`
+--
+
+INSERT INTO `abono` (`id_abono`, `id_venta`, `id_vendedor`, `monto`, `fecha`) VALUES
+(1, 5, 5, 68000.00, '2026-03-17'),
+(2, 5, 6, 100000.00, '2026-03-17'),
+(3, 7, 7, 560000.00, '2026-03-17'),
+(4, 11, 6, 5000000.00, '2026-03-19');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `categorias`
+--
+
+CREATE TABLE `categorias` (
+  `id_categoria` int(11) NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `estado` tinyint(1) NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `categorias`
+--
+
+INSERT INTO `categorias` (`id_categoria`, `nombre`, `estado`) VALUES
+(1, 'Aguas', 1),
+(2, 'Gaseosas', 1),
+(3, 'Cervezas', 1),
+(4, 'Sodas', 1),
+(5, 'Aguardientes', 1),
+(6, 'Ron', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `cierrediario`
+--
+
+CREATE TABLE `cierrediario` (
+  `id_cierre` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `fecha` date NOT NULL,
+  `total_contado` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `total_credito` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `total_general` decimal(10,2) NOT NULL DEFAULT 0.00,
+  `estado` tinyint(1) NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `cierrediario`
+--
+
+INSERT INTO `cierrediario` (`id_cierre`, `id_usuario`, `fecha`, `total_contado`, `total_credito`, `total_general`, `estado`) VALUES
+(1, 5, '2026-03-17', 68000.00, 168000.00, 236000.00, 1),
+(2, 6, '2026-03-17', 280000.00, 0.00, 280000.00, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `cliente`
+--
+
+CREATE TABLE `cliente` (
+  `id_cliente` int(11) NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `telefono` varchar(20) DEFAULT NULL,
+  `direccion` varchar(150) NOT NULL,
+  `estado` tinyint(1) NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `cliente`
+--
+
+INSERT INTO `cliente` (`id_cliente`, `nombre`, `telefono`, `direccion`, `estado`) VALUES
+(1, 'manolito', '3209891830', 'Acevedo', 1),
+(2, 'manoloka', '320 9891830', 'Acevedo', 0),
+(3, 'Las Delicias', '', 'Guayabal', 1),
+(4, 'Super el 24', '', 'El Brasil', 1),
+(5, 'Bomba Plus', '', 'Guayabal', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `detalle_venta`
+--
+
+CREATE TABLE `detalle_venta` (
+  `id_detalle` int(11) NOT NULL,
+  `id_venta` int(11) NOT NULL,
+  `id_producto` int(11) NOT NULL,
+  `cantidad` int(11) NOT NULL,
+  `precio_unitario` decimal(10,2) NOT NULL,
+  `subtotal` decimal(10,2) NOT NULL,
+  `estado` tinyint(1) NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `detalle_venta`
+--
+
+INSERT INTO `detalle_venta` (`id_detalle`, `id_venta`, `id_producto`, `cantidad`, `precio_unitario`, `subtotal`, `estado`) VALUES
+(1, 1, 4, 2, 56000.00, 112000.00, 1),
+(2, 2, 4, 2, 56000.00, 112000.00, 1),
+(3, 3, 4, 2, 56000.00, 112000.00, 1),
+(4, 4, 4, 3, 56000.00, 168000.00, 1),
+(5, 5, 4, 3, 56000.00, 168000.00, 1),
+(6, 6, 4, 5, 56000.00, 280000.00, 1),
+(7, 7, 4, 10, 56000.00, 560000.00, 1),
+(8, 8, 4, 5, 56000.00, 280000.00, 1),
+(9, 9, 4, 1, 56000.00, 56000.00, 1),
+(10, 10, 2, 10, 50000.00, 500000.00, 1),
+(11, 11, 1, 3, 55000.00, 165000.00, 1),
+(12, 11, 2, 2, 50000.00, 100000.00, 1),
+(13, 11, 7, 2, 5000000.00, 10000000.00, 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `inventariocamion`
+--
+
+CREATE TABLE `inventariocamion` (
+  `id_inventario` int(11) NOT NULL,
+  `id_vendedor` int(11) NOT NULL,
+  `id_producto` int(11) NOT NULL,
+  `cantidad_cargada` int(11) NOT NULL,
+  `cantidad_disponible` int(11) NOT NULL,
+  `fecha_cargue` date NOT NULL,
+  `estado` tinyint(1) NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `inventariocamion`
+--
+
+INSERT INTO `inventariocamion` (`id_inventario`, `id_vendedor`, `id_producto`, `cantidad_cargada`, `cantidad_disponible`, `fecha_cargue`, `estado`) VALUES
+(1, 5, 1, 15, 15, '2026-03-16', 1),
+(2, 5, 2, 10, 10, '2026-03-16', 1),
+(3, 5, 4, 10, 1, '2026-03-16', 1),
+(4, 5, 5, 10, 10, '2026-03-16', 1),
+(5, 5, 1, 10, 10, '2026-03-17', 1),
+(6, 5, 2, 10, 10, '2026-03-17', 1),
+(7, 5, 4, 10, 6, '2026-03-17', 1),
+(8, 5, 5, 10, 10, '2026-03-17', 1),
+(9, 6, 4, 20, 15, '2026-03-17', 1),
+(10, 7, 1, 20, 20, '2026-03-17', 1),
+(11, 7, 2, 20, 10, '2026-03-17', 1),
+(12, 7, 4, 20, 5, '2026-03-17', 1),
+(13, 7, 5, 20, 20, '2026-03-17', 1),
+(14, 6, 1, 10, 7, '2026-03-19', 1),
+(15, 6, 2, 4, 2, '2026-03-19', 1),
+(16, 6, 4, 5, 5, '2026-03-19', 1),
+(17, 6, 5, 15, 15, '2026-03-19', 1),
+(18, 6, 6, 10, 10, '2026-03-19', 1),
+(19, 6, 7, 6, 4, '2026-03-19', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `productos`
+--
+
+CREATE TABLE `productos` (
+  `id_producto` int(11) NOT NULL,
+  `id_categoria` int(11) NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `precio` decimal(10,2) NOT NULL,
+  `stock_inicial` int(11) NOT NULL DEFAULT 0,
+  `imagen` varchar(255) DEFAULT NULL,
+  `estado` tinyint(1) NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `productos`
+--
+
+INSERT INTO `productos` (`id_producto`, `id_categoria`, `nombre`, `precio`, `stock_inicial`, `imagen`, `estado`) VALUES
+(1, 2, 'Coca Cola 1.5L', 55000.00, 0, 'prod_1773785529_701.png', 1),
+(2, 3, 'Andina Dorada Lata 330ml', 50000.00, 0, 'prod_1773785564_354.webp', 1),
+(3, 3, 'Aguila Original lata 330 ml', 56000.00, 15, 'prod_1773423985_389.webp', 0),
+(4, 3, 'Aguila Original lata 330 ml', 56000.00, 15, 'prod_1773292116_761.jpg', 1),
+(5, 2, 'Coca Cola 3L', 55000.00, 10, 'prod_1773374055_900.webp', 1),
+(6, 2, 'Coca Cola Mini 250ml', 18000.00, 0, 'prod_1773942320_323.png', 1),
+(7, 3, 'Aguardiente Antioqueño 750 ml', 5000000.00, 0, 'prod_1773943265_422.png', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `ubicacion_vendedor`
+--
+
+CREATE TABLE `ubicacion_vendedor` (
+  `id_ubicacion` int(11) NOT NULL,
+  `id_vendedor` int(11) NOT NULL,
+  `latitud` decimal(10,7) NOT NULL,
+  `longitud` decimal(10,7) NOT NULL,
+  `actualizado_en` datetime NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `ubicacion_vendedor`
+--
+
+INSERT INTO `ubicacion_vendedor` (`id_ubicacion`, `id_vendedor`, `latitud`, `longitud`, `actualizado_en`) VALUES
+(1, 6, 1.6035613, -75.5828330, '2026-03-19 16:47:23'),
+(4, 7, 4.7585087, -74.1356454, '2026-03-19 15:00:54');
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `usuario`
+--
+
+CREATE TABLE `usuario` (
+  `id_usuario` int(11) NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `correo` varchar(100) DEFAULT NULL,
+  `contrasena` varchar(255) NOT NULL,
+  `rol` enum('admin','vendedor') NOT NULL,
+  `estado` tinyint(1) NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `usuario`
+--
+
+INSERT INTO `usuario` (`id_usuario`, `nombre`, `correo`, `contrasena`, `rol`, `estado`) VALUES
+(2, 'admin', 'admin@gmail.com', '12345', 'admin', 1),
+(3, 'manoloka', 'manolo@gmail.com', '12345', 'admin', 1),
+(4, 'manolito sunga', 'carvajal7lsch@gmail.com', '123', 'admin', 1),
+(5, 'Manolo Panadero', 'manuelpan@gmail.com', '12345', 'vendedor', 1),
+(6, 'juan', 'juan@gmai.com', '12345', 'vendedor', 1),
+(7, 'santiago', 'santiago@gmail.com', '12345', 'vendedor', 1);
+
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `venta`
+--
+
+CREATE TABLE `venta` (
+  `id_venta` int(11) NOT NULL,
+  `id_vendedor` int(11) NOT NULL,
+  `id_cliente` int(11) DEFAULT NULL,
+  `id_cierre` int(11) DEFAULT NULL,
+  `fecha` date NOT NULL,
+  `tipo_venta` enum('contado','credito') NOT NULL,
+  `total` decimal(10,2) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Volcado de datos para la tabla `venta`
+--
+
+INSERT INTO `venta` (`id_venta`, `id_vendedor`, `id_cliente`, `id_cierre`, `fecha`, `tipo_venta`, `total`) VALUES
+(1, 5, 5, NULL, '2026-03-16', 'contado', 112000.00),
+(2, 5, 3, NULL, '2026-03-16', 'credito', 112000.00),
+(3, 5, 5, NULL, '2026-03-16', 'contado', 112000.00),
+(4, 5, 3, NULL, '2026-03-16', 'contado', 168000.00),
+(5, 5, 5, 1, '2026-03-17', 'credito', 168000.00),
+(6, 6, 3, 2, '2026-03-17', 'contado', 280000.00),
+(7, 7, 1, NULL, '2026-03-17', 'credito', 560000.00),
+(8, 7, 5, NULL, '2026-03-17', 'contado', 280000.00),
+(9, 5, 5, NULL, '2026-03-17', 'contado', 56000.00),
+(10, 7, 1, NULL, '2026-03-17', 'contado', 500000.00),
+(11, 6, 4, NULL, '2026-03-19', 'credito', 10265000.00);
+
+--
+-- Índices para tablas volcadas
+--
+
+--
+-- Indices de la tabla `abono`
+--
+ALTER TABLE `abono`
+  ADD PRIMARY KEY (`id_abono`),
+  ADD KEY `fk_abono_venta` (`id_venta`),
+  ADD KEY `fk_abono_vendedor` (`id_vendedor`);
+
+--
+-- Indices de la tabla `categorias`
+--
+ALTER TABLE `categorias`
+  ADD PRIMARY KEY (`id_categoria`);
+
+--
+-- Indices de la tabla `cierrediario`
+--
+ALTER TABLE `cierrediario`
+  ADD PRIMARY KEY (`id_cierre`),
+  ADD KEY `fk_cierre_usuario` (`id_usuario`);
+
+--
+-- Indices de la tabla `cliente`
+--
+ALTER TABLE `cliente`
+  ADD PRIMARY KEY (`id_cliente`);
+
+--
+-- Indices de la tabla `detalle_venta`
+--
+ALTER TABLE `detalle_venta`
+  ADD PRIMARY KEY (`id_detalle`),
+  ADD KEY `fk_detalle_venta` (`id_venta`),
+  ADD KEY `fk_detalle_producto` (`id_producto`);
+
+--
+-- Indices de la tabla `inventariocamion`
+--
+ALTER TABLE `inventariocamion`
+  ADD PRIMARY KEY (`id_inventario`),
+  ADD KEY `fk_inventario_vendedor` (`id_vendedor`),
+  ADD KEY `fk_inventario_producto` (`id_producto`);
+
+--
+-- Indices de la tabla `productos`
+--
+ALTER TABLE `productos`
+  ADD PRIMARY KEY (`id_producto`),
+  ADD KEY `fk_producto_categoria` (`id_categoria`);
+
+--
+-- Indices de la tabla `ubicacion_vendedor`
+--
+ALTER TABLE `ubicacion_vendedor`
+  ADD PRIMARY KEY (`id_ubicacion`),
+  ADD UNIQUE KEY `uq_ubicacion_vendedor` (`id_vendedor`);
+
+--
+-- Indices de la tabla `usuario`
+--
+ALTER TABLE `usuario`
+  ADD PRIMARY KEY (`id_usuario`),
+  ADD UNIQUE KEY `correo` (`correo`);
+
+--
+-- Indices de la tabla `venta`
+--
+ALTER TABLE `venta`
+  ADD PRIMARY KEY (`id_venta`),
+  ADD KEY `fk_venta_vendedor` (`id_vendedor`),
+  ADD KEY `fk_venta_cliente` (`id_cliente`),
+  ADD KEY `fk_venta_cierre` (`id_cierre`);
+
+--
+-- AUTO_INCREMENT de las tablas volcadas
+--
+
+--
+-- AUTO_INCREMENT de la tabla `abono`
+--
+ALTER TABLE `abono`
+  MODIFY `id_abono` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT de la tabla `categorias`
+--
+ALTER TABLE `categorias`
+  MODIFY `id_categoria` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT de la tabla `cierrediario`
+--
+ALTER TABLE `cierrediario`
+  MODIFY `id_cierre` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT de la tabla `cliente`
+--
+ALTER TABLE `cliente`
+  MODIFY `id_cliente` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT de la tabla `detalle_venta`
+--
+ALTER TABLE `detalle_venta`
+  MODIFY `id_detalle` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+
+--
+-- AUTO_INCREMENT de la tabla `inventariocamion`
+--
+ALTER TABLE `inventariocamion`
+  MODIFY `id_inventario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=20;
+
+--
+-- AUTO_INCREMENT de la tabla `productos`
+--
+ALTER TABLE `productos`
+  MODIFY `id_producto` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT de la tabla `ubicacion_vendedor`
+--
+ALTER TABLE `ubicacion_vendedor`
+  MODIFY `id_ubicacion` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=107;
+
+--
+-- AUTO_INCREMENT de la tabla `usuario`
+--
+ALTER TABLE `usuario`
+  MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+
+--
+-- AUTO_INCREMENT de la tabla `venta`
+--
+ALTER TABLE `venta`
+  MODIFY `id_venta` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- Restricciones para tablas volcadas
+--
+
+--
+-- Filtros para la tabla `abono`
+--
+ALTER TABLE `abono`
+  ADD CONSTRAINT `fk_abono_vendedor` FOREIGN KEY (`id_vendedor`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_abono_venta` FOREIGN KEY (`id_venta`) REFERENCES `venta` (`id_venta`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `cierrediario`
+--
+ALTER TABLE `cierrediario`
+  ADD CONSTRAINT `fk_cierre_usuario` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `detalle_venta`
+--
+ALTER TABLE `detalle_venta`
+  ADD CONSTRAINT `fk_detalle_producto` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id_producto`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_detalle_venta` FOREIGN KEY (`id_venta`) REFERENCES `venta` (`id_venta`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `inventariocamion`
+--
+ALTER TABLE `inventariocamion`
+  ADD CONSTRAINT `fk_inventario_producto` FOREIGN KEY (`id_producto`) REFERENCES `productos` (`id_producto`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_inventario_vendedor` FOREIGN KEY (`id_vendedor`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `productos`
+--
+ALTER TABLE `productos`
+  ADD CONSTRAINT `fk_producto_categoria` FOREIGN KEY (`id_categoria`) REFERENCES `categorias` (`id_categoria`) ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `ubicacion_vendedor`
+--
+ALTER TABLE `ubicacion_vendedor`
+  ADD CONSTRAINT `fk_ubicacion_usuario` FOREIGN KEY (`id_vendedor`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Filtros para la tabla `venta`
+--
+ALTER TABLE `venta`
+  ADD CONSTRAINT `fk_venta_cierre` FOREIGN KEY (`id_cierre`) REFERENCES `cierrediario` (`id_cierre`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_venta_cliente` FOREIGN KEY (`id_cliente`) REFERENCES `cliente` (`id_cliente`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_venta_vendedor` FOREIGN KEY (`id_vendedor`) REFERENCES `usuario` (`id_usuario`) ON UPDATE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

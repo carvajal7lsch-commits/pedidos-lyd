@@ -1,0 +1,317 @@
+body {
+    font-family: 'inter';
+    display: flex;
+    margin: 0;
+    background: #E9ECF5;
+    height: 100vh;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+/* logo inicial */
+.logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 90%;
+    gap: 0.5rem;
+    padding: 1.4rem;
+    height: 2.5rem;
+}
+
+.favicon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.favicon i {
+    font-size: 1.5rem;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    background: linear-gradient(135deg, #4A80FF 0%, #1A3FD8 100%);
+    cursor: pointer;
+    transition: all ease 0.3s;
+    color: white;
+    flex-shrink: 0;
+}
+
+.favicon i:hover {
+    transform: scale(1.050);
+    background: rgb(86, 86, 86);
+}
+
+.letras {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.t1 {
+    font-size: 1.4rem;
+    font-weight: bold;
+    cursor: pointer;
+    color: #14429f;
+    margin: 0;
+    font-size: 0;
+    opacity: 0;
+    max-width: 0;
+    white-space: nowrap;
+    transition: font-size 0.3s ease, opacity 0.3s ease, max-width 0.3s ease;
+}
+
+.menu:hover .t1 {
+    opacity: 1;
+    font-size: 1rem;
+    max-width: 200px;
+    /* un valor suficientemente grande */
+    gap: 0.5rem;
+}
+
+.t2 {
+    margin: 0;
+    color: black;
+    width: 85%;
+    text-align: left;
+    font-weight: 300;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    align-items: center;
+    width: 70px;
+    height: 96%;
+    padding: 0.5rem;
+    margin-left: 0.8rem;
+    margin-top: 0.4rem;
+    position: relative;
+    transition: width 0.3s cubic-bezier(.4, 0, .2, 1);
+    border-radius: 1rem;
+    overflow: hidden;
+    flex-shrink: 0;
+    z-index: 100;
+}
+
+.menu:hover {
+    width: 15%;
+}
+
+/* ── Logo: centrado en colapsado ── */
+/* .menu .logo {
+    display: flex;
+    justify-content: center;
+} */
+
+.menu:hover .logo {
+    justify-content: flex-start;
+    width: 90%;
+}
+
+/* ── Favicon icon: padding mayor en colapsado ── */
+.menu .favicon i {
+    padding: 1rem;
+}
+
+.menu:hover .favicon i {
+    padding: 0.5rem;
+}
+
+/* ── Letras: ocultas en colapsado ── */
+.menu .letras {
+    display: flex;
+    /* siempre visible */
+    opacity: 0;
+    max-width: 0;
+    overflow: hidden;
+    transition: opacity 0.3s ease, max-width 0.3s ease;
+}
+
+.menu:hover .letras {
+    opacity: 1;
+    max-width: 200px;
+}
+
+/* ── Lista ── */
+.lista {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    list-style: none;
+    padding: 0.5rem;
+    justify-content: center;
+    margin: 0;
+    width: 90%;
+}
+
+/* ── Links: solo ícono centrado en colapsado ── */
+.lista a {
+    font-size: 0;
+    padding: 0.5rem;
+    height: 40px;
+    display: flex;
+    text-decoration: none;
+    color: black;
+    transition: all ease 0.3s;
+}
+
+.menu:hover .lista a {
+    font-size: 1rem;
+    gap: 0.5rem;
+}
+
+/* ── Íconos de lista: siempre visibles ── */
+.lista i {
+    font-size: 1.1rem;
+    transition: all ease 0.3s;
+    padding: 0.5rem;
+    margin-left: 5px;
+}
+
+
+/* ── Clase .a: centrada en colapsado ── */
+.a {
+    display: flex;
+    align-items: center;
+    border-radius: 0.6rem;
+    cursor: pointer;
+    transition: all ease 0.3s;
+}
+
+.menu:hover .a {
+    justify-content: flex-start;
+    gap: 0.5rem;
+}
+
+/* hovers de links */
+.a:hover i {
+    color: white;
+}
+
+.lista a:hover {
+    background: #1855CF;
+    color: white;
+}
+
+/* ── Salir ── */
+.salir {
+    height: 40%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    list-style: none;
+    padding: 0.5rem;
+    justify-content: end;
+    width: 100%;
+    align-items: center;
+}
+
+.menu:hover .salir {
+    align-items: stretch;
+}
+
+/* ── Logout: solo ícono en colapsado ── */
+.logout {
+    display: flex;
+    gap: 0;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem;
+    cursor: pointer;
+    width: 42px;
+    height: 42px;
+    border-radius: 1rem;
+    background: #FEF2F2;
+    color: #DC2626;
+    text-decoration: none;
+    font-weight: bold;
+    transition: all ease 0.3s;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.menu:hover .logout {
+    gap: 0.5rem;
+    justify-content: center;
+    width: auto;
+    height: auto;
+}
+
+.logout i {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    padding: 0.5rem;
+}
+
+/* Texto del logout  */
+.menu .logout span {
+    display: none;
+}
+
+.menu:hover .logout span {
+    display: inline;
+}
+
+.salir a:hover {
+    color: red;
+    background: #ffded2;
+}
+
+/* submenu usuarios */
+.submenu {
+    list-style: none;
+    display: none;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    gap: 0;
+}
+
+.submenu li {
+    margin: 0;
+    border-radius: 0.5rem;
+}
+
+/* se abre con la clase .abierto */
+.desplegable.abierto .submenu {
+    display: flex;
+    gap: 0;
+}
+
+/* flecha — visible solo cuando el menú está expandido */
+.flecha {
+    margin-left: auto;
+    font-size: 11px !important;
+    transition: transform 0.25s ease;
+    opacity: 0;
+    /* oculta en colapsado */
+    width: 0;
+}
+
+.menu:hover .flecha {
+    opacity: 1;
+    /* visible al expandir */
+    width: auto;
+    margin-left: 30px;
+}
+
+/* flecha rota cuando está abierto */
+.desplegable.abierto .flecha {
+    transform: rotate(180deg);
+}
+
+/* quitar el hover del desplegable que teníamos antes */
+
+.desplegable.abierto .submenu {
+    display: block;
+}
+
+
+.submenu a {
+    height: 1.5rem;
+}

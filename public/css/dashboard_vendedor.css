@@ -1,0 +1,477 @@
+/* =============================================
+   vendedor.css — panel móvil vendedor
+   Fuentes: Sora (títulos) + DM Sans (cuerpo)
+   ============================================= */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    height: 100%;
+    background: #F0F2F7;
+    font-family: 'DM Sans', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overscroll-behavior: none;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* ══════════════════════════════════════════
+   TOP BAR
+   ══════════════════════════════════════════ */
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: #fff;
+    padding: 16px 20px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid #EAECF2;
+}
+
+.topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #1A2B6B;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.avatar i {
+    font-size: 20px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.greeting-sub {
+    font-size: 11px;
+    color: #8A93A8;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.2px;
+    line-height: 1;
+}
+
+.greeting-name {
+    font-size: 17px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    color: #0F1623;
+    margin-top: 3px;
+    line-height: 1;
+}
+
+.topbar-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #F4F5F7;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #4A5568;
+    font-size: 18px;
+    transition: background 0.15s;
+}
+
+.topbar-btn:hover {
+    background: #EAECF2;
+}
+
+/* ══════════════════════════════════════════
+   SCROLL BODY
+   ══════════════════════════════════════════ */
+.scroll-body {
+    padding: 16px 16px 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* ══════════════════════════════════════════
+   BANNER JORNADA
+   ══════════════════════════════════════════ */
+.jornada-banner {
+    border-radius: 14px;
+    padding: 11px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.jornada-activa {
+    background: #FFFBEB;
+    border: 1px solid #FDE68A;
+}
+
+.jornada-inactiva {
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+}
+
+.jornada-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.jornada-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.dot-on {
+    background: #F59E0B;
+    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+}
+
+.dot-off {
+    background: #CBD5E1;
+}
+
+.jornada-text {
+    font-size: 12.5px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    color: #92400E;
+}
+
+.jornada-inactiva .jornada-text {
+    color: #64748B;
+}
+
+.jornada-badge {
+    font-size: 11.5px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    background: #FEF3C7;
+    color: #B45309;
+    padding: 4px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+.badge-iniciar {
+    background: #1A2B6B;
+    color: #fff;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+}
+
+/* ══════════════════════════════════════════
+   CARD VENTAS DEL DÍA
+   ══════════════════════════════════════════ */
+.ventas-card {
+    background: #1A2B6B;
+    border-radius: 20px;
+    padding: 22px 22px 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Círculos decorativos */
+.ventas-card::before {
+    content: '';
+    position: absolute;
+    right: -28px;
+    top: -28px;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    pointer-events: none;
+}
+
+.ventas-card::after {
+    content: '';
+    position: absolute;
+    right: 32px;
+    bottom: -36px;
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.04);
+    pointer-events: none;
+}
+
+.ventas-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.55);
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.ventas-amount {
+    font-size: 32px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -1px;
+    line-height: 1;
+}
+
+.ventas-cop {
+    font-size: 13px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.45);
+    margin-left: 4px;
+    vertical-align: middle;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0;
+}
+
+.ventas-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 14px;
+}
+
+.ventas-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 600;
+}
+
+.delta-pos {
+    background: rgba(74, 222, 128, 0.18);
+    color: #86EFAC;
+}
+
+.delta-neg {
+    background: rgba(252, 165, 165, 0.18);
+    color: #FCA5A5;
+}
+
+.ventas-delta i {
+    font-size: 15px;
+}
+
+.ventas-pedidos {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.45);
+    font-family: 'DM Sans', sans-serif;
+}
+
+.ventas-pedidos span {
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 700;
+    font-family: 'Sora', sans-serif;
+}
+
+.ventas-empty-msg {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.45);
+    font-family: 'DM Sans', sans-serif;
+    margin-top: 8px;
+}
+
+/* ══════════════════════════════════════════
+   CTA TOMAR PEDIDO
+   ══════════════════════════════════════════ */
+.cta-btn {
+    background: #22C55E;
+    border: none;
+    border-radius: 18px;
+    padding: 18px 20px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.cta-btn::after {
+    content: '';
+    position: absolute;
+    right: -8px;
+    top: -8px;
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    pointer-events: none;
+}
+
+.cta-btn:active {
+    transform: scale(0.98);
+}
+
+.cta-disabled {
+    background: #94A3B8;
+    cursor: not-allowed;
+    opacity: 0.75;
+}
+
+.cta-left {
+    text-align: left;
+}
+
+.cta-title {
+    display: block;
+    font-size: 18px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.3px;
+}
+
+.cta-sub {
+    display: block;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.72);
+    font-family: 'DM Sans', sans-serif;
+    margin-top: 3px;
+}
+
+.cta-icon {
+    width: 46px;
+    height: 46px;
+    background: rgba(255, 255, 255, 0.18);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 22px;
+    color: #fff;
+}
+
+/* ══════════════════════════════════════════
+   GRID ACCESOS RÁPIDOS
+   ══════════════════════════════════════════ */
+.access-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.access-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px 16px 14px;
+    border: 1px solid #EAECF2;
+    display: flex;
+    flex-direction: column;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s;
+}
+
+.access-card:active {
+    transform: scale(0.97);
+}
+
+.access-icon-wrap {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12px;
+    font-size: 18px;
+}
+
+.ic-blue {
+    background: #EBF1FD;
+    color: #1A51C5;
+}
+
+.ic-orange {
+    background: #FEF0E7;
+    color: #C2651A;
+}
+
+.ic-purple {
+    background: #F0EFFE;
+    color: #6040CC;
+}
+
+.ic-red {
+    background: #FEECEC;
+    color: #C03030;
+}
+
+.access-title {
+    font-size: 14px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    color: #0F1623;
+    line-height: 1.2;
+}
+
+.access-sub {
+    font-size: 11.5px;
+    color: #8A93A8;
+    font-family: 'DM Sans', sans-serif;
+    margin-top: 3px;
+}
+
+.access-count {
+    font-size: 11.5px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-top: 10px;
+    display: inline-block;
+    align-self: flex-start;
+}
+
+.cnt-blue {
+    background: #EBF1FD;
+    color: #1A51C5;
+}
+
+.cnt-orange {
+    background: #FEF0E7;
+    color: #C2651A;
+}
+
+.cnt-purple {
+    background: #F0EFFE;
+    color: #6040CC;
+}
+
+.cnt-red {
+    background: #FEECEC;
+    color: #C03030;
+}
+
+/* Navbar del vendedor → ver navbar.css */

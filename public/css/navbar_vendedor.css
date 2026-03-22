@@ -1,0 +1,58 @@
+/* =============================================
+   NAVBAR VENDEDOR — móvil (bottom nav)
+   Agregar al final de navbar.css
+   ============================================= */
+
+.vend-navbar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #fff;
+    border-top: 1px solid #EAECF2;
+    display: flex;
+    padding: 8px 0 max(12px, env(safe-area-inset-bottom));
+    z-index: 100;
+}
+
+.vend-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 0;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.vend-nav-item i {
+    font-size: 20px;
+    line-height: 1;
+}
+
+.vend-nav-label {
+    font-size: 10px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+
+.vend-nav-active i,
+.vend-nav-active .vend-nav-label {
+    color: #1A2B6B;
+}
+
+.vend-nav-inactive i,
+.vend-nav-inactive .vend-nav-label {
+    color: #B0B8CC;
+}
+
+.vend-nav-pip {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #1A2B6B;
+    margin-top: -2px;
+}

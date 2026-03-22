@@ -1,0 +1,1100 @@
+/* =============================================
+   clientes_vendedor.css
+   ============================================= */
+
+/* ── Page title en topbar ── */
+.page-title {
+    font-size: 18px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    color: #0F1623;
+    letter-spacing: -0.3px;
+    margin: 0;
+}
+
+/* ── Botón + (agregar) ── */
+.btn-add {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #1A2B6B;
+    color: #fff;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s;
+}
+
+.btn-add:active {
+    transform: scale(0.93);
+}
+
+/* ── Alertas ── */
+.alerta {
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 13.5px;
+    font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    margin-bottom: 4px;
+}
+
+.alerta-exito {
+    background: #f0fdf4;
+    color: #15803d;
+    border: 1px solid #bbf7d0;
+}
+
+.alerta-error {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+/* ══════════════════════════════════════════
+   FILTROS
+   ══════════════════════════════════════════ */
+.filtros-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.search-box {
+    position: relative;
+}
+
+.search-box i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94A3B8;
+    font-size: 15px;
+    pointer-events: none;
+}
+
+.search-box input {
+    width: 100%;
+    height: 44px;
+    padding: 0 16px 0 42px;
+    background: #fff;
+    border: 1px solid #E8EAF0;
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    color: #0F1623;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.search-box input::placeholder {
+    color: #B0B8CC;
+}
+
+.search-box input:focus {
+    border-color: #1A2B6B;
+    box-shadow: 0 0 0 3px rgba(26, 43, 107, 0.1);
+}
+
+/* Filter pills */
+.filter-pills {
+    display: flex;
+    gap: 8px;
+}
+
+.fpill {
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 12.5px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 600;
+    border: 1.5px solid #E8EAF0;
+    background: #fff;
+    color: #8A93A8;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: all 0.15s;
+}
+
+.fpill.active {
+    background: #1A2B6B;
+    border-color: #1A2B6B;
+    color: #fff;
+}
+
+/* ══════════════════════════════════════════
+   LISTA DE CLIENTES
+   ══════════════════════════════════════════ */
+.clientes-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.cliente-card {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #E8EAF0;
+    overflow: hidden;
+    transition: transform 0.15s;
+}
+
+.card-link {
+    display: block;
+    padding: 14px 16px 10px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.card-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+/* Avatar pequeño con inicial */
+.cli-avatar-sm {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1A2B6B, #3B5BDB);
+    color: #fff;
+    font-size: 15px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    user-select: none;
+}
+
+.card-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+    min-width: 0;
+}
+
+.card-nombre {
+    font-size: 15px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    color: #0F1623;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Badge saldo pendiente */
+.saldo-badge {
+    display: inline-flex;
+    align-items: center;
+    background: #FEF2F2;
+    color: #C03030;
+    font-size: 11px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+    align-self: flex-start;
+}
+
+.card-bottom {
+    border-top: 1px solid #F4F5F7;
+    padding-top: 8px;
+}
+
+.card-dir {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12.5px;
+    color: #8A93A8;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.card-dir i {
+    font-size: 13px;
+}
+
+/* Botón Hacer Pedido */
+.card-actions {
+    padding: 10px 16px 14px;
+}
+
+.btn-pedido {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 11px;
+    background: #1A2B6B;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s;
+}
+
+.btn-pedido:active {
+    transform: scale(0.98);
+}
+
+/* Estado vacío / sin resultados */
+.lista-vacia {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 48px 20px;
+    color: #B0B8CC;
+}
+
+.lista-vacia i {
+    font-size: 32px;
+}
+
+.lista-vacia p {
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    margin: 0;
+}
+
+/* ══════════════════════════════════════════
+   DETALLE CLIENTE
+   ══════════════════════════════════════════ */
+.detalle-cliente-card {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #E8EAF0;
+    padding: 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.detalle-avatar {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1A2B6B, #3B5BDB);
+    color: #fff;
+    font-size: 20px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(26, 43, 107, 0.25);
+}
+
+.detalle-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+    min-width: 0;
+}
+
+.detalle-nombre {
+    font-size: 16px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    color: #0F1623;
+}
+
+.detalle-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: #8A93A8;
+    font-family: 'DM Sans', sans-serif;
+    text-decoration: none;
+}
+
+.detalle-meta i {
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.detalle-tel {
+    color: #1A2B6B;
+    font-weight: 500;
+}
+
+/* ── Cartera card ── */
+.cartera-card {
+    background: #1A2B6B;
+    border-radius: 20px;
+    padding: 22px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.cartera-card::before {
+    content: '';
+    position: absolute;
+    right: -20px;
+    top: -20px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .06);
+    pointer-events: none;
+}
+
+.cartera-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, .55);
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.cartera-monto {
+    font-size: 34px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -1px;
+    margin-bottom: 16px;
+}
+
+.btn-pagar-todo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 28px;
+    background: rgba(255, 255, 255, .15);
+    color: #fff;
+    border: 1.5px solid rgba(255, 255, 255, .3);
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s;
+}
+
+.btn-pagar-todo:active {
+    background: rgba(255, 255, 255, .25);
+}
+
+/* Cartera limpia */
+.cartera-limpia {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 28px;
+    background: #F0FDF4;
+    border-radius: 16px;
+    color: #15803d;
+}
+
+.cartera-limpia i {
+    font-size: 28px;
+}
+
+.cartera-limpia p {
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* ── Sección títulos ── */
+.seccion-titulo {
+    font-size: 14px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    color: #0F1623;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.seccion-badge {
+    font-size: 11.5px;
+    font-weight: 700;
+    background: #FEF2F2;
+    color: #C03030;
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+/* ── Facturas pendientes ── */
+.facturas-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.factura-card {
+    background: #fff;
+    border: 1px solid #E8EAF0;
+    border-radius: 14px;
+    padding: 14px 16px;
+}
+
+.factura-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.factura-id {
+    font-size: 13px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    color: #0F1623;
+}
+
+.factura-fecha {
+    font-size: 11.5px;
+    color: #8A93A8;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.factura-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid #F4F5F7;
+    padding-top: 10px;
+}
+
+.factura-label {
+    font-size: 10px;
+    color: #B0B8CC;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.6px;
+    margin-bottom: 2px;
+}
+
+.factura-monto {
+    font-size: 17px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    color: #0F1623;
+}
+
+.btn-abonar {
+    padding: 8px 20px;
+    background: #1A2B6B;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    font-size: 13px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s;
+}
+
+.btn-abonar:active {
+    transform: scale(0.96);
+}
+
+/* ── Historial ── */
+.historial-lista {
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    border: 1px solid #E8EAF0;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.historial-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid #F4F5F7;
+}
+
+.historial-item:last-child {
+    border-bottom: none;
+}
+
+.historial-id {
+    font-size: 13px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    color: #0F1623;
+}
+
+.historial-fecha {
+    font-size: 11.5px;
+    color: #8A93A8;
+    font-family: 'DM Sans', sans-serif;
+    margin-top: 2px;
+}
+
+.historial-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+}
+
+.historial-monto {
+    font-size: 14px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    color: #0F1623;
+}
+
+.historial-tipo {
+    font-size: 11px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 20px;
+}
+
+.tipo-contado {
+    background: #F0FDF4;
+    color: #15803d;
+}
+
+.tipo-credito {
+    background: #FEF2F2;
+    color: #C03030;
+}
+
+/* ══════════════════════════════════════════
+   MODAL — BOTTOM SHEET
+   ══════════════════════════════════════════ */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.5);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 200;
+    backdrop-filter: blur(2px);
+}
+
+.bottom-sheet {
+    background: #fff;
+    border-radius: 24px 24px 0 0;
+    width: 100%;
+    max-width: 480px;
+    padding: 12px 20px 32px;
+    transform: translateY(100%);
+    transition: transform 0.28s cubic-bezier(.32, 1.2, .6, 1);
+}
+
+.bottom-sheet.sheet-open {
+    transform: translateY(0);
+}
+
+.sheet-handle {
+    width: 40px;
+    height: 4px;
+    background: #E8EAF0;
+    border-radius: 2px;
+    margin: 0 auto 16px;
+}
+
+.sheet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.sheet-title {
+    font-size: 18px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    color: #0F1623;
+    margin: 0;
+}
+
+.sheet-cerrar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #F4F5F7;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: #64748B;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.sheet-cerrar:hover {
+    background: #FEE2E2;
+    color: #ef4444;
+}
+
+/* Campos del formulario */
+.sheet-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.form-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-campo label {
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Sora', sans-serif;
+    color: #64748B;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+.label-opcional {
+    font-size: 10px;
+    font-weight: 400;
+    text-transform: none;
+    color: #B0B8CC;
+    margin-left: 3px;
+}
+
+.form-campo input {
+    width: 100%;
+    height: 46px;
+    padding: 0 14px;
+    border: 1.5px solid #E8EAF0;
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    color: #0F1623;
+    background: #FAFBFF;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-campo input::placeholder {
+    color: #B0B8CC;
+}
+
+.form-campo input:focus {
+    border-color: #1A2B6B;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(26, 43, 107, 0.1);
+}
+
+/* Input con ícono */
+.input-icon-wrap {
+    position: relative;
+}
+
+.input-icon-wrap i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #B0B8CC;
+    font-size: 15px;
+    pointer-events: none;
+}
+
+.input-icon-wrap input {
+    padding-left: 40px;
+}
+
+/* Botón guardar */
+.btn-guardar-sheet {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px;
+    background: #1A2B6B;
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 4px;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s;
+}
+
+.btn-guardar-sheet:active {
+    transform: scale(0.98);
+}
+
+/* ── Facturas clickeables ── */
+.factura-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+}
+
+.factura-chevron {
+    font-size: 16px;
+    color: #9ca3af;
+    align-self: center;
+    flex-shrink: 0;
+}
+
+.factura-footer {
+    padding: 0 16px 14px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.factura-card {
+    cursor: pointer;
+    transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.factura-card:active {
+    transform: scale(0.985);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* ── Historial clickeable ── */
+.historial-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-decoration: none;
+    color: inherit;
+    padding: 14px 16px;
+    background: #fff;
+    border-radius: 14px;
+    margin-bottom: 8px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    transition: box-shadow 0.15s, transform 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.historial-item:active {
+    transform: scale(0.985);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+.historial-chevron {
+    font-size: 14px;
+    color: #9ca3af;
+    margin-left: 6px;
+}
+
+/* ── Select de rutas ── */
+.form-campo select {
+    width: 100%;
+    height: 46px;
+    padding: 0 14px 0 40px;
+    border: 1.5px solid #E8EAF0;
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    color: #0F1623;
+    background: #FAFBFF;
+    outline: none;
+    box-sizing: border-box;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%23B0B8CC' d='M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-campo select:focus {
+    border-color: #1A2B6B;
+    background-color: #fff;
+    box-shadow: 0 0 0 3px rgba(26, 43, 107, 0.1);
+}
+
+/* ══════════════════════════════════════════
+   ETIQUETAS DE CARACTERIZACIÓN (vendedor)
+══════════════════════════════════════════ */
+.etiquetas-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin: 4px 0 2px;
+}
+
+.etiqueta {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+.etiqueta-nuevo {
+    background: #dbeafe;
+    color: #1d4ed8;
+}
+
+.etiqueta-frecuente {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.etiqueta-vip {
+    background: #ede9fe;
+    color: #6d28d9;
+}
+
+.etiqueta-inactivo {
+    background: #f1f5f9;
+    color: #64748b;
+}
+
+.etiqueta-deuda {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+/* ══════════════════════════════════════════
+   PERFIL COMERCIAL
+══════════════════════════════════════════ */
+
+/* KPIs rápidos */
+.perfil-kpis {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.perfil-kpi {
+    background: #fff;
+    border-radius: 14px;
+    padding: 14px 8px;
+    text-align: center;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.perfil-kpi-alerta {
+    background: #fff5f5;
+    border: 1.5px solid #fecaca;
+}
+
+.perfil-kpi-alerta .perfil-kpi-valor {
+    color: #dc2626;
+}
+
+.perfil-kpi-valor {
+    font-size: 16px;
+    font-weight: 800;
+    color: #1A2B6B;
+    font-family: 'Sora', sans-serif;
+    line-height: 1.2;
+}
+
+.perfil-kpi-label {
+    font-size: 10px;
+    color: #94a3b8;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    margin-top: 4px;
+}
+
+/* Card genérica del perfil */
+.perfil-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.perfil-card-titulo {
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Barra de forma de pago */
+.perfil-pago-barra {
+    display: flex;
+    height: 28px;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 8px;
+}
+
+.perfil-pago-segmento {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    transition: width 0.4s ease;
+}
+
+.perfil-pago-segmento.contado {
+    background: #1A2B6B;
+}
+
+.perfil-pago-segmento.credito {
+    background: #f59e0b;
+}
+
+.perfil-pago-leyenda {
+    font-size: 12px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.perfil-pago-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.perfil-pago-dot.contado {
+    background: #1A2B6B;
+}
+
+.perfil-pago-dot.credito {
+    background: #f59e0b;
+}
+
+/* Productos favoritos */
+.perfil-prods {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.perfil-prod-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.perfil-prod-rank {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #1A2B6B;
+    font-size: 12px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.perfil-prod-item:first-child .perfil-prod-rank {
+    background: #fef3c7;
+    color: #b45309;
+}
+
+.perfil-prod-nombre {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0F1623;
+}
+
+.perfil-prod-cant {
+    font-size: 12px;
+    color: #94a3b8;
+    font-weight: 600;
+}
+
+/* ── Info extra en tarjetas de clientes ── */
+.card-etiquetas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.card-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.card-meta-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    color: #64748b;
+    background: #f1f5f9;
+    padding: 3px 8px;
+    border-radius: 20px;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.card-meta-item i {
+    font-size: 10px;
+    flex-shrink: 0;
+}
+
+.card-meta-alerta {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.card-meta-gris {
+    color: #94a3b8;
+}

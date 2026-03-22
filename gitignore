@@ -1,0 +1,43 @@
+# =============================================
+# .gitignore — Pedidos LYD
+# =============================================
+
+# ── Configuración sensible ───────────────────
+# El archivo real de conexión NO va al repo.
+# Usa conexion.example.php como plantilla.
+config/conexion.php
+
+# ── Uploads de usuarios ──────────────────────
+# Las imágenes de productos subidas en producción
+# no se versionan. El directorio se mantiene vacío
+# con un .gitkeep para que Git lo trackee.
+public/uploads/productos/*
+!public/uploads/productos/.gitkeep
+
+# ── Iconos PWA (generados) ───────────────────
+# Si los quieres en el repo, comenta estas líneas
+# public/icons/*
+# !public/icons/.gitkeep
+
+# ── Editores y OS ────────────────────────────
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+desktop.ini
+
+# ── IDEs ─────────────────────────────────────
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+nbproject/
+
+# ── XAMPP / entorno local ────────────────────
+*.log
+*.pid
+
+# ── PHP ──────────────────────────────────────
+*.cache
