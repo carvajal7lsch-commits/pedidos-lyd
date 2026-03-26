@@ -191,30 +191,7 @@ http://localhost/Pedidos_LYD/public/login.php
 2. Chrome mostrará el banner "Agregar a pantalla de inicio"
 3. También disponible en: menú ⋮ → "Instalar aplicación"
 
-> **Nota:** El PWA y el modo offline requieren **HTTPS** en producción. En localhost funcionan sin configuración adicional.
-
----
-
-## 🔌 Modo Offline
-
-### Cómo activarlo
-El modo offline se activa automáticamente la primera vez que el vendedor abre el panel **con internet**. El Service Worker cachea las páginas y el JS guarda los datos en IndexedDB.
-
-### Qué funciona sin internet
-| Módulo | Offline |
-|---|---|
-| Dashboard | ✅ Datos cacheados |
-| Productos | ✅ Catálogo e inventario |
-| Clientes | ✅ Directorio |
-| Carrito / Tomar pedido | ✅ Guarda en IndexedDB |
-| Comprobante de venta | ✅ Generado en JS + PDF |
-| Inventario del camión | ✅ |
-| Facturas del día | ✅ Incluye pendientes offline |
-| Cargue del camión | ❌ Requiere conexión |
-| Cierre de jornada | ❌ Requiere conexión |
-
-### Sincronización
-Al recuperar la conexión, el dashboard sincroniza automáticamente las ventas pendientes con el servidor vía `sync.php`.
+> **Nota:** El PWA requiere **HTTPS** en producción. En localhost funcionan sin configuración adicional.
 
 ---
 
@@ -225,7 +202,6 @@ Al recuperar la conexión, el dashboard sincroniza automáticamente las ventas p
 | Backend | PHP 8.x (sin framework, patrón MVC manual) |
 | Base de datos | MySQL / MariaDB via `mysqli` |
 | Frontend | HTML5 + CSS3 + JS vanilla |
-| Offline | Service Worker + IndexedDB |
 | PWA | Web App Manifest |
 | PDF | jsPDF |
 | Mapas | Leaflet.js |
@@ -235,6 +211,16 @@ Al recuperar la conexión, el dashboard sincroniza automáticamente las ventas p
 ---
 
 ## 📋 Changelog
+
+## v2.0.0 — 2026-03-25
+- 🔴 Cambios importantes
+- Eliminación completa del modo offline
+- Eliminados Service Worker, IndexedDB y sincronización local
+- Sistema ahora funciona 100% online
+- ✅ Mejoras
+- Simplificación de la arquitectura
+- Mejor rendimiento general
+- Reducción de complejidad en frontend
 
 ### v1.0.0 — 2026-03-20
 - 🎉 Primera versión estable
