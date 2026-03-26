@@ -63,6 +63,9 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    overflow: hidden;
 }
 
 .search-box {
@@ -103,10 +106,31 @@
     box-shadow: 0 0 0 3px rgba(26, 43, 107, 0.1);
 }
 
-/* Filter pills */
+/* Filter pills — scroll horizontal sin desbordamiento */
 .filter-pills {
     display: flex;
     gap: 8px;
+    overflow-x: auto;
+    overflow-y: visible;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 4px;
+    width: calc(100% + 32px);
+    margin-left: -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+}
+
+.filter-pills::-webkit-scrollbar {
+    display: none;
+}
+
+/* ── Separador entre fila de rutas y fila de saldo ── */
+/* Quitamos el border-top y usamos solo el gap del padre
+   para mantener el ritmo visual sin una línea extra */
+#pillsSaldo {
+    padding-top: 0;
+    border-top: none;
 }
 
 .fpill {
@@ -119,6 +143,8 @@
     background: #fff;
     color: #8A93A8;
     cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
     -webkit-tap-highlight-color: transparent;
     transition: all 0.15s;
 }
@@ -127,6 +153,17 @@
     background: #1A2B6B;
     border-color: #1A2B6B;
     color: #fff;
+}
+
+/* Pills de saldo con color diferenciado cuando están activos */
+#pillsSaldo .fpill[data-saldo="saldo"].active {
+    background: #C03030;
+    border-color: #C03030;
+}
+
+#pillsSaldo .fpill[data-saldo="libre"].active {
+    background: #15803d;
+    border-color: #15803d;
 }
 
 /* ══════════════════════════════════════════
@@ -138,6 +175,7 @@
     gap: 10px;
 }
 
+/* ── Card base ── */
 .cliente-card {
     background: #fff;
     border-radius: 16px;
@@ -146,6 +184,52 @@
     transition: transform 0.15s;
 }
 
+/* ── Card con deuda: borde rojo para diferenciación inmediata ── */
+.cliente-card--deuda {
+    border-color: #fca5a5;
+}
+
+/* ══════════════════════════════════════════
+   BANNER DE DEUDA (parte superior de la card)
+   ══════════════════════════════════════════ */
+.card-deuda-banner {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #fef2f2;
+    padding: 6px 14px;
+    border-bottom: 1px solid #fecaca;
+}
+
+.card-deuda-banner__icon {
+    color: #b91c1c;
+    font-size: 12px;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.card-deuda-banner__monto {
+    flex: 1;
+    font-size: 11.5px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    color: #b91c1c;
+    letter-spacing: 0.3px;
+}
+
+.card-deuda-banner__badge {
+    background: #b91c1c;
+    color: #fff;
+    font-size: 9.5px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.4px;
+    flex-shrink: 0;
+}
+
+/* ── Link principal de la card ── */
 .card-link {
     display: block;
     padding: 14px 16px 10px;
@@ -195,7 +279,8 @@
     text-overflow: ellipsis;
 }
 
-/* Badge saldo pendiente */
+/* Badge saldo — ya no se usa en la card-info, se eliminó del HTML.
+   Se mantiene por compatibilidad con otras vistas que puedan usarlo. */
 .saldo-badge {
     display: inline-flex;
     align-items: center;
@@ -228,17 +313,23 @@
     font-size: 13px;
 }
 
-/* Botón Hacer Pedido */
+/* ══════════════════════════════════════════
+   ACCIONES DE LA CARD
+   ══════════════════════════════════════════ */
 .card-actions {
     padding: 10px 16px 14px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
 
+/* Botón principal — Hacer Pedido */
 .btn-pedido {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    width: 100%;
     padding: 11px;
     background: #1A2B6B;
     color: #fff;
@@ -255,6 +346,30 @@
 
 .btn-pedido:active {
     transform: scale(0.98);
+}
+
+/* Botones de acción secundaria (llamar, más opciones) */
+.btn-accion-sec {
+    width: 42px;
+    height: 42px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #F4F5F7;
+    color: #64748B;
+    border: 1px solid #E8EAF0;
+    border-radius: 12px;
+    font-size: 16px;
+    cursor: pointer;
+    text-decoration: none;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s, transform 0.15s;
+}
+
+.btn-accion-sec:active {
+    background: #E8EAF0;
+    transform: scale(0.95);
 }
 
 /* Estado vacío / sin resultados */
@@ -895,7 +1010,6 @@
    PERFIL COMERCIAL
 ══════════════════════════════════════════ */
 
-/* KPIs rápidos */
 .perfil-kpis {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -937,7 +1051,6 @@
     margin-top: 4px;
 }
 
-/* Card genérica del perfil */
 .perfil-card {
     background: #fff;
     border-radius: 16px;
@@ -958,7 +1071,6 @@
     gap: 6px;
 }
 
-/* Barra de forma de pago */
 .perfil-pago-barra {
     display: flex;
     height: 28px;
@@ -1009,7 +1121,6 @@
     background: #f59e0b;
 }
 
-/* Productos favoritos */
 .perfil-prods {
     display: flex;
     flex-direction: column;
@@ -1097,4 +1208,228 @@
 
 .card-meta-gris {
     color: #94a3b8;
+}
+
+/* ══════════════════════════════════════════
+   MODAL ABONO — bottom sheet
+   ══════════════════════════════════════════ */
+
+/* ── Header del sheet ── */
+.credito-sheet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+/* ── Tarjeta de saldo total ── */
+.credito-total-card {
+    background: #1A2B6B;
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Círculo decorativo de fondo, igual que .cartera-card */
+.credito-total-card::before {
+    content: '';
+    position: absolute;
+    right: -20px;
+    top: -20px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    pointer-events: none;
+}
+
+.cred-total-label {
+    font-size: 10px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.55);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+}
+
+.cred-total-monto {
+    font-size: 32px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -1px;
+    margin-bottom: 4px;
+    line-height: 1.1;
+}
+
+.cred-total-sub {
+    font-size: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+}
+
+/* ── Sección del input de abono ── */
+.abono-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.abono-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.abono-campo-label {
+    font-size: 11px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    color: #64748B;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+}
+
+/* Input con prefijo $ */
+.abono-input-wrap {
+    display: flex;
+    align-items: center;
+    border: 1.5px solid #E8EAF0;
+    border-radius: 14px;
+    background: #FAFBFF;
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.abono-input-wrap:focus-within {
+    border-color: #1A2B6B;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(26, 43, 107, 0.1);
+}
+
+.abono-prefix {
+    padding: 0 4px 0 16px;
+    font-size: 20px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    color: #1A2B6B;
+    line-height: 1;
+    flex-shrink: 0;
+    user-select: none;
+}
+
+.abono-input-wrap input[type="number"] {
+    flex: 1;
+    height: 54px;
+    padding: 0 16px 0 6px;
+    border: none;
+    background: transparent;
+    font-size: 24px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    color: #0F1623;
+    outline: none;
+}
+
+.abono-input-wrap input[type="number"]::-webkit-outer-spin-button,
+.abono-input-wrap input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.abono-input-wrap input[type="number"]::placeholder {
+    color: #D1D5E0;
+    font-weight: 600;
+}
+
+/* ── Saldo restante en tiempo real ── */
+.saldo-restante-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #F4F5F7;
+    border-radius: 10px;
+    padding: 9px 14px;
+    margin-top: 2px;
+}
+
+.saldo-restante-label {
+    font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 500;
+    color: #8A93A8;
+}
+
+.saldo-restante-val {
+    font-size: 14px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    color: #0F1623;
+    transition: color 0.2s;
+}
+
+/* Si el abono cubre exactamente o paga de más, colorear en verde */
+.saldo-restante-val.saldo-cero {
+    color: #15803d;
+}
+
+/* ── Botones de acción ── */
+.btn-confirmar-credito {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 14px;
+    background: #1A2B6B;
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    margin-bottom: 10px;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.15s, opacity 0.15s;
+}
+
+.btn-confirmar-credito:active {
+    transform: scale(0.98);
+}
+
+.btn-confirmar-credito:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.btn-cancelar-credito {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 13px;
+    background: transparent;
+    color: #8A93A8;
+    border: 1.5px solid #E8EAF0;
+    border-radius: 14px;
+    font-size: 14px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 600;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s, color 0.15s;
+}
+
+.btn-cancelar-credito:active {
+    background: #F4F5F7;
+    color: #64748B;
 }

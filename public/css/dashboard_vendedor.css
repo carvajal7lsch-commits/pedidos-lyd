@@ -17,7 +17,9 @@ body {
     background: #F0F2F7;
     font-family: 'DM Sans', sans-serif;
     -webkit-font-smoothing: antialiased;
-    overscroll-behavior: none;
+    /* Solo bloquear swipe lateral — el vertical queda libre
+       para que pull-to-refresh.js pueda manejar el gesto */
+    overscroll-behavior-x: none;
 }
 
 a {

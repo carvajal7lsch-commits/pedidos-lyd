@@ -8,22 +8,118 @@ require_once __DIR__ . '/../../config/conexion.php';
 $id_vendedor = $_SESSION['id_usuario'];
 $hoy         = date('Y-m-d');
 
-// ── Validar cliente seleccionado ─────────────
-$id_cliente = $_SESSION['pedido_id_cliente'] ?? 0;
-if (!$id_cliente) {
-    header('Location: clientes.php?msg=selecciona_cliente');
+// ── Cierre automático si es hora ──
+$hora_actual = date('H:i');
+if ($hora_actual >= '21:00') {
+    // Verificar si no hay cierre
+    $stmt = mysqli_prepare($conexion,
+        "SELECT COUNT(*) AS cnt FROM cierrediario WHERE id_usuario = ? AND fecha = ?"
+    );
+    mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
+    mysqli_stmt_execute($stmt);
+    $cierre_hoy = (int) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['cnt'];
+
+    if ($cierre_hoy === 0) {
+        // Verificar si hubo cargue y ventas
+        $total_productos = (int) mysqli_fetch_assoc(mysqli_query($conexion,
+            "SELECT COUNT(*) AS c FROM inventariocamion
+             WHERE id_vendedor = $id_vendedor AND fecha_cargue = '$hoy'
+               AND estado = 1 AND cantidad_disponible > 0"
+        ))['c'];
+
+        $pedidos_hoy = (int) mysqli_fetch_assoc(mysqli_query($conexion,
+            "SELECT COUNT(*) AS c FROM venta WHERE id_vendedor = $id_vendedor AND fecha = '$hoy'"
+        ))['c'];
+
+        if ($total_productos > 0 && $pedidos_hoy > 0) {
+            // Ejecutar cierre automático (código similar al de dashboard)
+            $stmt = mysqli_prepare($conexion,
+                "SELECT COALESCE(SUM(total), 0) AS total
+                 FROM venta WHERE id_vendedor = ? AND fecha = ? AND tipo_venta = 'contado'"
+            );
+            mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
+            mysqli_stmt_execute($stmt);
+            $ventas_contado = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
+
+            $stmt = mysqli_prepare($conexion,
+                "SELECT COALESCE(SUM(a.monto), 0) AS total
+                 FROM abono a
+                 JOIN venta v ON v.id_venta = a.id_venta
+                 WHERE v.id_vendedor = ? AND a.fecha = ?"
+            );
+            mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
+            mysqli_stmt_execute($stmt);
+            $abonos_hoy = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
+
+            $stmt = mysqli_prepare($conexion,
+                "SELECT COALESCE(SUM(total), 0) AS total
+                 FROM venta WHERE id_vendedor = ? AND fecha = ? AND tipo_venta = 'credito'"
+            );
+            mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
+            mysqli_stmt_execute($stmt);
+            $ventas_credito = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
+
+            $total_contado = $ventas_contado + $abonos_hoy;
+            $total_general = $total_contado + $ventas_credito;
+
+            mysqli_begin_transaction($conexion);
+            try {
+                $stmt = mysqli_prepare($conexion,
+                    "INSERT INTO cierrediario (id_usuario, fecha, total_contado, total_credito, total_general, estado)
+                     VALUES (?, ?, ?, ?, ?, 1)"
+                );
+                mysqli_stmt_bind_param($stmt, 'isddd',
+                    $id_vendedor, $hoy, $total_contado, $ventas_credito, $total_general
+                );
+                mysqli_stmt_execute($stmt);
+                $id_cierre = mysqli_insert_id($conexion);
+
+                $stmt = mysqli_prepare($conexion,
+                    "UPDATE venta SET id_cierre = ? WHERE id_vendedor = ? AND fecha = ? AND id_cierre IS NULL"
+                );
+                mysqli_stmt_bind_param($stmt, 'iis', $id_cierre, $id_vendedor, $hoy);
+                mysqli_stmt_execute($stmt);
+
+                mysqli_commit($conexion);
+                // No redirigir, solo cerrar
+            } catch (Exception $e) {
+                mysqli_rollback($conexion);
+            }
+        }
+    }
+}
+
+// ── Verificar jornada cerrada
+$hoy = date('Y-m-d');
+$stmt = mysqli_prepare($conexion,
+    "SELECT COUNT(*) AS cnt FROM cierrediario WHERE id_usuario = ? AND fecha = ?"
+);
+mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
+mysqli_stmt_execute($stmt);
+$cierre_hoy = (int) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['cnt'];
+if ($cierre_hoy > 0) {
+    header('Location: dashboard.php?msg=jornada_cerrada');
     exit();
 }
 
-// Datos del cliente
-$stmt = mysqli_prepare($conexion,
-    "SELECT id_cliente, nombre, direccion, telefono
-     FROM cliente WHERE id_cliente = ? AND estado = 1 LIMIT 1"
-);
-mysqli_stmt_bind_param($stmt, 'i', $id_cliente);
-mysqli_stmt_execute($stmt);
-$cliente = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+// ── Validar cliente seleccionado ─────────────
+// FIX OFFLINE: No redirigir si no hay cliente en sesión.
+// En offline la página viene del caché del SW sin sesión PHP activa.
+// El JS leerá el id_cliente desde sessionStorage y lo manejará.
+$id_cliente = $_SESSION['pedido_id_cliente'] ?? 0;
+$cliente    = null;
 
+if ($id_cliente) {
+    $stmt = mysqli_prepare($conexion,
+        "SELECT id_cliente, nombre, direccion, telefono
+         FROM cliente WHERE id_cliente = ? AND estado = 1 LIMIT 1"
+    );
+    mysqli_stmt_bind_param($stmt, 'i', $id_cliente);
+    mysqli_stmt_execute($stmt);
+    $cliente = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+}
+
+// Redirigir si no hay cliente seleccionado
 if (!$cliente) {
     header('Location: clientes.php?msg=selecciona_cliente');
     exit();
@@ -176,7 +272,10 @@ foreach ($prods_camion as $p) {
         </a>
         <div>
             <div class="page-subtitle-top">CLIENTE SELECCIONADO</div>
-            <h1 class="page-title"><?php echo htmlspecialchars($cliente['nombre']); ?></h1>
+            <!-- FIX OFFLINE: id en el h1 para que JS pueda actualizarlo en offline -->
+            <h1 class="page-title" id="tituloCliente">
+                <?php echo $cliente ? htmlspecialchars($cliente['nombre']) : '...'; ?>
+            </h1>
         </div>
     </div>
 </header>
@@ -236,6 +335,7 @@ foreach ($prods_camion as $p) {
 </main>
 
 <?php require_once __DIR__ . '/partials/navbar.php'; ?>
+
 <!-- ══ MODAL CRÉDITO ══ -->
 <div class="modal-overlay" id="modalCredito" style="display:none;">
     <div class="bottom-sheet" id="sheetCredito">
@@ -289,12 +389,26 @@ foreach ($prods_camion as $p) {
 </div>
 
 <script>
-const PRODS_MAP  = <?php echo json_encode($prods_map); ?>;
-const UPLOAD     = '../uploads/productos/';
+// FIX OFFLINE: PRODS_MAP empieza con los datos del servidor (si hay).
+// En offline se rellenará desde IndexedDB en el bloque DOMContentLoaded.
+let PRODS_MAP  = <?php echo json_encode($prods_map); ?>;
+const UPLOAD   = '../uploads/productos/';
+
+// FIX OFFLINE: CLIENTE_ACTUAL viene del PHP cuando hay conexión.
+// En offline, el bloque DOMContentLoaded lo recupera de sessionStorage + IndexedDB.
+let CLIENTE_ACTUAL = {
+    id:       <?php echo $cliente ? $cliente['id_cliente'] : 'null'; ?>,
+    nombre:   '<?php echo $cliente ? addslashes($cliente['nombre']) : ''; ?>',
+    dir:      '<?php echo $cliente ? addslashes($cliente['direccion'] ?? '') : ''; ?>',
+    telefono: '<?php echo $cliente ? addslashes($cliente['telefono'] ?? '') : ''; ?>',
+};
+
+const VENDEDOR_ID     = <?php echo $_SESSION['id_usuario']; ?>;
+const VENDEDOR_NOMBRE = '<?php echo addslashes($_SESSION['nombre']); ?>';
 
 // Carrito desde sessionStorage
-let carrito    = JSON.parse(sessionStorage.getItem('carrito') || '{}');
-let tipoPago   = 'contado';
+let carrito  = JSON.parse(sessionStorage.getItem('carrito') || '{}');
+let tipoPago = 'contado';
 
 // ══════════════════════════════════════════
 // RENDER CARRITO
@@ -382,9 +496,7 @@ function cambiarCant(id, delta) {
     if (nueva > stock) return;
 
     if (nueva === 0) {
-        if (confirm('¿Quitar ' + carrito[id].nombre + ' del pedido?')) {
-            eliminarItem(id);
-        }
+        eliminarItem(id);
         return;
     }
 
@@ -424,18 +536,16 @@ function confirmarPedido() {
         return;
     }
 
-    // Contado — confirmar directo
-    const total = items.reduce((s, i) => s + i.precio * i.cantidad, 0);
-    if (!confirm(`¿Confirmar pedido de contado?\n\nTotal: $${total.toLocaleString('es-CO')}`)) return;
-
-    if (navigator.onLine) {
-        document.getElementById('inputItems').value = JSON.stringify(items);
-        document.getElementById('inputAbono').value = '0';
-        sessionStorage.removeItem('carrito');
-        document.getElementById('formPedido').submit();
-    } else {
-        guardarVentaOffline(items, 'contado', 0);
+    // Contado — enviar directo
+    if (!navigator.onLine) {
+        alert('No hay conexión. Debes estar conectado para guardar el pedido.');
+        return;
     }
+
+    document.getElementById('inputItems').value = JSON.stringify(items);
+    document.getElementById('inputAbono').value = '0';
+    sessionStorage.removeItem('carrito');
+    document.getElementById('formPedido').submit();
 }
 
 // ══════════════════════════════════════════
@@ -489,7 +599,6 @@ function actualizarSaldo() {
         wrap.style.display = '';
         document.getElementById('saldoRestanteVal').textContent =
             '$' + saldo.toLocaleString('es-CO');
-        // Advertencia si abono supera total
         document.getElementById('saldoRestanteVal').style.color =
             abono > total ? '#C03030' : '#15803d';
     } else {
@@ -516,78 +625,30 @@ function confirmarCredito() {
     }
 
     cerrarModalCredito();
-    if (navigator.onLine) {
-        document.getElementById('inputItems').value = JSON.stringify(items);
-        document.getElementById('inputAbono').value = abono;
-        document.getElementById('inputTipo').value  = 'credito';
-        sessionStorage.removeItem('carrito');
-        document.getElementById('formPedido').submit();
-    } else {
-        guardarVentaOffline(items, 'credito', abono);
+    if (!navigator.onLine) {
+        alert('No hay conexión. Debes estar conectado para guardar el pedido a crédito.');
+        return;
     }
+
+    document.getElementById('inputItems').value = JSON.stringify(items);
+    document.getElementById('inputAbono').value = abono;
+    document.getElementById('inputTipo').value  = 'credito';
+    sessionStorage.removeItem('carrito');
+    document.getElementById('formPedido').submit();
 }
 
 // Cerrar al tocar overlay
 document.getElementById('modalCredito').addEventListener('click', function(e) {
     if (e.target === this) cerrarModalCredito();
 });
-
-// Init
-renderCarrito();
 </script>
 
 
-<!-- ======================================================
-     OFFLINE: guardar venta en IndexedDB si no hay red
-====================================================== -->
-<script src="/public/js/db-vendedor.js"></script>
 <script>
-const CLIENTE_ACTUAL  = {
-    id:       <?php echo $cliente['id_cliente']; ?>,
-    nombre:   '<?php echo addslashes($cliente['nombre']); ?>',
-    dir:      '<?php echo addslashes($cliente['direccion'] ?? ''); ?>',
-    telefono: '<?php echo addslashes($cliente['telefono'] ?? ''); ?>',
-};
-const VENDEDOR_ID     = <?php echo $_SESSION['id_usuario']; ?>;
-const VENDEDOR_NOMBRE = '<?php echo addslashes($_SESSION['nombre']); ?>';
-
-async function guardarVentaOffline(items, tipo_venta, abono) {
-    const total = items.reduce((s, i) => s + i.precio * i.cantidad, 0);
-    const hoy   = new Date().toISOString().split('T')[0];
-
-    const venta = {
-        id_cliente:       CLIENTE_ACTUAL.id,
-        cliente_nombre:   CLIENTE_ACTUAL.nombre,
-        cliente_dir:      CLIENTE_ACTUAL.dir,
-        cliente_telefono: CLIENTE_ACTUAL.telefono,
-        tipo_venta,
-        items,
-        total,
-        abono,
-        fecha:     hoy,
-        timestamp: Date.now(),
-        vendedor_id:     VENDEDOR_ID,
-        vendedor_nombre: VENDEDOR_NOMBRE,
-    };
-
-    try {
-        for (const item of items) {
-            await DB.descontarInventario(item.id, item.cantidad);
-        }
-        const id_local = await DB.guardarVentaPendiente(venta);
-        sessionStorage.removeItem('carrito');
-        window.location.href = `comprobante.php?offline=1&id_local=${id_local}`;
-    } catch(e) {
-        console.error('[Offline] Error guardando venta:', e);
-        alert('Error al guardar la venta. Intenta de nuevo.');
-    }
-}
-
-document.addEventListener('DOMContentLoaded', async () => {
-    const n     = await DB.contarPendientes();
-    const badge = document.getElementById('badge-pendientes');
-    if (badge) { badge.textContent = n; badge.style.display = n > 0 ? 'inline-flex' : 'none'; }
-});
+    // Solo modo online
+    document.addEventListener('DOMContentLoaded', () => {
+        renderCarrito();
+    });
 </script>
 
 </body>

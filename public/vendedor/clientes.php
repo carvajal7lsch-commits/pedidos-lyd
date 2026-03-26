@@ -7,6 +7,15 @@ require_once __DIR__ . '/../../config/conexion.php';
 require_once __DIR__ . '/../../controllers/ClienteController.php';
 require_once __DIR__ . '/../../models/cliente.php';
 
+$hoy = date('Y-m-d');
+$stmt = mysqli_prepare($conexion,
+    "SELECT COUNT(*) AS cnt FROM cierrediario WHERE id_usuario = ? AND fecha = ?"
+);
+mysqli_stmt_bind_param($stmt, 'is', $_SESSION['id_usuario'], $hoy);
+mysqli_stmt_execute($stmt);
+$cierre_hoy = (int) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['cnt'];
+$jornada_activa = ($cierre_hoy === 0);
+
 $mensaje  = '';
 $tipo_msg = '';
 $accion   = $_GET['accion'] ?? 'listar';
@@ -50,6 +59,9 @@ foreach ($clientes as &$c) {
         : null;
 }
 unset($c);
+
+// Rutas disponibles (misma lista que en el formulario)
+$rutas = ['Guayabal', 'Cruce', 'Acevedo', 'Gallardo', 'El Brasil', 'Quemadas'];
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -89,22 +101,41 @@ unset($c);
 <!-- ══ CONTENIDO ══ -->
 <main class="scroll-body">
 
+    <?php if (!$jornada_activa): ?>
+    <div class="alerta alerta-error">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        Jornada cerrada: no se permiten pedidos hoy.
+    </div>
+    <?php endif; ?>
+
     <?php if (!empty($mensaje)): ?>
     <div class="alerta alerta-<?php echo $tipo_msg; ?>">
         <?php echo $mensaje; ?>
     </div>
     <?php endif; ?>
 
-    <!-- Buscador + pills filtro -->
+    <!-- Buscador + filtros -->
     <div class="filtros-wrap">
         <div class="search-box">
             <i class="bi bi-search"></i>
             <input type="text" id="inputBuscar" placeholder="Buscar tienda o cliente..." oninput="filtrar()">
         </div>
-        <div class="filter-pills">
-            <button class="fpill active" data-filtro="todos" onclick="setFiltro(this)">Todos</button>
-            <button class="fpill" data-filtro="saldo" onclick="setFiltro(this)">Con saldo</button>
-            <button class="fpill" data-filtro="libre" onclick="setFiltro(this)">Sin saldo</button>
+
+        <!-- Filtro por ruta -->
+        <div class="filter-pills" id="pillsRuta">
+            <button class="fpill active" data-ruta="" onclick="setRuta(this)">Todas</button>
+            <?php foreach ($rutas as $ruta): ?>
+            <button class="fpill" data-ruta="<?php echo strtolower($ruta); ?>" onclick="setRuta(this)">
+                <?php echo $ruta; ?>
+            </button>
+            <?php endforeach; ?>
+        </div>
+
+        <!-- Filtro por saldo -->
+        <div class="filter-pills" id="pillsSaldo">
+            <button class="fpill active" data-saldo="" onclick="setSaldo(this)">Todos</button>
+            <button class="fpill" data-saldo="saldo" onclick="setSaldo(this)">Con saldo</button>
+            <button class="fpill" data-saldo="libre" onclick="setSaldo(this)">Sin saldo</button>
         </div>
     </div>
 
@@ -117,9 +148,20 @@ unset($c);
         </div>
         <?php else: ?>
         <?php foreach ($clientes as $c): ?>
-        <div class="cliente-card"
+        <div class="cliente-card <?php echo $c['saldo_pendiente'] > 0 ? 'cliente-card--deuda' : ''; ?>"
              data-nombre="<?php echo strtolower(htmlspecialchars($c['nombre'])); ?>"
-             data-saldo="<?php echo $c['saldo_pendiente'] > 0 ? 'saldo' : 'libre'; ?>">
+             data-saldo="<?php echo $c['saldo_pendiente'] > 0 ? 'saldo' : 'libre'; ?>"
+             data-ruta="<?php echo strtolower(htmlspecialchars($c['direccion'] ?? '')); ?>">
+
+            <?php if ($c['saldo_pendiente'] > 0): ?>
+            <div class="card-deuda-banner">
+                <span class="card-deuda-banner__icon"><i class="bi bi-exclamation-triangle-fill"></i></span>
+                <span class="card-deuda-banner__monto">
+                    SALDO: $<?php echo number_format($c['saldo_pendiente'], 0, ',', '.'); ?>
+                </span>
+                <span class="card-deuda-banner__badge">CON DEUDA</span>
+            </div>
+            <?php endif; ?>
 
             <a href="detalle_cliente.php?id=<?php echo $c['id_cliente']; ?>" class="card-link">
                 <div class="card-top">
@@ -128,11 +170,6 @@ unset($c);
                     </div>
                     <div class="card-info">
                         <div class="card-nombre"><?php echo htmlspecialchars($c['nombre']); ?></div>
-                        <?php if ($c['saldo_pendiente'] > 0): ?>
-                        <div class="saldo-badge">
-                            SALDO: $<?php echo number_format($c['saldo_pendiente'], 0, ',', '.'); ?>
-                        </div>
-                        <?php endif; ?>
                         <?php if (!empty($c['etiquetas'])): ?>
                         <div class="card-etiquetas">
                             <?php foreach ($c['etiquetas'] as $t): ?>
@@ -171,8 +208,24 @@ unset($c);
             </a>
 
             <div class="card-actions">
+                <?php if ($jornada_activa): ?>
                 <a href="productos.php?id_cliente=<?php echo $c['id_cliente']; ?>" class="btn-pedido">
                     <i class="bi bi-cart3"></i> Hacer Pedido
+                </a>
+                <?php else: ?>
+                <button class="btn-pedido btn-disabled" disabled>
+                    <i class="bi bi-cart3"></i> Hacer Pedido
+                </button>
+                <?php endif; ?>
+
+                <?php if (!empty($c['telefono'])): ?>
+                <a href="tel:<?php echo htmlspecialchars($c['telefono']); ?>" class="btn-accion-sec" title="Llamar">
+                    <i class="bi bi-telephone-fill"></i>
+                </a>
+                <?php endif; ?>
+
+                <a href="detalle_cliente.php?id=<?php echo $c['id_cliente']; ?>" class="btn-accion-sec" title="Ver detalle">
+                    <i class="bi bi-three-dots"></i>
                 </a>
             </div>
 
@@ -215,8 +268,7 @@ unset($c);
                     <select name="direccion" required>
                         <option value="">-- Selecciona la ruta --</option>
                         <?php
-                        $rutas = ['Guayabal','Cruce','Acevedo','Gallardo','El Brasil','Quemadas'];
-                        $sel   = $_POST['direccion'] ?? '';
+                        $sel = $_POST['direccion'] ?? '';
                         foreach ($rutas as $ruta):
                         ?>
                         <option value="<?php echo $ruta; ?>"
@@ -245,17 +297,19 @@ unset($c);
 </div>
 
 <script>
-let filtroActual = 'todos';
+let filtroRuta  = '';
+let filtroSaldo = '';
 
 function filtrar() {
-    const q        = document.getElementById('inputBuscar').value.toLowerCase().trim();
-    const cards    = document.querySelectorAll('.cliente-card');
-    let   visibles = 0;
+    const q     = document.getElementById('inputBuscar').value.toLowerCase().trim();
+    const cards = document.querySelectorAll('.cliente-card');
+    let visibles = 0;
 
     cards.forEach(card => {
-        const okQ      = !q || card.dataset.nombre.includes(q);
-        const okFiltro = filtroActual === 'todos' || card.dataset.saldo === filtroActual;
-        const mostrar  = okQ && okFiltro;
+        const okQ     = !q           || card.dataset.nombre.includes(q);
+        const okRuta  = !filtroRuta  || card.dataset.ruta  === filtroRuta;
+        const okSaldo = !filtroSaldo || card.dataset.saldo === filtroSaldo;
+        const mostrar = okQ && okRuta && okSaldo;
         card.style.display = mostrar ? '' : 'none';
         if (mostrar) visibles++;
     });
@@ -263,10 +317,17 @@ function filtrar() {
     document.getElementById('sinResultados').style.display = visibles === 0 ? 'flex' : 'none';
 }
 
-function setFiltro(pill) {
-    document.querySelectorAll('.fpill').forEach(p => p.classList.remove('active'));
+function setRuta(pill) {
+    document.querySelectorAll('#pillsRuta .fpill').forEach(p => p.classList.remove('active'));
     pill.classList.add('active');
-    filtroActual = pill.dataset.filtro;
+    filtroRuta = pill.dataset.ruta;
+    filtrar();
+}
+
+function setSaldo(pill) {
+    document.querySelectorAll('#pillsSaldo .fpill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    filtroSaldo = pill.dataset.saldo;
     filtrar();
 }
 
@@ -295,38 +356,11 @@ document.getElementById('modalCrear').addEventListener('click', function(e) {
 <?php endif; ?>
 </script>
 
-
-<!-- ══ OFFLINE: guardar clientes en IndexedDB ══ -->
-<script src="/public/js/db-vendedor.js"></script>
 <script>
-const DATOS_CLIENTES = <?php echo json_encode(array_map(function($c) {
-    return [
-        'id_cliente'   => (int)   $c['id_cliente'],
-        'nombre'       => $c['nombre'],
-        'telefono'     => $c['telefono'] ?? '',
-        'direccion'    => $c['direccion'],
-        'saldo_pendiente' => (float) $c['saldo_pendiente'],
-    ];
-}, $clientes)); ?>;
-
-document.addEventListener('DOMContentLoaded', async () => {
-    if (navigator.onLine && DATOS_CLIENTES.length > 0) {
-        try {
-            await DB.guardarClientes(DATOS_CLIENTES);
-            console.log('[Offline] Clientes guardados en IndexedDB');
-        } catch(e) {
-            console.warn('[Offline] Error guardando clientes:', e);
-        }
-    }
-
-    // Badge pendientes
-    const n = await DB.contarPendientes();
-    const badge = document.getElementById('badge-pendientes');
-    if (badge) {
-        badge.textContent = n;
-        badge.style.display = n > 0 ? 'inline-flex' : 'none';
-    }
-});
+    document.addEventListener('DOMContentLoaded', () => {
+        const badge = document.getElementById('badge-pendientes');
+        if (badge) badge.style.display = 'none';
+    });
 </script>
 
 </body>

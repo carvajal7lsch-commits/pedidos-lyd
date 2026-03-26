@@ -25,11 +25,10 @@ Sistema de gestión de pedidos y ventas para **Depósito LYD**, diseñado para v
 - Cierre de jornada con resumen contado/crédito
 - Tracking de ubicación GPS en tiempo real
 
-### Modo Offline
-- Funciona sin internet gracias a **Service Worker** + **IndexedDB**
-- Las ventas generadas offline se sincronizan automáticamente al recuperar conexión
-- Comprobante de venta disponible offline
-- Badge en navbar indica ventas pendientes de sincronización
+### Modo Online (ahora obligatorio)
+- La aplicación requiere conexión a Internet para todas las operaciones.
+- No se utiliza Service Worker ni IndexedDB para datos de ventas.
+- Sincronización offline y reporte de pendientes se han deshabilitado.
 
 ### PWA (Progressive Web App)
 - Instalable en Android desde Chrome ("Agregar a pantalla de inicio")

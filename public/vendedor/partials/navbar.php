@@ -30,7 +30,6 @@ $pagina_actual = basename($_SERVER['PHP_SELF']);
 </style>
 </head>
 
-
 <nav class="vend-navbar">
     <a href="<?php echo BASE_URL; ?>public/vendedor/dashboard.php"
        class="vend-nav-item <?php echo $pagina_actual === 'dashboard.php' ? 'vend-nav-active' : 'vend-nav-inactive'; ?>">

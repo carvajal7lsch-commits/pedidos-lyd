@@ -5,78 +5,153 @@ soloVendedor();
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../config/conexion.php';
 
-$id_vendedor = $_SESSION['id_usuario'];
+// Datos de dashboard online (SQL en servidor)
 $nombre      = $_SESSION['nombre'];
+$id_vendedor = (int) $_SESSION['id_usuario'];
 $hoy         = date('Y-m-d');
 $ayer        = date('Y-m-d', strtotime('-1 day'));
 
-// ── Ventas de hoy ────────────────────────────
+// Jornada activa: sin cierre de hoy
 $stmt = mysqli_prepare($conexion,
-    "SELECT COALESCE(SUM(total), 0) AS total, COUNT(*) AS pedidos
-     FROM venta WHERE id_vendedor = ? AND fecha = ?"
+    "SELECT COUNT(*) AS cnt FROM cierrediario WHERE id_usuario = ? AND fecha = ?"
 );
 mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
 mysqli_stmt_execute($stmt);
-$ventas_hoy = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+$hoyCierre = (int) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['cnt'];
 
-// ── Ventas de ayer (para delta) ──────────────
 $stmt = mysqli_prepare($conexion,
-    "SELECT COALESCE(SUM(total), 0) AS total
-     FROM venta WHERE id_vendedor = ? AND fecha = ?"
-);
-mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $ayer);
-mysqli_stmt_execute($stmt);
-$ventas_ayer = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
-
-// ── Delta % vs ayer ──────────────────────────
-$delta_pct      = 0;
-$delta_positivo = true;
-if ($ventas_ayer['total'] > 0) {
-    $delta_pct      = round((($ventas_hoy['total'] - $ventas_ayer['total']) / $ventas_ayer['total']) * 100);
-    $delta_positivo = $delta_pct >= 0;
-}
-
-// ── Jornada activa ───────────────────────────
-// Activa = no tiene cierre en cierrediario hoy
-$stmt = mysqli_prepare($conexion,
-    "SELECT id_cierre FROM cierrediario
-     WHERE id_usuario = ? AND fecha = ? LIMIT 1"
+    "SELECT COUNT(*) AS cnt FROM cierrediario WHERE id_usuario = ? AND fecha < ?"
 );
 mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
 mysqli_stmt_execute($stmt);
-$cierre_hoy    = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
-$jornada_activa = !$cierre_hoy;
+$diasPrevios = (int) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['cnt'];
 
-// Número de día de ruta = cierres históricos + 1
-$stmt = mysqli_prepare($conexion,
-    "SELECT COUNT(*) AS total FROM cierrediario WHERE id_usuario = ?"
-);
-mysqli_stmt_bind_param($stmt, 'i', $id_vendedor);
-mysqli_stmt_execute($stmt);
-$dia_ruta = (int) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'] + 1;
+$jornada_activa = $hoyCierre === 0;
+$dia_ruta       = $diasPrevios + 1;
 
-// ── Clientes activos ─────────────────────────
-$res            = mysqli_query($conexion, "SELECT COUNT(*) AS total FROM cliente WHERE estado = 1");
-$total_clientes = (int) mysqli_fetch_assoc($res)['total'];
+$total_clientes = (int) mysqli_fetch_assoc(mysqli_query($conexion,
+    "SELECT COUNT(*) AS c FROM cliente WHERE estado = 1"
+))['c'];
 
-// ── Productos en camión hoy ──────────────────
-// Primero busca inventario cargado hoy, si no hay usa catálogo
-$stmt = mysqli_prepare($conexion,
-    "SELECT COUNT(*) AS total FROM inventariocamion
-     WHERE id_vendedor = ? AND fecha_cargue = ?
+$total_productos = (int) mysqli_fetch_assoc(mysqli_query($conexion,
+    "SELECT COUNT(*) AS c FROM inventariocamion
+     WHERE id_vendedor = $id_vendedor AND fecha_cargue = '$hoy'
        AND estado = 1 AND cantidad_disponible > 0"
-);
-mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
-mysqli_stmt_execute($stmt);
-$total_productos = (int) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
+))['c'];
 
-if ($total_productos === 0) {
-    $res             = mysqli_query($conexion, "SELECT COUNT(*) AS total FROM productos WHERE estado = 1");
-    $total_productos = (int) mysqli_fetch_assoc($res)['total'];
+// Ventas y pedidos hoy
+$hoyVentas = mysqli_fetch_assoc(mysqli_query($conexion,
+    "SELECT COALESCE(SUM(total),0) AS total, COUNT(*) AS pedidos
+     FROM venta WHERE id_vendedor = $id_vendedor AND fecha = '$hoy'"
+));
+
+$hoyAbonos = mysqli_fetch_assoc(mysqli_query($conexion,
+    "SELECT COALESCE(SUM(a.monto),0) AS total
+     FROM abono a
+     JOIN venta v ON v.id_venta = a.id_venta
+     WHERE v.id_vendedor = $id_vendedor AND a.fecha = '$hoy'"
+));
+
+$total_ventas_hoy = (float)$hoyVentas['total'] + (float)$hoyAbonos['total'];
+$pedidos_hoy      = (int)$hoyVentas['pedidos'];
+
+// Ventas ayer para delta
+$ayerVentas = mysqli_fetch_assoc(mysqli_query($conexion,
+    "SELECT COALESCE(SUM(total),0) AS total
+     FROM venta WHERE id_vendedor = $id_vendedor AND fecha = '$ayer'"
+));
+
+$ayerAbonos = mysqli_fetch_assoc(mysqli_query($conexion,
+    "SELECT COALESCE(SUM(a.monto),0) AS total
+     FROM abono a
+     JOIN venta v ON v.id_venta = a.id_venta
+     WHERE v.id_vendedor = $id_vendedor AND a.fecha = '$ayer'"
+));
+
+$total_ayer = (float)$ayerVentas['total'] + (float)$ayerAbonos['total'];
+if ($total_ayer > 0) {
+    $delta_pct = round(100 * ($total_ventas_hoy - $total_ayer) / $total_ayer, 2);
+} elseif ($total_ventas_hoy > 0) {
+    $delta_pct = 100;
+} else {
+    $delta_pct = 0;
+}
+$delta_positivo = $total_ventas_hoy >= $total_ayer;
+
+// ── Cierre automático si es hora y no hay cierre ──
+$mensaje  = '';
+$tipo_msg = '';
+$hora_actual = date('H:i');
+
+if ($hora_actual >= '21:00' && $jornada_activa && $total_productos > 0 && $pedidos_hoy > 0) {
+    // Ejecutar cierre automático
+
+    // Ventas contado del día
+    $stmt = mysqli_prepare($conexion,
+        "SELECT COALESCE(SUM(total), 0) AS total
+         FROM venta WHERE id_vendedor = ? AND fecha = ? AND tipo_venta = 'contado'"
+    );
+    mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
+    mysqli_stmt_execute($stmt);
+    $ventas_contado = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
+
+    // Abonos recibidos hoy
+    $stmt = mysqli_prepare($conexion,
+        "SELECT COALESCE(SUM(a.monto), 0) AS total
+         FROM abono a
+         JOIN venta v ON v.id_venta = a.id_venta
+         WHERE v.id_vendedor = ? AND a.fecha = ?"
+    );
+    mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
+    mysqli_stmt_execute($stmt);
+    $abonos_hoy = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
+
+    // Ventas crédito del día
+    $stmt = mysqli_prepare($conexion,
+        "SELECT COALESCE(SUM(total), 0) AS total
+         FROM venta WHERE id_vendedor = ? AND fecha = ? AND tipo_venta = 'credito'"
+    );
+    mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
+    mysqli_stmt_execute($stmt);
+    $ventas_credito = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
+
+    $total_contado = $ventas_contado + $abonos_hoy;
+    $total_general = $total_contado + $ventas_credito;
+
+    mysqli_begin_transaction($conexion);
+    try {
+        // Insertar cierre
+        $stmt = mysqli_prepare($conexion,
+            "INSERT INTO cierrediario (id_usuario, fecha, total_contado, total_credito, total_general, estado)
+             VALUES (?, ?, ?, ?, ?, 1)"
+        );
+        mysqli_stmt_bind_param($stmt, 'isddd',
+            $id_vendedor, $hoy, $total_contado, $ventas_credito, $total_general
+        );
+        mysqli_stmt_execute($stmt);
+        $id_cierre = mysqli_insert_id($conexion);
+
+        // Asociar ventas del día al cierre
+        $stmt = mysqli_prepare($conexion,
+            "UPDATE venta SET id_cierre = ? WHERE id_vendedor = ? AND fecha = ? AND id_cierre IS NULL"
+        );
+        mysqli_stmt_bind_param($stmt, 'iis', $id_cierre, $id_vendedor, $hoy);
+        mysqli_stmt_execute($stmt);
+
+        mysqli_commit($conexion);
+
+        // Actualizar variables para la página
+        $jornada_activa = false;
+        $mensaje  = 'Cierre automático realizado exitosamente.';
+        $tipo_msg = 'success';
+
+    } catch (Exception $e) {
+        mysqli_rollback($conexion);
+        $mensaje  = 'Error en cierre automático. Contacta soporte.';
+        $tipo_msg = 'error';
+    }
 }
 
-// ── Facturas emitidas hoy ────────────────────
-$facturas_hoy = (int) $ventas_hoy['pedidos'];
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -107,7 +182,7 @@ $facturas_hoy = (int) $ventas_hoy['pedidos'];
         </div>
         <div>
             <div class="greeting-sub">Hola 👋</div>
-            <div class="greeting-name"><?php echo htmlspecialchars($nombre); ?></div>
+            <div class="greeting-name" id="dash-nombre"><?php echo htmlspecialchars($nombre); ?></div>
         </div>
     </div>
     <a href="<?php echo BASE_URL; ?>controllers/logout.php" class="topbar-btn" title="Cerrar sesión">
@@ -118,113 +193,93 @@ $facturas_hoy = (int) $ventas_hoy['pedidos'];
 <!-- ══ CONTENIDO ══ -->
 <main class="scroll-body">
 
-    <!-- Banner jornada -->
-    <?php if ($jornada_activa): ?>
-    <div class="jornada-banner jornada-activa">
-        <div class="jornada-left">
-            <span class="jornada-dot dot-on"></span>
-            <span class="jornada-text">Jornada activa · <?php echo date('g:i A'); ?></span>
-        </div>
-        <span class="jornada-badge">Día <?php echo $dia_ruta; ?></span>
-    </div>
-    <?php else: ?>
-    <div class="jornada-banner jornada-inactiva">
-        <div class="jornada-left">
-            <span class="jornada-dot dot-off"></span>
-            <span class="jornada-text">Jornada cerrada hoy</span>
-        </div>
-        <span class="jornada-badge">Día <?php echo $dia_ruta - 1; ?></span>
+    <?php if (isset($_GET['msg']) && $_GET['msg'] === 'jornada_cerrada'): ?>
+    <div class="alerta alerta-error" style="margin:1rem;">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        Jornada cerrada: no es posible tomar pedidos hoy.
     </div>
     <?php endif; ?>
+
+    <?php if (!empty($mensaje)): ?>
+    <div class="alerta alerta-<?php echo $tipo_msg; ?>" style="margin:1rem;">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <?php echo $mensaje; ?>
+    </div>
+    <?php endif; ?>
+
+    <!-- Banner jornada -->
+    <div id="dash-banner" class="jornada-banner jornada-activa">
+        <div class="jornada-left">
+            <span class="jornada-dot dot-on"></span>
+            <span class="jornada-text" id="dash-banner-txt">Cargando...</span>
+        </div>
+        <span class="jornada-badge" id="dash-dia-ruta">—</span>
+    </div>
 
     <!-- Card ventas del día -->
     <div class="ventas-card">
         <div class="ventas-label">Ventas del día</div>
-
-        <?php if ($ventas_hoy['total'] > 0): ?>
-            <div class="ventas-amount">
-                $<?php echo number_format($ventas_hoy['total'], 0, ',', '.'); ?>
-                <span class="ventas-cop">COP</span>
+        <div id="dash-ventas-content">
+            <div class="ventas-amount" id="dash-total">$—</div>
+            <div class="ventas-empty-msg" id="dash-ventas-empty" style="display:none">
+                Empieza tu primera venta del día
             </div>
-            <div class="ventas-footer">
-                <div class="ventas-delta <?php echo $delta_positivo ? 'delta-pos' : 'delta-neg'; ?>">
-                    <i class="bi bi-arrow-<?php echo $delta_positivo ? 'up' : 'down'; ?>-short"></i>
-                    <span><?php echo ($delta_positivo ? '+' : '') . $delta_pct; ?>% vs ayer</span>
+            <div class="ventas-footer" id="dash-ventas-footer" style="display:none">
+                <div class="ventas-delta" id="dash-delta">
+                    <i class="bi bi-arrow-up-short"></i>
+                    <span id="dash-delta-txt"></span>
                 </div>
                 <div class="ventas-pedidos">
-                    <span><?php echo (int) $ventas_hoy['pedidos']; ?></span> pedidos hoy
+                    <span id="dash-pedidos">0</span> pedidos hoy
                 </div>
             </div>
-        <?php else: ?>
-            <div class="ventas-amount">$0</div>
-            <div class="ventas-empty-msg">Empieza tu primera venta del día</div>
-        <?php endif; ?>
+        </div>
     </div>
 
     <!-- CTA Tomar pedido -->
-    <?php if ($jornada_activa): ?>
-    <a href="clientes.php" class="cta-btn">
-        <div class="cta-left">
-            <span class="cta-title">Tomar Pedido</span>
-            <span class="cta-sub">Iniciar nueva venta</span>
-        </div>
-        <div class="cta-icon">
-            <i class="bi bi-cart3"></i>
-        </div>
-    </a>
-    <?php else: ?>
-    <div class="cta-btn cta-disabled">
-        <div class="cta-left">
-            <span class="cta-title">Tomar Pedido</span>
-            <span class="cta-sub">La jornada de hoy ya fue cerrada</span>
-        </div>
-        <div class="cta-icon">
-            <i class="bi bi-lock-fill"></i>
+    <div id="dash-cta-wrap">
+        <a href="clientes.php" class="cta-btn" id="dash-cta-activo">
+            <div class="cta-left">
+                <span class="cta-title">Tomar Pedido</span>
+                <span class="cta-sub">Iniciar nueva venta</span>
+            </div>
+            <div class="cta-icon"><i class="bi bi-cart3"></i></div>
+        </a>
+        <div class="cta-btn cta-disabled" id="dash-cta-cerrado" style="display:none">
+            <div class="cta-left">
+                <span class="cta-title">Tomar Pedido</span>
+                <span class="cta-sub">La jornada de hoy ya fue cerrada</span>
+            </div>
+            <div class="cta-icon"><i class="bi bi-lock-fill"></i></div>
         </div>
     </div>
-    <?php endif; ?>
 
     <!-- Grid accesos rápidos -->
     <div class="access-grid">
-
         <a href="clientes.php" class="access-card">
-            <div class="access-icon-wrap ic-blue">
-                <i class="bi bi-people-fill"></i>
-            </div>
+            <div class="access-icon-wrap ic-blue"><i class="bi bi-people-fill"></i></div>
             <div class="access-title">Clientes</div>
             <div class="access-sub">Ver directorio</div>
-            <div class="access-count cnt-blue"><?php echo $total_clientes; ?> clientes</div>
+            <div class="access-count cnt-blue" id="dash-cnt-clientes">— clientes</div>
         </a>
-
         <a href="inventario.php" class="access-card">
-            <div class="access-icon-wrap ic-orange">
-                <i class="bi bi-truck-front-fill"></i>
-            </div>
+            <div class="access-icon-wrap ic-orange"><i class="bi bi-truck-front-fill"></i></div>
             <div class="access-title">Inventario</div>
             <div class="access-sub">Stock camión</div>
-            <div class="access-count cnt-orange"><?php echo $total_productos; ?> productos</div>
+            <div class="access-count cnt-orange" id="dash-cnt-productos">— productos</div>
         </a>
-
         <a href="facturas.php" class="access-card">
-            <div class="access-icon-wrap ic-purple">
-                <i class="bi bi-receipt"></i>
-            </div>
+            <div class="access-icon-wrap ic-purple"><i class="bi bi-receipt"></i></div>
             <div class="access-title">Facturas</div>
             <div class="access-sub">Historial hoy</div>
-            <div class="access-count cnt-purple"><?php echo $facturas_hoy; ?> emitidas</div>
+            <div class="access-count cnt-purple" id="dash-cnt-facturas">— emitidas</div>
         </a>
-
         <a href="cierre.php" class="access-card">
-            <div class="access-icon-wrap ic-red">
-                <i class="bi bi-flag-fill"></i>
-            </div>
+            <div class="access-icon-wrap ic-red"><i class="bi bi-flag-fill"></i></div>
             <div class="access-title">Cierre de Ruta</div>
             <div class="access-sub">Finalizar jornada</div>
-            <div class="access-count cnt-red">
-                <?php echo $jornada_activa ? 'Pendiente' : 'Completado'; ?>
-            </div>
+            <div class="access-count cnt-red" id="dash-cnt-cierre">—</div>
         </a>
-
     </div>
 
 </main>
@@ -258,117 +313,128 @@ $facturas_hoy = (int) $ventas_hoy['pedidos'];
 })();
 </script>
 
-<!-- ══ OFFLINE: Service Worker + Sync + Cache ══ -->
-<script src="/public/js/db-vendedor.js"></script>
 <script>
-// ── Datos del servidor para cachear en IndexedDB ──────────
-const DATOS_SERVIDOR = {
-    total_ventas_hoy:  <?php echo (float) $ventas_hoy['total']; ?>,
-    pedidos_hoy:       <?php echo (int)   $ventas_hoy['pedidos']; ?>,
-    delta_pct:         <?php echo $delta_pct; ?>,
-    delta_positivo:    <?php echo $delta_positivo ? 'true' : 'false'; ?>,
-    jornada_activa:    <?php echo $jornada_activa ? 'true' : 'false'; ?>,
-    dia_ruta:          <?php echo $dia_ruta; ?>,
-    total_clientes:    <?php echo $total_clientes; ?>,
-    total_productos:   <?php echo $total_productos; ?>,
-    nombre:            '<?php echo addslashes($nombre); ?>',
-    vendedor_id:       <?php echo $id_vendedor; ?>,
-    hoy:               '<?php echo $hoy; ?>',
+// Datos de sesion PHP disponibles siempre (no requieren BD)
+const SESION = {
+    nombre:      '<?php echo addslashes($nombre); ?>',
+    vendedor_id: <?php echo $id_vendedor; ?>,
+    hoy:         '<?php echo $hoy; ?>',
 };
 
-// ── Registrar Service Worker ──────────────────────────────
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/public/vendedor/sw-vendedor.js')
-        .then(reg => {
-            console.log('[SW] Registrado:', reg.scope);
-        })
-        .catch(err => console.warn('[SW] Error:', err));
-}
+// Datos calculados del dashboard (online)
+const DASHBOARD = {
+    jornada_activa: <?php echo $jornada_activa ? 'true' : 'false'; ?>,
+    dia_ruta: <?php echo $dia_ruta; ?>,
+    total_ventas_hoy: <?php echo $total_ventas_hoy; ?>,
+    pedidos_hoy: <?php echo $pedidos_hoy; ?>,
+    delta_pct: <?php echo $delta_pct; ?>,
+    delta_positivo: <?php echo $delta_positivo ? 'true' : 'false'; ?>,
+    total_clientes: <?php echo $total_clientes; ?>,
+    total_productos: <?php echo $total_productos; ?>,
+};
 
-// ── Cachear datos del servidor en IndexedDB ───────────────
-document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        // Guardar snapshot del dashboard
-        await DB.guardarDashboard(DATOS_SERVIDOR);
-
-        // ── Sincronizar ventas pendientes si hay red ──────
-        const pendientes = await DB.obtenerVentasPendientes();
-        if (pendientes.length > 0) {
-            await sincronizarPendientes(pendientes);
-        }
-
-        // ── Mostrar badge de pendientes en navbar ─────────
-        actualizarBadgePendientes();
-
-    } catch(e) {
-        console.warn('[Offline] Error al cachear datos:', e);
-    }
+document.addEventListener('DOMContentLoaded', () => {
+    pintarDashboard(DASHBOARD);
 });
 
-// ── Sincronizar ventas offline con el servidor ────────────
-async function sincronizarPendientes(ventas) {
-    if (!navigator.onLine) return;
-
-    try {
-        const res = await fetch('sync.php', {
-            method:  'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body:    JSON.stringify({ ventas }),
-        });
-
-        if (!res.ok) return;
-        const data = await res.json();
-
-        for (const r of data.resultados || []) {
-            if (r.ok) {
-                await DB.marcarVentaSincronizada(r.id_local, r.id_servidor);
-                console.log(`[Sync] Venta ${r.id_local} → servidor #${r.id_servidor}`);
-            }
-        }
-
-        // Recargar la página para reflejar datos reales del servidor
-        const sinc_count = (data.resultados || []).filter(r => r.ok).length;
-        if (sinc_count > 0) {
-            mostrarToast(`✅ ${sinc_count} venta(s) sincronizada(s) con el servidor`);
-            setTimeout(() => location.reload(), 2000);
-        }
-
-    } catch(e) {
-        console.warn('[Sync] No se pudo sincronizar:', e);
+// ── Pull-to-refresh: en dashboard recarga datos frescos ──────────
+window.PTR = {
+    onRefresh: async () => {
+        // Si quieres, aquí puede volver a consultar un endpoint; ahora usa datos directos.
+        pintarDashboard(DASHBOARD);
+        mostrarToast('Dashboard actualizado');
     }
+};
+
+// ── Pintar dashboard con datos ────────────────────────────
+function pintarDashboard(d) {
+    const fmt = n => '$' + Number(n).toLocaleString('es-CO');
+
+    // Banner jornada
+    const banner = document.getElementById('dash-banner');
+    const bannerTxt = document.getElementById('dash-banner-txt');
+    const diaRutaEl = document.getElementById('dash-dia-ruta');
+
+    if (d.jornada_activa) {
+        banner.className = 'jornada-banner jornada-activa';
+        const hora = new Date().toLocaleTimeString('es-CO', { hour: 'numeric', minute: '2-digit', hour12: true });
+        bannerTxt.textContent = 'Jornada activa · ' + hora;
+        diaRutaEl.textContent = 'Día ' + d.dia_ruta;
+    } else {
+        banner.className = 'jornada-banner jornada-inactiva';
+        bannerTxt.innerHTML = '<span class="jornada-dot dot-off"></span> Jornada cerrada hoy';
+        diaRutaEl.textContent = 'Día ' + (d.dia_ruta - 1);
+    }
+
+    // Card ventas
+    const totalEl   = document.getElementById('dash-total');
+    const footer    = document.getElementById('dash-ventas-footer');
+    const emptyMsg  = document.getElementById('dash-ventas-empty');
+    const deltaEl   = document.getElementById('dash-delta');
+    const deltaTxt  = document.getElementById('dash-delta-txt');
+    const pedidosEl = document.getElementById('dash-pedidos');
+
+    if (d.total_ventas_hoy > 0) {
+        totalEl.innerHTML = fmt(d.total_ventas_hoy) + ' <span class="ventas-cop">COP</span>';
+        footer.style.display  = '';
+        emptyMsg.style.display = 'none';
+        const signo = d.delta_positivo ? '+' : '';
+        deltaTxt.textContent = signo + d.delta_pct + '% vs ayer';
+        deltaEl.className = 'ventas-delta ' + (d.delta_positivo ? 'delta-pos' : 'delta-neg');
+        deltaEl.querySelector('i').className = 'bi bi-arrow-' + (d.delta_positivo ? 'up' : 'down') + '-short';
+        pedidosEl.textContent = d.pedidos_hoy;
+    } else {
+        totalEl.textContent = '$0';
+        footer.style.display  = 'none';
+        emptyMsg.style.display = '';
+    }
+
+    // CTA
+    const ctaActivo  = document.getElementById('dash-cta-activo');
+    const ctaCerrado = document.getElementById('dash-cta-cerrado');
+    if (d.jornada_activa) {
+        ctaActivo.style.display  = '';
+        ctaCerrado.style.display = 'none';
+    } else {
+        ctaActivo.style.display  = 'none';
+        ctaCerrado.style.display = '';
+    }
+
+    // Contadores del grid
+    document.getElementById('dash-cnt-clientes').textContent  = d.total_clientes + ' clientes';
+    document.getElementById('dash-cnt-productos').textContent = d.total_productos + ' productos';
+    document.getElementById('dash-cnt-facturas').textContent  = d.pedidos_hoy + ' emitidas';
+    document.getElementById('dash-cnt-cierre').textContent    = d.jornada_activa ? 'Pendiente' : 'Completado';
 }
 
-// ── Badge pendientes ──────────────────────────────────────
-async function actualizarBadgePendientes() {
-    const n = await DB.contarPendientes();
-    const badge = document.getElementById('badge-pendientes');
-    if (!badge) return;
-    badge.textContent = n;
-    badge.style.display = n > 0 ? 'inline-flex' : 'none';
-}
+// ── Tracking GPS silencioso ───────────────────────────────
+(function iniciarTracking() {
+    if (!navigator.geolocation) return;
+    function enviar(pos) {
+        const fd = new FormData();
+        fd.append('lat', pos.coords.latitude);
+        fd.append('lng', pos.coords.longitude);
+        fetch('ubicacion.php', { method: 'POST', body: fd }).catch(() => {});
+    }
+    function tick() {
+        navigator.geolocation.getCurrentPosition(enviar, () => {}, {
+            enableHighAccuracy: true, timeout: 10000, maximumAge: 20000
+        });
+    }
+    tick();
+    setInterval(tick, 30000);
+})();
 
-// ── Toast notificación ────────────────────────────────────
+// ── Toast ─────────────────────────────────────────────────
 function mostrarToast(msg) {
     const t = document.createElement('div');
     t.textContent = msg;
-    t.style.cssText = `
-        position:fixed; bottom:80px; left:50%; transform:translateX(-50%);
-        background:#1e293b; color:#fff; padding:0.7rem 1.2rem;
-        border-radius:10px; font-size:0.85rem; z-index:9999;
-        box-shadow:0 4px 12px rgba(0,0,0,0.3); white-space:nowrap;
-    `;
+    t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);' +
+        'background:#1e293b;color:#fff;padding:.7rem 1.2rem;border-radius:10px;' +
+        'font-size:.85rem;z-index:9999;box-shadow:0 4px 12px rgba(0,0,0,.3);white-space:nowrap';
     document.body.appendChild(t);
     setTimeout(() => t.remove(), 4000);
 }
-
-// ── Escuchar cambio de conectividad ───────────────────────
-window.addEventListener('online', async () => {
-    const pendientes = await DB.obtenerVentasPendientes();
-    if (pendientes.length > 0) {
-        mostrarToast('📶 Conexión recuperada. Sincronizando ventas...');
-        await sincronizarPendientes(pendientes);
-    }
-});
 </script>
 
 </body>

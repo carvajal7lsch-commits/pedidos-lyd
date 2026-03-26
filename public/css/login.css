@@ -606,3 +606,138 @@ body {
     position: relative;
     z-index: 1;
 }
+
+/* ══════════════════════════════════════════
+   RESPONSIVE — Tablet (≤ 900px)
+══════════════════════════════════════════ */
+@media (max-width: 900px) {
+    body {
+        flex-direction: column;
+        overflow-y: auto;
+        overflow-x: hidden;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .cont2 {
+        display: none;
+        /* Ocultar decoración del camión en tablet/móvil */
+    }
+
+    .cont1 {
+        width: 100%;
+        min-height: 100vh;
+        padding: 1.5rem 1rem;
+        box-sizing: border-box;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .card-login {
+        width: 100%;
+        max-width: 420px;
+    }
+}
+
+/* ══════════════════════════════════════════
+   RESPONSIVE — Móvil (≤ 480px)
+══════════════════════════════════════════ */
+@media (max-width: 480px) {
+    body {
+        background-image:
+            linear-gradient(rgba(26, 63, 216, .04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(26, 63, 216, .04) 1px, transparent 1px);
+        background-size: 24px 24px;
+        overflow-y: auto;
+        height: auto;
+        min-height: 100dvh;
+        /* dynamic viewport height — evita el salto de barra de URL */
+        align-items: center;
+    }
+
+    .cont1 {
+        width: 100%;
+        min-height: 100dvh;
+        padding: 1.25rem 1rem;
+        box-sizing: border-box;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Card ocupa casi todo el ancho */
+    .card-login {
+        width: 100%;
+        max-width: 100%;
+        border-radius: 1.25rem;
+        padding: 1.75rem 0 0 0;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
+    }
+
+    /* Ícono camión un poco más pequeño */
+    .icon {
+        padding: 0.75rem;
+        height: 26px;
+    }
+
+    .icon i {
+        font-size: 1.35rem;
+    }
+
+    /* Títulos del saludo */
+    .saludo h2 {
+        font-size: 1.3rem;
+        margin-bottom: 0.1rem;
+    }
+
+    .saludo p {
+        font-size: 0.85rem;
+    }
+
+    /* Form con mayor padding lateral */
+    form {
+        width: 88%;
+        padding: 0.25rem 0.25rem;
+    }
+
+    /* Inputs más grandes para dedos */
+    input {
+        padding: 0.9rem 0.9rem 0.9rem 40px;
+        font-size: 16px;
+        /* 16px evita el zoom automático en iOS */
+        border-radius: 0.65rem;
+    }
+
+    label {
+        font-size: 13px;
+    }
+
+    /* Botón más alto y fácil de tocar */
+    .btn_iniciar {
+        height: 52px;
+        font-size: 16px;
+        border-radius: 0.65rem;
+        width: 100%;
+    }
+
+    .btn {
+        margin-bottom: 1rem;
+    }
+
+    /* Alerta de error */
+    .alerta-error {
+        font-size: 13px;
+        padding: 0.6rem 0.75rem;
+    }
+
+    /* Footer */
+    .footer {
+        height: 3rem;
+        font-size: 13px;
+    }
+
+    /* Partículas de fondo — reducir en móvil (se ajustan en JS, solo ocultamos el canvas cuando no aporta) */
+    #antigravity-bg {
+        opacity: 0.4;
+    }
+}

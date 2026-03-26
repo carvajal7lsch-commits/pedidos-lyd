@@ -205,7 +205,7 @@ $dias_sin_compra = $stats['ultima_visita']
         </a>
         <h1 class="page-title"><?php echo htmlspecialchars($cliente['nombre']); ?></h1>
     </div>
-    <a href="pedido.php?id_cliente=<?php echo $id; ?>" class="btn-add" title="Hacer pedido">
+    <a href="productos.php?id_cliente=<?php echo $id; ?>" class="btn-add" title="Hacer pedido">
         <i class="bi bi-cart3"></i>
     </a>
 </header>
@@ -246,7 +246,7 @@ $dias_sin_compra = $stats['ultima_visita']
         <div class="cartera-monto">
             $<?php echo number_format($saldo_total, 0, ',', '.'); ?>
         </div>
-        <form method="POST" onsubmit="return confirm('¿Marcar todas las facturas como pagadas?')">
+        <form method="POST">
             <input type="hidden" name="accion" value="pagar_todo">
             <button type="submit" class="btn-pagar-todo">
                 <i class="bi bi-cash-coin"></i> Pagar todo

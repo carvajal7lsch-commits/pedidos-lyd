@@ -439,7 +439,6 @@ function actualizarSubtotalModal() {
 }
 
 function confirmarEliminar(id_detalle, id_producto, cantidad, nombre) {
-    if (!confirm(`¿Eliminar "${nombre}" de esta venta?\n\nLas pacas volverán al inventario del camión.`)) return;
     document.getElementById('delIdDetalle').value  = id_detalle;
     document.getElementById('delIdProducto').value = id_producto;
     document.getElementById('delCantidad').value   = cantidad;

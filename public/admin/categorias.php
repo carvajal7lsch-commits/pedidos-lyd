@@ -99,10 +99,10 @@ $categoria  = ($accion === 'editar' && $id > 0) ? obtenerCategoriaPorId($id) : n
                     <option value="inactiva">Inactiva</option>
                 </select>
                 <div class="vista-toggle">
-                    <button class="vista-btn active" id="btnVista1" onclick="cambiarVista('tabla')" title="Vista tabla">
+                    <button class="vista-btn" id="btnVista1" onclick="cambiarVista('tabla')" title="Vista tabla">
                         <i class="bi bi-table"></i>
                     </button>
-                    <button class="vista-btn" id="btnVista2" onclick="cambiarVista('cards')" title="Vista tarjetas">
+                    <button class="vista-btn active" id="btnVista2" onclick="cambiarVista('cards')" title="Vista tarjetas">
                         <i class="bi bi-grid-3x3-gap-fill"></i>
                     </button>
                 </div>
@@ -280,7 +280,7 @@ $categoria  = ($accion === 'editar' && $id > 0) ? obtenerCategoriaPorId($id) : n
 
     <script>
         // ── Vista activa persistida en sessionStorage ──
-        let vistaActual = sessionStorage.getItem('catVista') || 'tabla';
+        let vistaActual = sessionStorage.getItem('catVista') || 'cards';
         cambiarVista(vistaActual, false); // sin animación al cargar
 
         function cambiarVista(tipo, animado = true) {

@@ -291,10 +291,7 @@ $preview_inv      = array_slice($inventario, 0, 3);
 
 <script>
 function confirmarCierre() {
-    const msg = '¿Confirmar cierre de ruta?\n\nEsta acción no se puede deshacer.\nNo podrás registrar más ventas hoy.';
-    if (confirm(msg)) {
-        document.getElementById('formCierre').submit();
-    }
+    document.getElementById('formCierre').submit();
 }
 </script>
 

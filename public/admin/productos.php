@@ -99,10 +99,10 @@ $categorias = obtenerCategorias();
                     <option value="inactivo">Inactivo</option>
                 </select>
                 <div class="vista-toggle">
-                    <button class="vista-btn active" id="btnVista1" onclick="cambiarVista('tabla')" title="Vista tabla">
+                    <button class="vista-btn" id="btnVista1" onclick="cambiarVista('tabla')" title="Vista tabla">
                         <i class="bi bi-table"></i>
                     </button>
-                    <button class="vista-btn" id="btnVista2" onclick="cambiarVista('cards')" title="Vista tarjetas">
+                    <button class="vista-btn active" id="btnVista2" onclick="cambiarVista('cards')" title="Vista tarjetas">
                         <i class="bi bi-grid-3x3-gap-fill"></i>
                     </button>
                 </div>
@@ -357,7 +357,7 @@ $categorias = obtenerCategorias();
         // ══════════════════════════════════════════
         // VISTA (tabla / cards) con persistencia
         // ══════════════════════════════════════════
-        let vistaActual = sessionStorage.getItem('prodVista') || 'tabla';
+        let vistaActual = sessionStorage.getItem('prodVista') || 'cards';
         cambiarVista(vistaActual);
 
         function cambiarVista(tipo) {

@@ -198,53 +198,11 @@ function setFiltro(pill) {
 </script>
 
 
-<script src="/public/js/db-vendedor.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
-    const n     = await DB.contarPendientes();
+document.addEventListener('DOMContentLoaded', () => {
     const badge = document.getElementById('badge-pendientes');
-    if (badge) { badge.textContent = n; badge.style.display = n > 0 ? 'inline-flex' : 'none'; }
-    try {
-        const pendientes = await DB.obtenerVentasPendientes();
-        const hoy = new Date().toISOString().split('T')[0];
-        const deHoy = pendientes.filter(v => v.fecha === hoy);
-        if (deHoy.length > 0) agregarVentasOffline(deHoy);
-    } catch(e) {}
+    if (badge) badge.style.display = 'none';
 });
-
-function agregarVentasOffline(ventas) {
-    const fmt = n => '$' + n.toLocaleString('es-CO');
-    let lista = document.getElementById('factLista');
-    if (!lista) {
-        lista = document.createElement('div');
-        lista.className = 'fact-lista';
-        lista.id = 'factLista';
-        document.querySelector('.fact-seccion-titulo').after(lista);
-    }
-    const vacia = document.querySelector('.fact-vacia');
-    if (vacia) vacia.style.display = 'none';
-
-    ventas.forEach(v => {
-        const item = document.createElement('a');
-        item.href = 'comprobante.php?offline=1&id_local=' + v.id_local;
-        item.className = 'fact-item';
-        item.dataset.cliente = (v.cliente_nombre || '').toLowerCase();
-        item.dataset.tipo    = v.tipo_venta;
-        item.style.borderLeft = '3px solid #f59e0b';
-        const inicial = (v.cliente_nombre || 'S').charAt(0).toUpperCase();
-        item.innerHTML =
-            '<div class="fact-avatar" style="background:#fef3c7;color:#92400e;">' + inicial + '</div>' +
-            '<div class="fact-info">' +
-                '<div class="fact-cliente">' + (v.cliente_nombre || 'Sin cliente') + '</div>' +
-                '<div class="fact-id" style="color:#f59e0b;">⏳ Pendiente de sync</div>' +
-            '</div>' +
-            '<div class="fact-derecha">' +
-                '<div class="fact-monto">' + fmt(v.total) + '</div>' +
-                '<span class="fact-tipo-badge tipo-' + v.tipo_venta + '">' + v.tipo_venta.toUpperCase() + '</span>' +
-            '</div>';
-        lista.insertBefore(item, lista.firstChild);
-    });
-}
 </script>
 
 </body>

@@ -8,6 +8,16 @@ require_once __DIR__ . '/../../config/conexion.php';
 $id_vendedor = $_SESSION['id_usuario'];
 $hoy         = date('Y-m-d');
 
+// ── Comprueba jornada cerrada (deshabilita agregar productos si ya se cerró hoy) ─
+$hoy = date('Y-m-d');
+$stmt = mysqli_prepare($conexion,
+    "SELECT COUNT(*) AS cnt FROM cierrediario WHERE id_usuario = ? AND fecha = ?"
+);
+mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
+mysqli_stmt_execute($stmt);
+$cierre_hoy = (int) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['cnt'];
+$jornada_activa = ($cierre_hoy === 0);
+
 // ── Cliente seleccionado (viene de clientes.php) ─
 $id_cliente = isset($_GET['id_cliente']) ? (int)$_GET['id_cliente'] : 0;
 
@@ -35,8 +45,6 @@ $cats = mysqli_fetch_all(mysqli_query($conexion,
 ), MYSQLI_ASSOC);
 
 // ── Productos con stock del camión ───────────
-// Une inventariocamion del día con productos
-// Si no hay cargue hoy, muestra catálogo con stock 0
 $productos = mysqli_fetch_all(mysqli_query($conexion,
     "SELECT p.id_producto, p.nombre, p.precio, p.imagen,
             p.id_categoria, c.nombre AS categoria,
@@ -94,6 +102,13 @@ $productos = mysqli_fetch_all(mysqli_query($conexion,
 
 <!-- ══ CONTENIDO ══ -->
 <main class="scroll-body" id="mainScroll">
+
+    <?php if (!$jornada_activa): ?>
+    <div class="alerta alerta-error" style="margin: 1rem;">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        Jornada cerrada: no se pueden agregar productos.
+    </div>
+    <?php endif; ?>
 
     <!-- Buscador -->
     <div class="search-box">
@@ -153,12 +168,17 @@ $productos = mysqli_fetch_all(mysqli_query($conexion,
                     $<?php echo number_format($p['precio'], 0, ',', '.'); ?>
                     <span class="prod-cop">COP</span>
                 </div>
-                <button class="btn-anadir <?php echo $p['stock_camion'] == 0 ? 'btn-disabled' : ''; ?>"
-                        onclick="<?php echo $p['stock_camion'] > 0 ? 'abrirModal(' . $p['id_producto'] . ')' : ''; ?>"
-                        <?php echo $p['stock_camion'] == 0 ? 'disabled' : ''; ?>>
+                <?php if ($jornada_activa && $p['stock_camion'] > 0): ?>
+                <button class="btn-anadir" onclick="abrirModal(<?php echo $p['id_producto']; ?>)">
                     <i class="bi bi-cart-plus"></i>
-                    <?php echo $p['stock_camion'] == 0 ? 'Sin stock' : 'Añadir'; ?>
+                    Añadir
                 </button>
+                <?php else: ?>
+                <button class="btn-anadir btn-disabled" disabled>
+                    <i class="bi bi-cart-plus"></i>
+                    <?php echo $p['stock_camion'] == 0 ? 'Sin stock' : 'Jornada cerrada'; ?>
+                </button>
+                <?php endif; ?>
             </div>
 
         </div>
@@ -400,53 +420,11 @@ actualizarCarritoBar();
 </script>
 
 
-<!-- ══ OFFLINE: guardar productos e inventario en IndexedDB ══ -->
-<script src="/public/js/db-vendedor.js"></script>
 <script>
-// Datos del servidor disponibles esta sesión
-const DATOS_PRODUCTOS = <?php echo json_encode(array_values($productos)); ?>;
-const DATOS_CATS      = <?php echo json_encode(array_values($cats)); ?>;
-
-document.addEventListener('DOMContentLoaded', async () => {
-    if (navigator.onLine && DATOS_PRODUCTOS.length > 0) {
-        try {
-            // Guardar productos con su stock de camión
-            await DB.guardarProductos(DATOS_PRODUCTOS.map(p => ({
-                id_producto:      parseInt(p.id_producto),
-                nombre:           p.nombre,
-                precio:           parseFloat(p.precio),
-                imagen:           p.imagen,
-                id_categoria:     parseInt(p.id_categoria),
-                categoria:        p.categoria,
-                stock_camion:     parseInt(p.stock_camion),
-            })));
-
-            // Guardar inventario también (para la vista inventario.php)
-            const inventario = DATOS_PRODUCTOS
-                .filter(p => parseInt(p.stock_camion) > 0)
-                .map(p => ({
-                    id_producto:          parseInt(p.id_producto),
-                    nombre:               p.nombre,
-                    imagen:               p.imagen,
-                    cantidad_disponible:  parseInt(p.stock_camion),
-                    cantidad_cargada:     parseInt(p.stock_camion), // approx
-                }));
-            await DB.guardarInventario(inventario);
-
-            console.log('[Offline] Productos e inventario guardados en IndexedDB');
-        } catch(e) {
-            console.warn('[Offline] Error guardando productos:', e);
-        }
-    }
-
-    // Actualizar badge pendientes en navbar
-    const n = await DB.contarPendientes();
-    const badge = document.getElementById('badge-pendientes');
-    if (badge) {
-        badge.textContent = n;
-        badge.style.display = n > 0 ? 'inline-flex' : 'none';
-    }
-});
+    // Solo modo online: no se usa IndexedDB ni mode offline.
+    document.addEventListener('DOMContentLoaded', () => {
+        actualizarCarritoBar();
+    });
 </script>
 
 </body>

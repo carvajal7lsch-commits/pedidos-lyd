@@ -188,41 +188,11 @@ function filtrar() {
 </script>
 
 
-<script src="/public/js/db-vendedor.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
-    const n     = await DB.contarPendientes();
+document.addEventListener('DOMContentLoaded', () => {
     const badge = document.getElementById('badge-pendientes');
-    if (badge) { badge.textContent = n; badge.style.display = n > 0 ? 'inline-flex' : 'none'; }
-    if (!navigator.onLine && document.querySelectorAll('.inv-fila').length === 0) {
-        try {
-            const inv = await DB.obtenerInventario();
-            if (inv.length > 0) renderInventarioOffline(inv);
-        } catch(e) {}
-    }
+    if (badge) badge.style.display = 'none';
 });
-function renderInventarioOffline(inventario) {
-    const lista = document.getElementById('invLista');
-    document.querySelector('.inv-sin-cargue') && (document.querySelector('.inv-sin-cargue').style.display='none');
-    inventario.forEach(item => {
-        const ini=item.cantidad_cargada||0, rest=item.cantidad_disponible||0, ven=Math.max(0,ini-rest);
-        const agotado=rest===0, bajo=!agotado&&rest<=3;
-        const fila=document.createElement('div');
-        fila.className='inv-fila'+(agotado?' fila-agotado':(bajo?' fila-bajo':''));
-        fila.dataset.nombre=(item.nombre||'').toLowerCase();
-        const img=item.imagen?'<img src="../uploads/productos/'+item.imagen+'" class="inv-img">':'<div class="inv-img-placeholder"><i class="bi bi-image"></i></div>';
-        const rb=agotado?'<span class="badge-agotado">AGOTADO</span>':(bajo?'<span class="badge-bajo">'+rest+'</span>':'<strong class="rest-normal">'+rest+'</strong>');
-        fila.innerHTML='<div class="inv-td inv-td-prod"><div class="inv-img-wrap">'+img+'</div><span class="inv-prod-nombre">'+(item.nombre||'')+'</span></div><div class="inv-td inv-td-num">'+ini+'</div><div class="inv-td inv-td-num">'+ven+'</div><div class="inv-td inv-td-rest">'+rb+'</div>';
-        lista.appendChild(fila);
-    });
-    const cards=document.querySelectorAll('.inv-res-val');
-    const totIni=inventario.reduce((s,i)=>s+(i.cantidad_cargada||0),0);
-    const totRest=inventario.reduce((s,i)=>s+(i.cantidad_disponible||0),0);
-    if(cards[0])cards[0].textContent=inventario.length;
-    if(cards[1])cards[1].textContent=totIni;
-    if(cards[2])cards[2].textContent=Math.max(0,totIni-totRest);
-    if(cards[3])cards[3].textContent=totRest;
-}
 </script>
 
 </body>

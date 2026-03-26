@@ -31,6 +31,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="es">
 
 <head>
+    <link rel="manifest" href="/public/manifest.json">
+    <meta name="theme-color" content="#1855CF">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="LYD">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pedidos LYD</title>
@@ -179,8 +184,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 "#00000",
             ];
 
-            // Configuración
-            const COUNT = 320;
+            // Configuración — menos partículas en móvil para ahorrar batería
+            const COUNT = window.innerWidth <= 480 ? 60 : 320;
             const MOUSE_RADIUS = 130;
             const MOUSE_FORCE = 6.8;
             const RETURN_SPEED = 0.055;

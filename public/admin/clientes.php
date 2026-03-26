@@ -104,10 +104,10 @@ $abrir_modal_editar = ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'edi
                 <option value="deuda">💳 Con deuda</option>
             </select>
             <div class="vista-toggle">
-                <button class="vista-btn active" id="btnVista1" onclick="cambiarVista('tabla')" title="Vista tabla">
+                <button class="vista-btn" id="btnVista1" onclick="cambiarVista('tabla')" title="Vista tabla">
                     <i class="bi bi-table"></i>
                 </button>
-                <button class="vista-btn" id="btnVista2" onclick="cambiarVista('cards')" title="Vista tarjetas">
+                <button class="vista-btn active" id="btnVista2" onclick="cambiarVista('cards')" title="Vista tarjetas">
                     <i class="bi bi-grid-3x3-gap-fill"></i>
                 </button>
             </div>
@@ -362,7 +362,7 @@ $abrir_modal_editar = ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'edi
 
 <script>
 // Variables globales — declaradas PRIMERO antes de cualquier llamada
-let vistaActual  = sessionStorage.getItem('cliVista') || 'tabla';
+let vistaActual  = sessionStorage.getItem('cliVista') || 'cards';
 let estadoFiltro = 'activo';
 
 // ── Funciones ──────────────────────────────────────────────────────────────
