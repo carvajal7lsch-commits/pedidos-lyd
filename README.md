@@ -35,6 +35,8 @@ Sistema de gestión de pedidos y ventas para **Depósito LYD**, diseñado para v
 - Modo pantalla completa sin barra del navegador
 - Ícono personalizado del camión en la pantalla de inicio
 
+ **Nota:** La aplicación funciona 100% online. El PWA es solo para instalación y experiencia de usuario, no incluye funcionalidades offline.
+
 ---
 
 ## 🏗️ Estructura del proyecto
