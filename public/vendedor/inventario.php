@@ -69,7 +69,7 @@ $total_pacas_ven   = array_sum(array_column($inventario, 'ven'));
     <div class="inv-sin-cargue">
         <i class="bi bi-truck-front"></i>
         <p>No hay cargue registrado hoy</p>
-        <a href="cargue.php" class="btn-ir-cargue">Registrar Cargue</a>
+        <a href="carga.php" class="btn-ir-cargue">Registrar Cargue</a>
     </div>
 
     <?php else: ?>
