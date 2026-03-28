@@ -13,7 +13,7 @@ function obtenerTodasCategorias() {
     global $conexion;
     $resultado = mysqli_query($conexion,
         "SELECT id_categoria, nombre, estado
-         FROM Categorias
+         FROM categorias
          ORDER BY id_categoria DESC"
     );
     return mysqli_fetch_all($resultado, MYSQLI_ASSOC);
@@ -25,7 +25,7 @@ function obtenerTodasCategorias() {
 function obtenerCategoriaPorId($id) {
     global $conexion;
     $stmt = mysqli_prepare($conexion,
-        "SELECT * FROM Categorias WHERE id_categoria = ? LIMIT 1"
+        "SELECT * FROM categorias WHERE id_categoria = ? LIMIT 1"
     );
     mysqli_stmt_bind_param($stmt, 'i', $id);
     mysqli_stmt_execute($stmt);
@@ -39,7 +39,7 @@ function obtenerCategoriaPorId($id) {
 function existeCategoria($nombre, $excluir_id = 0) {
     global $conexion;
     $stmt = mysqli_prepare($conexion,
-        "SELECT id_categoria FROM Categorias
+        "SELECT id_categoria FROM categorias
          WHERE nombre = ? AND id_categoria != ? LIMIT 1"
     );
     mysqli_stmt_bind_param($stmt, 'si', $nombre, $excluir_id);
@@ -54,7 +54,7 @@ function existeCategoria($nombre, $excluir_id = 0) {
 function crearCategoria($nombre) {
     global $conexion;
     $stmt = mysqli_prepare($conexion,
-        "INSERT INTO Categorias (nombre, estado) VALUES (?, 1)"
+        "INSERT INTO categorias (nombre, estado) VALUES (?, 1)"
     );
     mysqli_stmt_bind_param($stmt, 's', $nombre);
     return mysqli_stmt_execute($stmt);
@@ -66,7 +66,7 @@ function crearCategoria($nombre) {
 function editarCategoria($id, $nombre) {
     global $conexion;
     $stmt = mysqli_prepare($conexion,
-        "UPDATE Categorias SET nombre = ? WHERE id_categoria = ?"
+        "UPDATE categorias SET nombre = ? WHERE id_categoria = ?"
     );
     mysqli_stmt_bind_param($stmt, 'si', $nombre, $id);
     return mysqli_stmt_execute($stmt);
@@ -78,7 +78,7 @@ function editarCategoria($id, $nombre) {
 function desactivarCategoria($id) {
     global $conexion;
     $stmt = mysqli_prepare($conexion,
-        "UPDATE Categorias SET estado = 0 WHERE id_categoria = ?"
+        "UPDATE categorias SET estado = 0 WHERE id_categoria = ?"
     );
     mysqli_stmt_bind_param($stmt, 'i', $id);
     return mysqli_stmt_execute($stmt);
@@ -90,7 +90,7 @@ function desactivarCategoria($id) {
 function reactivarCategoria($id) {
     global $conexion;
     $stmt = mysqli_prepare($conexion,
-        "UPDATE Categorias SET estado = 1 WHERE id_categoria = ?"
+        "UPDATE categorias SET estado = 1 WHERE id_categoria = ?"
     );
     mysqli_stmt_bind_param($stmt, 'i', $id);
     return mysqli_stmt_execute($stmt);

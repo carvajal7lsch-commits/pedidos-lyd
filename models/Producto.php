@@ -12,8 +12,8 @@ function obtenerProductos() {
         "SELECT p.id_producto, p.id_categoria, p.nombre, p.precio,
                 p.imagen, p.estado,
                 c.nombre AS categoria
-         FROM Productos p
-         INNER JOIN Categorias c ON p.id_categoria = c.id_categoria
+         FROM productos p
+         INNER JOIN categorias c ON p.id_categoria = c.id_categoria
          ORDER BY p.id_producto DESC"
     );
     return mysqli_fetch_all($resultado, MYSQLI_ASSOC);
@@ -26,8 +26,8 @@ function obtenerProductosActivos() {
         "SELECT p.id_producto, p.nombre, p.precio,
                 p.imagen,
                 c.nombre AS categoria
-         FROM Productos p
-         INNER JOIN Categorias c ON p.id_categoria = c.id_categoria
+         FROM productos p
+         INNER JOIN categorias c ON p.id_categoria = c.id_categoria
          WHERE p.estado = 1
          ORDER BY p.nombre ASC"
     );
@@ -38,7 +38,7 @@ function obtenerProductosActivos() {
 function obtenerProductoPorId($id) {
     global $conexion;
     $stmt = mysqli_prepare($conexion,
-        "SELECT * FROM Productos WHERE id_producto = ? LIMIT 1"
+        "SELECT * FROM productos WHERE id_producto = ? LIMIT 1"
     );
     mysqli_stmt_bind_param($stmt, 'i', $id);
     mysqli_stmt_execute($stmt);
@@ -49,7 +49,7 @@ function obtenerProductoPorId($id) {
 function crearProducto($id_categoria, $nombre, $precio, $imagen) {
     global $conexion;
     $stmt = mysqli_prepare($conexion,
-        "INSERT INTO Productos (id_categoria, nombre, precio, imagen, estado)
+        "INSERT INTO productos (id_categoria, nombre, precio, imagen, estado)
          VALUES (?, ?, ?, ?, 1)"
     );
     mysqli_stmt_bind_param($stmt, 'isds', $id_categoria, $nombre, $precio, $imagen);
@@ -62,14 +62,14 @@ function editarProducto($id, $id_categoria, $nombre, $precio, $imagen) {
 
     if ($imagen !== null) {
         $stmt = mysqli_prepare($conexion,
-            "UPDATE Productos
+            "UPDATE productos
              SET id_categoria = ?, nombre = ?, precio = ?, imagen = ?
              WHERE id_producto = ?"
         );
         mysqli_stmt_bind_param($stmt, 'isdsi', $id_categoria, $nombre, $precio, $imagen, $id);
     } else {
         $stmt = mysqli_prepare($conexion,
-            "UPDATE Productos
+            "UPDATE productos
              SET id_categoria = ?, nombre = ?, precio = ?
              WHERE id_producto = ?"
         );
@@ -81,7 +81,7 @@ function editarProducto($id, $id_categoria, $nombre, $precio, $imagen) {
 // Desactivar producto
 function desactivarProducto($id) {
     global $conexion;
-    $stmt = mysqli_prepare($conexion, "UPDATE Productos SET estado = 0 WHERE id_producto = ?");
+    $stmt = mysqli_prepare($conexion, "UPDATE productos SET estado = 0 WHERE id_producto = ?");
     mysqli_stmt_bind_param($stmt, 'i', $id);
     return mysqli_stmt_execute($stmt);
 }
@@ -89,7 +89,7 @@ function desactivarProducto($id) {
 // Reactivar producto
 function reactivarProducto($id) {
     global $conexion;
-    $stmt = mysqli_prepare($conexion, "UPDATE Productos SET estado = 1 WHERE id_producto = ?");
+    $stmt = mysqli_prepare($conexion, "UPDATE productos SET estado = 1 WHERE id_producto = ?");
     mysqli_stmt_bind_param($stmt, 'i', $id);
     return mysqli_stmt_execute($stmt);
 }
@@ -98,7 +98,7 @@ function reactivarProducto($id) {
 function obtenerCategorias() {
     global $conexion;
     $resultado = mysqli_query($conexion,
-        "SELECT id_categoria, nombre FROM Categorias WHERE estado = 1 ORDER BY nombre"
+        "SELECT id_categoria, nombre FROM categorias WHERE estado = 1 ORDER BY nombre"
     );
     return mysqli_fetch_all($resultado, MYSQLI_ASSOC);
 }

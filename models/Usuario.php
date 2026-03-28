@@ -13,7 +13,7 @@ function obtenerUsuarios() {
     global $conexion;
     $resultado = mysqli_query($conexion,
         "SELECT id_usuario, nombre, correo, rol, estado
-         FROM Usuario
+         FROM usuario
          ORDER BY id_usuario DESC"
     );
     return mysqli_fetch_all($resultado, MYSQLI_ASSOC);
@@ -25,7 +25,7 @@ function obtenerUsuarios() {
 function obtenerUsuarioPorId($id) {
     global $conexion;
     $stmt = mysqli_prepare($conexion,
-        "SELECT * FROM Usuario WHERE id_usuario = ? LIMIT 1"
+        "SELECT * FROM usuario WHERE id_usuario = ? LIMIT 1"
     );
     mysqli_stmt_bind_param($stmt, 'i', $id);
     mysqli_stmt_execute($stmt);
@@ -39,7 +39,7 @@ function obtenerUsuarioPorId($id) {
 function existeCorreo($correo, $excluir_id = 0) {
     global $conexion;
     $stmt = mysqli_prepare($conexion,
-        "SELECT id_usuario FROM Usuario
+        "SELECT id_usuario FROM usuario
          WHERE correo = ? AND id_usuario != ? LIMIT 1"
     );
     mysqli_stmt_bind_param($stmt, 'si', $correo, $excluir_id);
@@ -55,7 +55,7 @@ function crearUsuario($nombre, $correo, $contrasena) {
     global $conexion;
     $rol  = 'vendedor';
     $stmt = mysqli_prepare($conexion,
-        "INSERT INTO Usuario (nombre, correo, contrasena, rol, estado)
+        "INSERT INTO usuario (nombre, correo, contrasena, rol, estado)
          VALUES (?, ?, ?, ?, 1)"
     );
     mysqli_stmt_bind_param($stmt, 'ssss', $nombre, $correo, $contrasena, $rol);
@@ -68,7 +68,7 @@ function crearUsuario($nombre, $correo, $contrasena) {
 function editarUsuario($id, $nombre, $correo) {
     global $conexion;
     $stmt = mysqli_prepare($conexion,
-        "UPDATE Usuario SET nombre = ?, correo = ?
+        "UPDATE usuario SET nombre = ?, correo = ?
          WHERE id_usuario = ?"
     );
     mysqli_stmt_bind_param($stmt, 'ssi', $nombre, $correo, $id);
@@ -81,7 +81,7 @@ function editarUsuario($id, $nombre, $correo) {
 function cambiarContrasena($id, $contrasena) {
     global $conexion;
     $stmt = mysqli_prepare($conexion,
-        "UPDATE Usuario SET contrasena = ? WHERE id_usuario = ?"
+        "UPDATE usuario SET contrasena = ? WHERE id_usuario = ?"
     );
     mysqli_stmt_bind_param($stmt, 'si', $contrasena, $id);
     return mysqli_stmt_execute($stmt);
@@ -93,7 +93,7 @@ function cambiarContrasena($id, $contrasena) {
 function desactivarUsuario($id) {
     global $conexion;
     $stmt = mysqli_prepare($conexion,
-        "UPDATE Usuario SET estado = 0 WHERE id_usuario = ?"
+        "UPDATE usuario SET estado = 0 WHERE id_usuario = ?"
     );
     mysqli_stmt_bind_param($stmt, 'i', $id);
     return mysqli_stmt_execute($stmt);
@@ -105,7 +105,7 @@ function desactivarUsuario($id) {
 function reactivarUsuario($id) {
     global $conexion;
     $stmt = mysqli_prepare($conexion,
-        "UPDATE Usuario SET estado = 1 WHERE id_usuario = ?"
+        "UPDATE usuario SET estado = 1 WHERE id_usuario = ?"
     );
     mysqli_stmt_bind_param($stmt, 'i', $id);
     return mysqli_stmt_execute($stmt);

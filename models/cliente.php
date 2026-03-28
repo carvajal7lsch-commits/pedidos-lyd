@@ -22,10 +22,10 @@ function etiquetarCliente($c) {
     // Usamos el id como proxy si no hay fecha de registro
     // Si la BD tiene fecha_registro úsala; si no, comparamos por id relativo
     $stmt = mysqli_prepare($conexion,
-        "SELECT COUNT(*) FROM Cliente WHERE id_cliente > ? AND estado = 1"
+        "SELECT COUNT(*) FROM cliente WHERE id_cliente > ? AND estado = 1"
     );
     // Alternativa sin fecha: compara por rango de IDs recientes (top 20% más nuevo)
-    $total_cli = mysqli_fetch_row(mysqli_query($conexion, "SELECT COUNT(*) FROM Cliente"))[0];
+    $total_cli = mysqli_fetch_row(mysqli_query($conexion, "SELECT COUNT(*) FROM cliente"))[0];
     $umbral_nuevo = $total_cli - max(1, (int)($total_cli * 0.2));
     if ($id > $umbral_nuevo) {
         $tags[] = ['clave' => 'nuevo', 'label' => 'Nuevo', 'icon' => '🆕', 'color' => '#3b82f6'];
@@ -123,7 +123,7 @@ function obtenerClientes() {
     global $conexion;
     $resultado = mysqli_query($conexion,
         "SELECT id_cliente, nombre, telefono, direccion, estado
-         FROM Cliente
+         FROM cliente
          ORDER BY id_cliente DESC"
     );
     return mysqli_fetch_all($resultado, MYSQLI_ASSOC);
@@ -135,7 +135,7 @@ function obtenerClientes() {
 function obtenerClientePorId($id) {
     global $conexion;
     $stmt = mysqli_prepare($conexion,
-        "SELECT * FROM Cliente WHERE id_cliente = ? LIMIT 1"
+        "SELECT * FROM cliente WHERE id_cliente = ? LIMIT 1"
     );
     mysqli_stmt_bind_param($stmt, 'i', $id);
     mysqli_stmt_execute($stmt);
@@ -151,7 +151,7 @@ function buscarClientes($termino) {
     $like = '%' . $termino . '%';
     $stmt = mysqli_prepare($conexion,
         "SELECT id_cliente, nombre, telefono, direccion
-         FROM Cliente
+         FROM cliente
          WHERE (nombre LIKE ? OR telefono LIKE ?) AND estado = 1
          ORDER BY nombre
          LIMIT 10"
@@ -168,7 +168,7 @@ function buscarClientes($termino) {
 function existeCliente($nombre, $telefono, $excluir_id = 0) {
     global $conexion;
     $stmt = mysqli_prepare($conexion,
-        "SELECT id_cliente FROM Cliente
+        "SELECT id_cliente FROM cliente
          WHERE nombre = ? AND telefono = ? AND id_cliente != ? LIMIT 1"
     );
     mysqli_stmt_bind_param($stmt, 'ssi', $nombre, $telefono, $excluir_id);
@@ -183,7 +183,7 @@ function existeCliente($nombre, $telefono, $excluir_id = 0) {
 function crearCliente($nombre, $telefono, $direccion) {
     global $conexion;
     $stmt = mysqli_prepare($conexion,
-        "INSERT INTO Cliente (nombre, telefono, direccion, estado)
+        "INSERT INTO cliente (nombre, telefono, direccion, estado)
          VALUES (?, ?, ?, 1)"
     );
     mysqli_stmt_bind_param($stmt, 'sss', $nombre, $telefono, $direccion);
@@ -196,7 +196,7 @@ function crearCliente($nombre, $telefono, $direccion) {
 function editarCliente($id, $nombre, $telefono, $direccion) {
     global $conexion;
     $stmt = mysqli_prepare($conexion,
-        "UPDATE Cliente SET nombre = ?, telefono = ?, direccion = ?
+        "UPDATE cliente SET nombre = ?, telefono = ?, direccion = ?
          WHERE id_cliente = ?"
     );
     mysqli_stmt_bind_param($stmt, 'sssi', $nombre, $telefono, $direccion, $id);
@@ -209,7 +209,7 @@ function editarCliente($id, $nombre, $telefono, $direccion) {
 function desactivarCliente($id) {
     global $conexion;
     $stmt = mysqli_prepare($conexion,
-        "UPDATE Cliente SET estado = 0 WHERE id_cliente = ?"
+        "UPDATE cliente SET estado = 0 WHERE id_cliente = ?"
     );
     mysqli_stmt_bind_param($stmt, 'i', $id);
     return mysqli_stmt_execute($stmt);
@@ -221,7 +221,7 @@ function desactivarCliente($id) {
 function reactivarCliente($id) {
     global $conexion;
     $stmt = mysqli_prepare($conexion,
-        "UPDATE Cliente SET estado = 1 WHERE id_cliente = ?"
+        "UPDATE cliente SET estado = 1 WHERE id_cliente = ?"
     );
     mysqli_stmt_bind_param($stmt, 'i', $id);
     return mysqli_stmt_execute($stmt);
