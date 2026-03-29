@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pedidos LYD — Sistema de Gestión de Ventas</title>
+    <link rel="stylesheet" href="public/css/index_ini.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+</head>
+
+<body>
+
+    <!-- ── NAVBAR ── -->
+    <nav id="navbar">
+        <a href="#" class="nav-brand">
+            <div class="brand-icon"><i class="bi bi-truck"></i></div>
+            <span>Pedidos <em>LYD</em></span>
+        </a>
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#features">Funcionalidades</a></li>
+            <li><a href="#how">¿Cómo funciona?</a></li>
+            <li><a href="#roles">Roles</a></li>
+            <li><a href="#tech">Tecnología</a></li>
+            <li><a href="public/login.php" class="btn-login"><i class="bi bi-box-arrow-in-right"></i> Iniciar sesión</a>
+            </li>
+        </ul>
+        <button class="nav-toggle" id="navToggle" aria-label="Menú"><i class="bi bi-list"></i></button>
+    </nav>
+
+    <!-- ── HERO ── -->
+    <section class="hero" id="home">
+        <div class="hero-orb hero-orb-1"></div>
+        <div class="hero-orb hero-orb-2"></div>
+        <div class="hero-inner">
+            <div class="hero-text">
+                <div class="hero-badge">
+                    <span class="dot"></span>
+                    Sistema 100% Online · Depósito LYD
+                </div>
+                <h1>Gestión de ventas <span>desde el camión</span></h1>
+                <p class="hero-desc">
+                    Pedidos LYD es la plataforma que conecta a tus vendedores de ruta con la administración en tiempo
+                    real. Control de inventario, facturación, créditos y tracking GPS, todo en un solo lugar.
+                </p>
+                <div class="hero-actions">
+                    <a href="public/login.php" class="btn-hero btn-hero-primary">
+                        <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión
+                    </a>
+                    <a href="#features" class="btn-hero btn-hero-ghost">
+                        <i class="bi bi-compass"></i> Explorar sistema
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mockup visual -->
+            <div class="hero-visual">
+                <div class="mockup-card">
+                    <div class="mockup-topbar">
+                        <span class="mockup-dot d-red"></span>
+                        <span class="mockup-dot d-yellow"></span>
+                        <span class="mockup-dot d-green"></span>
+                        <span class="mockup-title">Dashboard · Hoy</span>
+                    </div>
+                    <div class="mockup-stats">
+                        <div class="stat-box">
+                            <div class="stat-label">Ventas hoy</div>
+                            <div class="stat-val">$4.2M</div>
+                            <div class="stat-badge"><i class="bi bi-arrow-up-short"></i> +18%</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Facturas</div>
+                            <div class="stat-val">37</div>
+                            <div class="stat-badge"><i class="bi bi-arrow-up-short"></i> +5</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Cartera</div>
+                            <div class="stat-val">$1.1M</div>
+                            <div class="stat-badge" style="color:var(--warning)"><i class="bi bi-clock"></i> Pendiente
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-label">Vendedores</div>
+                            <div class="stat-val">3</div>
+                            <div class="stat-badge"><i class="bi bi-geo-alt"></i> En ruta</div>
+                        </div>
+                    </div>
+                    <div class="mockup-list">
+                        <div class="mockup-row">
+                            <div class="mockup-row-icon" style="background:rgba(16,185,129,0.15); color:#10b981;">
+                                <i class="bi bi-receipt"></i>
+                            </div>
+                            <div class="mockup-row-text">
+                                <p>Venta contado · Cliente VIP</p>
+                                <span>hace 4 min · Manuel P.</span>
+                            </div>
+                            <div class="mockup-row-amount">$85.000</div>
+                        </div>
+                        <div class="mockup-row">
+                            <div class="mockup-row-icon" style="background:rgba(99,102,241,0.15); color:#6366f1;">
+                                <i class="bi bi-credit-card"></i>
+                            </div>
+                            <div class="mockup-row-text">
+                                <p>Venta crédito · Ferretería Díaz</p>
+                                <span>hace 12 min · Manuel P.</span>
+                            </div>
+                            <div class="mockup-row-amount">$240.000</div>
+                        </div>
+                        <div class="mockup-row">
+                            <div class="mockup-row-icon" style="background:rgba(245,158,11,0.15); color:#f59e0b;">
+                                <i class="bi bi-cash-coin"></i>
+                            </div>
+                            <div class="mockup-row-text">
+                                <p>Abono recibido · Cliente frecuente</p>
+                                <span>hace 28 min · Manuel P.</span>
+                            </div>
+                            <div class="mockup-row-amount">$50.000</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── STATS BAR ── -->
+    <div class="stats-bar">
+        <div class="stats-bar-inner reveal">
+            <div class="stat-item">
+                <div class="val">2</div>
+                <div class="lbl">Roles de usuario</div>
+            </div>
+            <div class="stat-item">
+                <div class="val">10+</div>
+                <div class="lbl">Módulos integrados</div>
+            </div>
+            <div class="stat-item">
+                <div class="val">GPS</div>
+                <div class="lbl">Tracking en tiempo real</div>
+            </div>
+            <div class="stat-item">
+                <div class="val">PWA</div>
+                <div class="lbl">Instalable en Android</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── FEATURES ── -->
+    <section id="features">
+        <div class="container">
+            <div class="features-header reveal">
+                <div class="section-tag"><i class="bi bi-grid-1x2"></i> Funcionalidades</div>
+                <h2 class="section-title">Todo lo que necesitas para <span>gestionar tu ruta</span></h2>
+                <p class="section-desc">Dos paneles especializados diseñados para el flujo real de trabajo de un
+                    depósito con vendedores de camión.</p>
+            </div>
+
+            <div class="features-tabs reveal">
+                <button class="tab-btn active" onclick="switchTab('admin')"><i class="bi bi-shield-check"></i> Panel
+                    Admin</button>
+                <button class="tab-btn" onclick="switchTab('vendor')"><i class="bi bi-phone"></i> Panel
+                    Vendedor</button>
+            </div>
+
+            <!-- Admin tab -->
+            <div class="tab-content active" id="tab-admin">
+                <div class="feat-card reveal">
+                    <div class="feat-icon" style="background:var(--info-bg); color:var(--info)"><i
+                            class="bi bi-speedometer2"></i></div>
+                    <h3>Dashboard con métricas</h3>
+                    <p>Indicadores clave del negocio, mapa de ubicación de vendedores y resumen de ventas del día en
+                        tiempo real.</p>
+                </div>
+                <div class="feat-card reveal">
+                    <div class="feat-icon" style="background:var(--success-bg); color:var(--success)"><i
+                            class="bi bi-box-seam"></i></div>
+                    <h3>Gestión de productos</h3>
+                    <p>Catálogo con imágenes, categorías, control de estado activo/inactivo y stock disponible.</p>
+                </div>
+                <div class="feat-card reveal">
+                    <div class="feat-icon" style="background:var(--warning-bg); color:var(--warning)"><i
+                            class="bi bi-people"></i></div>
+                    <h3>Gestión de clientes</h3>
+                    <p>Etiquetado automático: VIP, Frecuente, Con deuda, Inactivo y Nuevo. Historial completo por
+                        cliente.</p>
+                </div>
+                <div class="feat-card reveal">
+                    <div class="feat-icon" style="background:var(--danger-bg); color:var(--danger)"><i
+                            class="bi bi-person-badge"></i></div>
+                    <h3>Gestión de vendedores</h3>
+                    <p>Administra el equipo de vendedores, asigna rutas y monitorea su desempeño en tiempo real.</p>
+                </div>
+                <div class="feat-card reveal">
+                    <div class="feat-icon" style="background:var(--info-bg); color:var(--primary)"><i
+                            class="bi bi-geo-alt"></i></div>
+                    <h3>Mapa GPS en vivo</h3>
+                    <p>Visualiza la ubicación en tiempo real de todos los vendedores activos directamente desde el
+                        panel.</p>
+                </div>
+                <div class="feat-card reveal">
+                    <div class="feat-icon" style="background:var(--success-bg); color:var(--success)"><i
+                            class="bi bi-funnel"></i></div>
+                    <h3>Filtros inteligentes</h3>
+                    <p>Todos los módulos cuentan con filtros por estado activo por defecto para una navegación ágil.</p>
+                </div>
+            </div>
+
+            <!-- Vendor tab -->
+            <div class="tab-content" id="tab-vendor">
+                <div class="feat-card reveal">
+                    <div class="feat-icon" style="background:var(--info-bg); color:var(--info)"><i
+                            class="bi bi-truck"></i></div>
+                    <h3>Cargue diario del camión</h3>
+                    <p>Registra el inventario inicial del camión por producto antes de salir a ruta cada mañana.</p>
+                </div>
+                <div class="feat-card reveal">
+                    <div class="feat-icon" style="background:var(--success-bg); color:var(--success)"><i
+                            class="bi bi-cart3"></i></div>
+                    <h3>Carrito de ventas</h3>
+                    <p>Crea pedidos rápidamente. Soporte para ventas de contado y crédito con cálculo automático.</p>
+                </div>
+                <div class="feat-card reveal">
+                    <div class="feat-icon" style="background:var(--warning-bg); color:var(--warning)"><i
+                            class="bi bi-file-earmark-pdf"></i></div>
+                    <h3>Comprobante PDF</h3>
+                    <p>Genera y descarga el comprobante de cada venta en PDF. También puede ser compartido por WhatsApp.
+                    </p>
+                </div>
+                <div class="feat-card reveal">
+                    <div class="feat-icon" style="background:var(--danger-bg); color:var(--danger)"><i
+                            class="bi bi-cash-coin"></i></div>
+                    <h3>Registro de abonos</h3>
+                    <p>Gestiona los pagos parciales de ventas a crédito, con seguimiento del saldo pendiente por
+                        cliente.</p>
+                </div>
+                <div class="feat-card reveal">
+                    <div class="feat-icon" style="background:var(--info-bg); color:var(--primary)"><i
+                            class="bi bi-clipboard-data"></i></div>
+                    <h3>Cierre de jornada</h3>
+                    <p>Resumen automático al final del día: total contado, total crédito, productos vendidos y restantes
+                        en camión.</p>
+                </div>
+                <div class="feat-card reveal">
+                    <div class="feat-icon" style="background:var(--success-bg); color:var(--success)"><i
+                            class="bi bi-phone"></i></div>
+                    <h3>Mobile-first & PWA</h3>
+                    <p>Diseñado para usarse desde el celular. Instalable en Android como app desde Chrome.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── HOW IT WORKS ── -->
+    <section id="how">
+        <div class="container">
+            <div class="how-grid">
+                <div>
+                    <div class="section-tag reveal"><i class="bi bi-diagram-3"></i> ¿Cómo funciona?</div>
+                    <h2 class="section-title reveal">Un flujo claro de <span>inicio a cierre</span></h2>
+                    <p class="section-desc reveal" style="margin-bottom:2rem;">El sistema sigue el proceso natural de
+                        una jornada de distribución.</p>
+                    <div class="steps">
+                        <div class="step reveal">
+                            <div class="step-num">1</div>
+                            <div class="step-body">
+                                <h4>Cargue del camión</h4>
+                                <p>Cada mañana el vendedor registra cuántos productos lleva en el camión, estableciendo
+                                    el inventario del día.</p>
+                            </div>
+                        </div>
+                        <div class="step reveal">
+                            <div class="step-num">2</div>
+                            <div class="step-body">
+                                <h4>Ventas en ruta</h4>
+                                <p>Durante la ruta, el vendedor crea pedidos, aplica precios, elige contado o crédito y
+                                    genera el comprobante al instante.</p>
+                            </div>
+                        </div>
+                        <div class="step reveal">
+                            <div class="step-num">3</div>
+                            <div class="step-body">
+                                <h4>Cobro de abonos</h4>
+                                <p>Si un cliente tiene deuda pendiente, el vendedor registra el abono directamente desde
+                                    su panel móvil.</p>
+                            </div>
+                        </div>
+                        <div class="step reveal">
+                            <div class="step-num">4</div>
+                            <div class="step-body">
+                                <h4>Cierre de jornada</h4>
+                                <p>Al terminar el día, el vendedor hace el cierre con el resumen completo: contado,
+                                    crédito e inventario sobrante.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="how-visual reveal">
+                    <div class="role-card">
+                        <div class="role-header">
+                            <div class="role-avatar" style="background:linear-gradient(135deg,#7c3aed,#a855f7)">A</div>
+                            <div>
+                                <div class="role-name">Administrador</div>
+                                <div class="role-sub">Acceso completo al sistema</div>
+                            </div>
+                        </div>
+                        <div class="role-tags">
+                            <span class="role-tag"><i class="bi bi-speedometer2"></i> Dashboard</span>
+                            <span class="role-tag"><i class="bi bi-people"></i> Clientes</span>
+                            <span class="role-tag"><i class="bi bi-box-seam"></i> Productos</span>
+                            <span class="role-tag"><i class="bi bi-geo-alt"></i> Mapa GPS</span>
+                            <span class="role-tag"><i class="bi bi-person-badge"></i> Vendedores</span>
+                        </div>
+                    </div>
+                    <div class="role-card">
+                        <div class="role-header">
+                            <div class="role-avatar" style="background:linear-gradient(135deg,#0369a1,#0ea5e9)">V</div>
+                            <div>
+                                <div class="role-name">Vendedor</div>
+                                <div class="role-sub">Panel mobile-first</div>
+                            </div>
+                        </div>
+                        <div class="role-tags">
+                            <span class="role-tag"><i class="bi bi-truck"></i> Cargue</span>
+                            <span class="role-tag"><i class="bi bi-cart3"></i> Ventas</span>
+                            <span class="role-tag"><i class="bi bi-file-pdf"></i> PDF</span>
+                            <span class="role-tag"><i class="bi bi-cash-coin"></i> Abonos</span>
+                            <span class="role-tag"><i class="bi bi-bar-chart"></i> Cierre</span>
+                            <span class="role-tag"><i class="bi bi-phone"></i> PWA</span>
+                        </div>
+                    </div>
+                    <div
+                        style="margin-top:1rem; padding:1rem; background:rgba(16,185,129,0.15); border-radius:var(--r-md); border:1px solid rgba(16,185,129,0.3);">
+                        <div style="display:flex; align-items:center; gap:0.6rem;">
+                            <i class="bi bi-wifi" style="color:#10b981; font-size:1rem;"></i>
+                            <span style="font-size:0.8rem; font-weight:600; color:#10b981;">Sistema 100% Online</span>
+                        </div>
+                        <p style="font-size:0.75rem; color:rgba(255,255,255,0.55); margin-top:0.4rem; line-height:1.5;">
+                            Todas las operaciones se sincronizan en tiempo real. Requiere conexión a Internet activa.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── ROLES ── -->
+    <section id="roles">
+        <div class="container">
+            <div style="text-align:center; margin-bottom:3rem;" class="reveal">
+                <div class="section-tag"><i class="bi bi-people"></i> Roles del sistema</div>
+                <h2 class="section-title">Dos perfiles, <span>un solo sistema</span></h2>
+                <p class="section-desc" style="margin:0 auto;">Cada rol tiene su propio panel optimizado para sus tareas
+                    específicas.</p>
+            </div>
+            <div class="roles-grid">
+                <div class="role-panel admin reveal">
+                    <span class="role-badge">Escritorio</span>
+                    <div style="font-size:2.5rem; margin-bottom:1rem;"><i class="bi bi-shield-check"></i></div>
+                    <h3>Administrador</h3>
+                    <p>Control total del negocio desde un panel web completo. Monitorea vendedores, productos, clientes
+                        y ventas.</p>
+                    <ul class="role-features">
+                        <li><i class="bi bi-check-circle-fill"></i> Dashboard con KPIs y mapa en tiempo real</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Gestión completa de productos y categorías</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Clientes con etiquetado automático inteligente</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Gestión y monitoreo de vendedores</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Seguimiento de cartera y créditos</li>
+                    </ul>
+                </div>
+                <div class="role-panel vendor reveal">
+                    <span class="role-badge">Mobile-first</span>
+                    <div style="font-size:2.5rem; margin-bottom:1rem;"><i class="bi bi-phone"></i></div>
+                    <h3>Vendedor</h3>
+                    <p>Panel optimizado para el celular. Diseñado para usarse en movimiento, desde el camión, en toda la
+                        ruta.</p>
+                    <ul class="role-features">
+                        <li><i class="bi bi-check-circle-fill"></i> Cargue diario y control de inventario en camión</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Carrito rápido con ventas contado y crédito</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Comprobantes PDF descargables y compartibles</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Registro de abonos a ventas en crédito</li>
+                        <li><i class="bi bi-check-circle-fill"></i> Cierre de jornada con resumen completo</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── TECH STACK ── -->
+    <section id="tech">
+        <div class="container">
+            <div class="tech-header reveal">
+                <div class="section-tag"><i class="bi bi-cpu"></i> Stack tecnológico</div>
+                <h2 class="section-title">Construido con <span>tecnología sólida</span></h2>
+                <p class="section-desc">Sin frameworks innecesarios. PHP puro con patrón MVC, base de datos MySQL y
+                    frontend ligero.</p>
+            </div>
+            <div class="tech-grid" style="margin-top:2.5rem;">
+                <div class="tech-item reveal">
+                    <i class="bi bi-filetype-php" style="color:#7c3aed;"></i>
+                    <div class="tech-name">PHP 8.x</div>
+                    <div class="tech-desc">Backend MVC manual</div>
+                </div>
+                <div class="tech-item reveal">
+                    <i class="bi bi-database" style="color:#0369a1;"></i>
+                    <div class="tech-name">MySQL</div>
+                    <div class="tech-desc">MariaDB · mysqli</div>
+                </div>
+                <div class="tech-item reveal">
+                    <i class="bi bi-filetype-html" style="color:#e05c2e;"></i>
+                    <div class="tech-name">HTML5 + CSS3</div>
+                    <div class="tech-desc">Frontend vanilla</div>
+                </div>
+                <div class="tech-item reveal">
+                    <i class="bi bi-phone" style="color:#10b981;"></i>
+                    <div class="tech-name">PWA</div>
+                    <div class="tech-desc">Instalable en Android</div>
+                </div>
+                <div class="tech-item reveal">
+                    <i class="bi bi-file-earmark-pdf" style="color:#ef4444;"></i>
+                    <div class="tech-name">jsPDF</div>
+                    <div class="tech-desc">Comprobantes PDF</div>
+                </div>
+                <div class="tech-item reveal">
+                    <i class="bi bi-map" style="color:#22c55e;"></i>
+                    <div class="tech-name">Leaflet.js</div>
+                    <div class="tech-desc">Mapas y GPS</div>
+                </div>
+                <div class="tech-item reveal">
+                    <i class="bi bi-bootstrap" style="color:#7c3aed;"></i>
+                    <div class="tech-name">Bootstrap Icons</div>
+                    <div class="tech-desc">Iconografía</div>
+                </div>
+                <div class="tech-item reveal">
+                    <i class="bi bi-fonts" style="color:#1855CF;"></i>
+                    <div class="tech-name">Sora + DM Sans</div>
+                    <div class="tech-desc">Tipografía del sistema</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── CTA ── -->
+    <section id="cta">
+        <div class="container reveal">
+            <h2>¿Listo para gestionar tu ruta?</h2>
+            <p>Accede al sistema con tus credenciales y empieza a controlar tus ventas desde el primer día.</p>
+            <a href="public/login.php" class="btn-cta">
+                <i class="bi bi-box-arrow-in-right"></i> Iniciar sesión ahora
+            </a>
+        </div>
+    </section>
+
+    <!-- ── FOOTER ── -->
+    <footer>
+        <p>© 2026 <span>Pedidos LYD</span> · Depósito LYD · Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        // Navbar scroll effect
+        const nav = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            nav.classList.toggle('scrolled', window.scrollY > 20);
+        });
+
+        // Mobile nav toggle
+        const toggle = document.getElementById('navToggle');
+        const links = document.getElementById('navLinks');
+        toggle.addEventListener('click', () => {
+            links.classList.toggle('open');
+            toggle.querySelector('i').className =
+                links.classList.contains('open') ? 'bi bi-x-lg' : 'bi bi-list';
+        });
+        links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
+            links.classList.remove('open');
+            toggle.querySelector('i').className = 'bi bi-list';
+        }));
+
+        // Tab switcher
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById('tab-' + tab).classList.add('active');
+            event.currentTarget.classList.add('active');
+        }
+
+        // Reveal on scroll
+        const reveals = document.querySelectorAll('.reveal');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((e, i) => {
+                if (e.isIntersecting) {
+                    setTimeout(() => e.target.classList.add('visible'), i * 60);
+                    observer.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.1 });
+        reveals.forEach(r => observer.observe(r));
+    </script>
+</body>
+
+</html>
