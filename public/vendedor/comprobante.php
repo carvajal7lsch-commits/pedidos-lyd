@@ -10,7 +10,7 @@ if (!$id_venta) { header('Location: dashboard.php'); exit(); }
 
 // ── Datos de la venta ────────────────────────
 $stmt = mysqli_prepare($conexion,
-    "SELECT v.id_venta, v.fecha, v.tipo_venta, v.total,
+    "SELECT v.id_venta, v.fecha, v.hora, v.tipo_venta, v.total,
             c.nombre AS cliente_nombre, c.direccion AS cliente_dir
      FROM venta v
      LEFT JOIN cliente c ON c.id_cliente = v.id_cliente
@@ -39,27 +39,17 @@ $stmt = mysqli_prepare($conexion,
             p.nombre AS producto
      FROM detalle_venta dv
      JOIN productos p ON p.id_producto = dv.id_producto
-     WHERE dv.id_venta = ?"
+     WHERE dv.id_venta = ? AND dv.estado = 1"
 );
 mysqli_stmt_bind_param($stmt, 'i', $id_venta);
 mysqli_stmt_execute($stmt);
 $detalles = mysqli_fetch_all(mysqli_stmt_get_result($stmt), MYSQLI_ASSOC);
 
-    $stmt = mysqli_prepare($conexion,
-        "SELECT dv.cantidad, dv.precio_unitario, dv.subtotal,
-                p.nombre AS producto
-         FROM detalle_venta dv
-         JOIN productos p ON p.id_producto = dv.id_producto
-         WHERE dv.id_venta = ?"
-    );
-    mysqli_stmt_bind_param($stmt, 'i', $id_venta);
-    mysqli_stmt_execute($stmt);
-    $detalles = mysqli_fetch_all(mysqli_stmt_get_result($stmt), MYSQLI_ASSOC);
-
 
 // Número de orden formateado
+$fecha_completa = $venta['fecha'] . ' ' . ($venta['hora'] ?? '00:00:00');
 $num_orden = 'ORD-' . date('Y') . '-' . str_pad($id_venta, 4, '0', STR_PAD_LEFT);
-$fecha_fmt = fecha_es('d \d\e F, Y · g:i A', strtotime($venta['fecha']));
+$fecha_fmt = fecha_es('d \d\e F, Y · g:i A', strtotime($fecha_completa));
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -357,13 +347,24 @@ function generarPDF() {
     doc.internal.pageSize.height = y + 15;
 
     const nombre = `comprobante_${DATOS.orden}.pdf`;
-    if (navigator.share) {
-        doc.getBlob(blob => {
+    
+    try {
+        if (navigator.share) {
+            const blob = doc.output('blob');
             const file = new File([blob], nombre, { type: 'application/pdf' });
-            navigator.share({ files: [file], title: 'Comprobante ' + DATOS.orden })
-                .catch(() => doc.save(nombre));
-        });
-    } else {
+            
+            navigator.share({
+                files: [file],
+                title: 'Comprobante ' + DATOS.orden
+            }).catch((err) => {
+                console.log('Error al compartir o cancelado:', err);
+                doc.save(nombre); // Si cancela o falla, al menos lo intenta descargar
+            });
+        } else {
+            doc.save(nombre);
+        }
+    } catch (e) {
+        console.error('Error generando PDF:', e);
         doc.save(nombre);
     }
 }

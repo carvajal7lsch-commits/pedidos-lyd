@@ -351,6 +351,7 @@ $num_orden = '#FAC-' . str_pad($id_venta, 3, '0', STR_PAD_LEFT);
             <input type="hidden" name="id_producto"      id="editIdProducto">
             <input type="hidden" name="cantidad_anterior" id="editCantAnterior">
             <input type="hidden" name="precio_unitario"  id="editPrecioUnit">
+            <input type="hidden" name="nueva_cantidad"   id="editNuevaCantidad">
 
             <div class="cantidad-label">CANTIDAD (PACAS)</div>
             <div class="cantidad-wrap">
@@ -405,6 +406,7 @@ function abrirModalEditar(id_detalle, id_producto, nombre, cantidad, precio) {
     document.getElementById('editIdProducto').value   = id_producto;
     document.getElementById('editCantAnterior').value = cantidad;
     document.getElementById('editPrecioUnit').value   = precio;
+    document.getElementById('editNuevaCantidad').value = cantidad;
     document.getElementById('modalProdNombre').textContent = nombre;
     document.getElementById('editCantValor').textContent   = cantidad;
     document.getElementById('editPrecioShow').textContent  =
@@ -429,6 +431,7 @@ function cambiarCantModal(delta) {
     const nueva = Math.max(1, editCantActual + delta);
     editCantActual = nueva;
     document.getElementById('editCantValor').textContent = nueva;
+    document.getElementById('editNuevaCantidad').value = nueva;
     actualizarSubtotalModal();
 }
 

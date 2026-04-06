@@ -151,12 +151,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
             mysqli_begin_transaction($conexion);
             try {
                 // Insertar venta
+                $ahora = date('H:i:s');
                 $stmt = mysqli_prepare($conexion,
-                    "INSERT INTO venta (id_vendedor, id_cliente, fecha, tipo_venta, total)
-                     VALUES (?, ?, ?, ?, ?)"
+                    "INSERT INTO venta (id_vendedor, id_cliente, fecha, hora, tipo_venta, total)
+                     VALUES (?, ?, ?, ?, ?, ?)"
                 );
-                mysqli_stmt_bind_param($stmt, 'iissd',
-                    $id_vendedor, $id_cliente, $hoy, $tipo_venta, $total
+                mysqli_stmt_bind_param($stmt, 'iisssd',
+                    $id_vendedor, $id_cliente, $hoy, $ahora, $tipo_venta, $total
                 );
                 mysqli_stmt_execute($stmt);
                 $id_venta_nueva = mysqli_insert_id($conexion);
