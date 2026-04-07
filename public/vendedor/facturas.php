@@ -30,6 +30,23 @@ mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
 mysqli_stmt_execute($stmt);
 $totales = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
 
+// Abonos iniciales de créditos de hoy
+$stmt = mysqli_prepare($conexion,
+    "SELECT COALESCE(SUM(a.monto), 0) AS total
+     FROM abono a
+     JOIN venta v ON v.id_venta = a.id_venta
+     WHERE v.id_vendedor = ? AND a.fecha = ? AND v.fecha = ? AND v.tipo_venta = 'credito'"
+);
+mysqli_stmt_bind_param($stmt, 'iss', $id_vendedor, $hoy, $hoy);
+mysqli_stmt_execute($stmt);
+$abonos_credito_hoy = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
+
+$total_contado_raw = (float)$totales['total_contado'];
+$total_credito_raw = (float)$totales['total_credito'];
+$efectivo = $total_contado_raw + $abonos_credito_hoy;
+$credito_pendiente = $total_credito_raw - $abonos_credito_hoy;
+$total_real = $efectivo + $credito_pendiente;
+
 // ── Ventas del día con cliente ───────────────
 $stmt = mysqli_prepare($conexion,
     "SELECT v.id_venta, v.tipo_venta, v.total,
@@ -80,7 +97,7 @@ $ventas = mysqli_fetch_all(mysqli_stmt_get_result($stmt), MYSQLI_ASSOC);
     <div class="fact-total-card">
         <div class="fact-total-label">TOTAL VENDIDO HOY</div>
         <div class="fact-total-monto">
-            $<?php echo number_format($totales['total_general'], 0, ',', '.'); ?>
+            $<?php echo number_format($total_real, 0, ',', '.'); ?>
             <span class="fact-total-cop">COP</span>
         </div>
     </div>
@@ -88,16 +105,26 @@ $ventas = mysqli_fetch_all(mysqli_stmt_get_result($stmt), MYSQLI_ASSOC);
     <!-- Desglose contado / crédito -->
     <div class="fact-desglose-grid">
         <div class="fact-des-card">
-            <div class="fact-des-label">CONTADO</div>
+            <div class="fact-des-label">EFECTIVO</div>
             <div class="fact-des-monto">
-                $<?php echo number_format($totales['total_contado'], 0, ',', '.'); ?>
+                $<?php echo number_format($efectivo, 0, ',', '.'); ?>
             </div>
+            <?php if ($abonos_credito_hoy > 0): ?>
+            <div style="font-size:.7rem;color:var(--text-muted,#8b95a5);margin-top:2px;">
+                + $<?php echo number_format($abonos_credito_hoy, 0, ',', '.'); ?> abonos
+            </div>
+            <?php endif; ?>
         </div>
         <div class="fact-des-card">
-            <div class="fact-des-label">CRÉDITO</div>
+            <div class="fact-des-label">CRÉDITO PENDIENTE</div>
             <div class="fact-des-monto">
-                $<?php echo number_format($totales['total_credito'], 0, ',', '.'); ?>
+                $<?php echo number_format($credito_pendiente, 0, ',', '.'); ?>
             </div>
+            <?php if ($abonos_credito_hoy > 0): ?>
+            <div style="font-size:.7rem;color:var(--text-muted,#8b95a5);margin-top:2px;">
+                De $<?php echo number_format($total_credito_raw, 0, ',', '.'); ?> en créditos
+            </div>
+            <?php endif; ?>
         </div>
     </div>
 

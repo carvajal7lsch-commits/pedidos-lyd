@@ -37,17 +37,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
     mysqli_stmt_execute($stmt);
     $ventas_contado = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
 
-    // Abonos recibidos hoy
-    $stmt = mysqli_prepare($conexion,
-        "SELECT COALESCE(SUM(a.monto), 0) AS total
-         FROM abono a
-         JOIN venta v ON v.id_venta = a.id_venta
-         WHERE v.id_vendedor = ? AND a.fecha = ?"
-    );
-    mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
-    mysqli_stmt_execute($stmt);
-    $abonos_hoy = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
-
     // Ventas crédito del día
     $stmt = mysqli_prepare($conexion,
         "SELECT COALESCE(SUM(total), 0) AS total
@@ -57,8 +46,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
     mysqli_stmt_execute($stmt);
     $ventas_credito = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
 
-    $total_contado = $ventas_contado + $abonos_hoy;
-    $total_general = $total_contado + $ventas_credito;
+    // Abonos iniciales de créditos de hoy
+    $stmt = mysqli_prepare($conexion,
+        "SELECT COALESCE(SUM(a.monto), 0) AS total
+         FROM abono a
+         JOIN venta v ON v.id_venta = a.id_venta
+         WHERE v.id_vendedor = ? AND a.fecha = ? AND v.fecha = ? AND v.tipo_venta = 'credito'"
+    );
+    mysqli_stmt_bind_param($stmt, 'iss', $id_vendedor, $hoy, $hoy);
+    mysqli_stmt_execute($stmt);
+    $abonos_credito_hoy = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
+
+    $total_contado = $ventas_contado + $abonos_credito_hoy;
+    $credito_pendiente = $ventas_credito - $abonos_credito_hoy;
+    $total_general = $total_contado + $credito_pendiente;
 
     mysqli_begin_transaction($conexion);
     try {
@@ -68,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
              VALUES (?, ?, ?, ?, ?, 1)"
         );
         mysqli_stmt_bind_param($stmt, 'isddd',
-            $id_vendedor, $hoy, $total_contado, $ventas_credito, $total_general
+            $id_vendedor, $hoy, $total_contado, $credito_pendiente, $total_general
         );
         mysqli_stmt_execute($stmt);
         $id_cierre = mysqli_insert_id($conexion);
@@ -102,17 +103,6 @@ mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
 mysqli_stmt_execute($stmt);
 $res_contado = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
 
-// Abonos recibidos hoy
-$stmt = mysqli_prepare($conexion,
-    "SELECT COALESCE(SUM(a.monto), 0) AS total
-     FROM abono a
-     JOIN venta v ON v.id_venta = a.id_venta
-     WHERE v.id_vendedor = ? AND a.fecha = ?"
-);
-mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
-mysqli_stmt_execute($stmt);
-$abonos_hoy = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
-
 // Ventas crédito
 $stmt = mysqli_prepare($conexion,
     "SELECT COALESCE(SUM(total), 0) AS total, COUNT(*) AS pedidos
@@ -122,9 +112,21 @@ mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
 mysqli_stmt_execute($stmt);
 $res_credito = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
 
-$total_contado = (float)$res_contado['total'] + $abonos_hoy;
+// Abonos iniciales de créditos de hoy
+$stmt = mysqli_prepare($conexion,
+    "SELECT COALESCE(SUM(a.monto), 0) AS total
+     FROM abono a
+     JOIN venta v ON v.id_venta = a.id_venta
+     WHERE v.id_vendedor = ? AND a.fecha = ? AND v.fecha = ? AND v.tipo_venta = 'credito'"
+);
+mysqli_stmt_bind_param($stmt, 'iss', $id_vendedor, $hoy, $hoy);
+mysqli_stmt_execute($stmt);
+$abonos_credito_hoy = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
+
+$total_contado = (float)$res_contado['total'] + $abonos_credito_hoy;
 $total_credito = (float)$res_credito['total'];
-$total_general = $total_contado + $total_credito;
+$credito_pendiente = $total_credito - $abonos_credito_hoy;
+$total_general = $total_contado + $credito_pendiente;
 
 // Inventario restante (máximo 3 para preview)
 $inventario = mysqli_fetch_all(mysqli_query($conexion,
@@ -210,18 +212,23 @@ $preview_inv      = array_slice($inventario, 0, 3);
             <div class="desglose-monto contado">
                 $<?php echo number_format((float)$res_contado['total'], 0, ',', '.'); ?>
             </div>
-            <?php if ($abonos_hoy > 0): ?>
+            <?php if ($abonos_credito_hoy > 0): ?>
             <div class="desglose-extra">
-                + $<?php echo number_format($abonos_hoy, 0, ',', '.'); ?> abonos
+                + $<?php echo number_format($abonos_credito_hoy, 0, ',', '.'); ?> abonos
             </div>
             <?php endif; ?>
             <div class="desglose-bar bar-contado"></div>
         </div>
         <div class="desglose-card">
-            <div class="desglose-label">Ventas Crédito</div>
+            <div class="desglose-label">Crédito Pendiente</div>
             <div class="desglose-monto credito">
-                $<?php echo number_format($total_credito, 0, ',', '.'); ?>
+                $<?php echo number_format($credito_pendiente, 0, ',', '.'); ?>
             </div>
+            <?php if ($abonos_credito_hoy > 0): ?>
+            <div class="desglose-extra">
+                De $<?php echo number_format($total_credito, 0, ',', '.'); ?> en créditos
+            </div>
+            <?php endif; ?>
             <div class="desglose-bar bar-credito"></div>
         </div>
     </div>

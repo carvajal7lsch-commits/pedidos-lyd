@@ -45,14 +45,7 @@ $hoyVentas = mysqli_fetch_assoc(mysqli_query($conexion,
      FROM venta WHERE id_vendedor = $id_vendedor AND fecha = '$hoy'"
 ));
 
-$hoyAbonos = mysqli_fetch_assoc(mysqli_query($conexion,
-    "SELECT COALESCE(SUM(a.monto),0) AS total
-     FROM abono a
-     JOIN venta v ON v.id_venta = a.id_venta
-     WHERE v.id_vendedor = $id_vendedor AND a.fecha = '$hoy'"
-));
-
-$total_ventas_hoy = (float)$hoyVentas['total'] + (float)$hoyAbonos['total'];
+$total_ventas_hoy = (float)$hoyVentas['total'];
 $pedidos_hoy      = (int)$hoyVentas['pedidos'];
 
 // Ventas ayer para delta
@@ -61,14 +54,7 @@ $ayerVentas = mysqli_fetch_assoc(mysqli_query($conexion,
      FROM venta WHERE id_vendedor = $id_vendedor AND fecha = '$ayer'"
 ));
 
-$ayerAbonos = mysqli_fetch_assoc(mysqli_query($conexion,
-    "SELECT COALESCE(SUM(a.monto),0) AS total
-     FROM abono a
-     JOIN venta v ON v.id_venta = a.id_venta
-     WHERE v.id_vendedor = $id_vendedor AND a.fecha = '$ayer'"
-));
-
-$total_ayer = (float)$ayerVentas['total'] + (float)$ayerAbonos['total'];
+$total_ayer = (float)$ayerVentas['total'];
 if ($total_ayer > 0) {
     $delta_pct = round(100 * ($total_ventas_hoy - $total_ayer) / $total_ayer, 2);
 } elseif ($total_ventas_hoy > 0) {
@@ -78,78 +64,102 @@ if ($total_ayer > 0) {
 }
 $delta_positivo = $total_ventas_hoy >= $total_ayer;
 
-// ── Cierre automático si es hora y no hay cierre ──
+// ── Cierre automático retroactivo ─────────────────────────
+// Al abrir el dashboard, busca días anteriores con ventas pero sin cierre
+// y los cierra automáticamente. También cierra HOY si ya pasó las 21:00.
 $mensaje  = '';
 $tipo_msg = '';
 $hora_actual = date('H:i');
 
-if ($hora_actual >= '21:00' && $jornada_activa && $total_productos > 0 && $pedidos_hoy > 0) {
-    // Ejecutar cierre automático
+// Buscar días sin cierre que tuvieron ventas (anteriores a hoy, o hoy si >= 21:00)
+$fecha_limite = ($hora_actual >= '21:00') ? date('Y-m-d', strtotime('+1 day')) : $hoy;
+
+$stmt = mysqli_prepare($conexion,
+    "SELECT v.fecha, COUNT(*) AS total_ventas
+     FROM venta v
+     LEFT JOIN cierrediario c ON c.id_usuario = v.id_vendedor AND c.fecha = v.fecha
+     WHERE v.id_vendedor = ? AND v.fecha < ? AND c.id_cierre IS NULL
+     GROUP BY v.fecha
+     ORDER BY v.fecha ASC"
+);
+mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $fecha_limite);
+mysqli_stmt_execute($stmt);
+$dias_sin_cierre = mysqli_fetch_all(mysqli_stmt_get_result($stmt), MYSQLI_ASSOC);
+
+$cierres_realizados = 0;
+
+foreach ($dias_sin_cierre as $dia) {
+    $fecha_cierre = $dia['fecha'];
 
     // Ventas contado del día
     $stmt = mysqli_prepare($conexion,
         "SELECT COALESCE(SUM(total), 0) AS total
          FROM venta WHERE id_vendedor = ? AND fecha = ? AND tipo_venta = 'contado'"
     );
-    mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
+    mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $fecha_cierre);
     mysqli_stmt_execute($stmt);
     $ventas_contado = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
-
-    // Abonos recibidos hoy
-    $stmt = mysqli_prepare($conexion,
-        "SELECT COALESCE(SUM(a.monto), 0) AS total
-         FROM abono a
-         JOIN venta v ON v.id_venta = a.id_venta
-         WHERE v.id_vendedor = ? AND a.fecha = ?"
-    );
-    mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
-    mysqli_stmt_execute($stmt);
-    $abonos_hoy = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
 
     // Ventas crédito del día
     $stmt = mysqli_prepare($conexion,
         "SELECT COALESCE(SUM(total), 0) AS total
          FROM venta WHERE id_vendedor = ? AND fecha = ? AND tipo_venta = 'credito'"
     );
-    mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
+    mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $fecha_cierre);
     mysqli_stmt_execute($stmt);
     $ventas_credito = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
 
-    $total_contado = $ventas_contado + $abonos_hoy;
-    $total_general = $total_contado + $ventas_credito;
+    // Abonos iniciales de créditos de ese día
+    $stmt = mysqli_prepare($conexion,
+        "SELECT COALESCE(SUM(a.monto), 0) AS total
+         FROM abono a
+         JOIN venta v ON v.id_venta = a.id_venta
+         WHERE v.id_vendedor = ? AND a.fecha = ? AND v.fecha = ? AND v.tipo_venta = 'credito'"
+    );
+    mysqli_stmt_bind_param($stmt, 'iss', $id_vendedor, $fecha_cierre, $fecha_cierre);
+    mysqli_stmt_execute($stmt);
+    $abonos_credito = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
+
+    $total_contado = $ventas_contado + $abonos_credito;
+    $credito_pendiente = $ventas_credito - $abonos_credito;
+    $total_general = $total_contado + $credito_pendiente;
 
     mysqli_begin_transaction($conexion);
     try {
-        // Insertar cierre
         $stmt = mysqli_prepare($conexion,
             "INSERT INTO cierrediario (id_usuario, fecha, total_contado, total_credito, total_general, estado)
              VALUES (?, ?, ?, ?, ?, 1)"
         );
         mysqli_stmt_bind_param($stmt, 'isddd',
-            $id_vendedor, $hoy, $total_contado, $ventas_credito, $total_general
+            $id_vendedor, $fecha_cierre, $total_contado, $credito_pendiente, $total_general
         );
         mysqli_stmt_execute($stmt);
         $id_cierre = mysqli_insert_id($conexion);
 
-        // Asociar ventas del día al cierre
         $stmt = mysqli_prepare($conexion,
             "UPDATE venta SET id_cierre = ? WHERE id_vendedor = ? AND fecha = ? AND id_cierre IS NULL"
         );
-        mysqli_stmt_bind_param($stmt, 'iis', $id_cierre, $id_vendedor, $hoy);
+        mysqli_stmt_bind_param($stmt, 'iis', $id_cierre, $id_vendedor, $fecha_cierre);
         mysqli_stmt_execute($stmt);
 
         mysqli_commit($conexion);
+        $cierres_realizados++;
 
-        // Actualizar variables para la página
-        $jornada_activa = false;
-        $mensaje  = 'Cierre automático realizado exitosamente.';
-        $tipo_msg = 'success';
+        // Si cerró hoy, actualizar el estado
+        if ($fecha_cierre === $hoy) {
+            $jornada_activa = false;
+        }
 
     } catch (Exception $e) {
         mysqli_rollback($conexion);
-        $mensaje  = 'Error en cierre automático. Contacta soporte.';
-        $tipo_msg = 'error';
     }
+}
+
+if ($cierres_realizados > 0) {
+    $mensaje  = $cierres_realizados === 1
+        ? 'Se cerró automáticamente 1 jornada pendiente.'
+        : "Se cerraron automáticamente $cierres_realizados jornadas pendientes.";
+    $tipo_msg = 'success';
 }
 
 ?>

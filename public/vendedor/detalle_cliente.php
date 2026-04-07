@@ -25,11 +25,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
         } else {
             // Verificar que el monto no supere el saldo pendiente
             $stmt_check = mysqli_prepare($conexion,
-                "SELECT v.total - COALESCE(SUM(a.monto), 0) AS saldo
+                "SELECT v.total - (SELECT COALESCE(SUM(monto), 0) FROM abono WHERE id_venta = v.id_venta) AS saldo
                  FROM venta v
-                 LEFT JOIN abono a ON a.id_venta = v.id_venta
-                 WHERE v.id_venta = ? AND v.id_cliente = ?
-                 GROUP BY v.id_venta"
+                 WHERE v.id_venta = ? AND v.id_cliente = ?"
             );
             mysqli_stmt_bind_param($stmt_check, 'ii', $id_venta, $id);
             mysqli_stmt_execute($stmt_check);
@@ -59,13 +57,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
         $id_vendedor_abono = $_SESSION['id_usuario'];
         // Para cada factura pendiente insertar un abono por el saldo restante
         $stmt_facturas = mysqli_prepare($conexion,
-            "SELECT v.id_venta,
-                    v.total - COALESCE(SUM(a.monto), 0) AS saldo
-             FROM venta v
-             LEFT JOIN abono a ON a.id_venta = v.id_venta
-             WHERE v.id_cliente = ? AND v.tipo_venta = 'credito'
-             GROUP BY v.id_venta
-             HAVING saldo > 0"
+            "SELECT sub.id_venta, sub.saldo FROM (
+                 SELECT v.id_venta,
+                        v.total - (SELECT COALESCE(SUM(monto), 0) FROM abono WHERE id_venta = v.id_venta) AS saldo
+                 FROM venta v
+                 WHERE v.id_cliente = ? AND v.tipo_venta = 'credito'
+             ) AS sub WHERE sub.saldo > 0"
         );
         mysqli_stmt_bind_param($stmt_facturas, 'i', $id);
         mysqli_stmt_execute($stmt_facturas);
@@ -101,15 +98,15 @@ $etiquetas_cliente = etiquetarCliente($cliente);
 
 // ── Facturas pendientes con saldo real ───────
 $stmt = mysqli_prepare($conexion,
-    "SELECT v.id_venta, v.fecha, v.total,
-            COALESCE(SUM(a.monto), 0)            AS total_abonado,
-            v.total - COALESCE(SUM(a.monto), 0)  AS saldo_pendiente
-     FROM venta v
-     LEFT JOIN abono a ON a.id_venta = v.id_venta
-     WHERE v.id_cliente = ? AND v.tipo_venta = 'credito'
-     GROUP BY v.id_venta
-     HAVING saldo_pendiente > 0
-     ORDER BY v.fecha ASC"
+    "SELECT * FROM (
+         SELECT v.id_venta, v.fecha, v.total,
+                (SELECT COALESCE(SUM(monto), 0) FROM abono WHERE id_venta = v.id_venta) AS total_abonado,
+                v.total - (SELECT COALESCE(SUM(monto), 0) FROM abono WHERE id_venta = v.id_venta) AS saldo_pendiente
+         FROM venta v
+         WHERE v.id_cliente = ? AND v.tipo_venta = 'credito'
+     ) AS sub
+     WHERE sub.saldo_pendiente > 0
+     ORDER BY sub.fecha ASC"
 );
 mysqli_stmt_bind_param($stmt, 'i', $id);
 mysqli_stmt_execute($stmt);
