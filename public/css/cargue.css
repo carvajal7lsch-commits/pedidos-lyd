@@ -584,3 +584,48 @@
     font-family: 'DM Sans', sans-serif;
     margin-top: 2px;
 }
+
+/* ══════════════════════════════════════════
+   RESTANTE DE AYER
+   ══════════════════════════════════════════ */
+.restante-wrap {
+    margin-top: 6px;
+}
+
+.restante-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.restante-label input {
+    margin: 0;
+    width: 14px;
+    height: 14px;
+    accent-color: #1A2B6B;
+}
+
+.restante-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #FEF3C7;
+    color: #B45309;
+    padding: 3px 8px;
+    border-radius: 6px;
+    font-size: 10.5px;
+    font-weight: 700;
+    font-family: 'Sora', sans-serif;
+}
+
+.restante-label input:not(:checked) + .restante-badge {
+    background: #F4F5F7;
+    color: #8A93A8;
+}
+
+.resumen-desglose {
+    color: #64748B;
+    font-weight: 500;
+    font-size: 11px;
+}

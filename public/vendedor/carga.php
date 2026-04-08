@@ -98,6 +98,26 @@ $productos = mysqli_fetch_all(mysqli_query($conexion,
      ORDER BY c.nombre ASC, p.nombre ASC"
 ), MYSQLI_ASSOC);
 
+// ── Inventario restante del último cargue ──
+$stmt_restante = mysqli_prepare($conexion,
+    "SELECT ic.id_producto, ic.cantidad_disponible
+     FROM inventariocamion ic
+     WHERE ic.id_vendedor = ? 
+       AND ic.fecha_cargue = (
+           SELECT MAX(fecha_cargue) FROM inventariocamion 
+           WHERE id_vendedor = ? AND fecha_cargue < ?
+       )
+       AND ic.estado = 1
+       AND ic.cantidad_disponible > 0"
+);
+mysqli_stmt_bind_param($stmt_restante, 'iis', $id_vendedor, $id_vendedor, $hoy);
+mysqli_stmt_execute($stmt_restante);
+$res_restante = mysqli_stmt_get_result($stmt_restante);
+$restante_ayer_map = [];
+while ($row = mysqli_fetch_assoc($res_restante)) {
+    $restante_ayer_map[$row['id_producto']] = (int) $row['cantidad_disponible'];
+}
+
 // ── Si ya cargó hoy, obtener detalle ────────
 $items_cargados = [];
 if ($cargue_hoy) {
@@ -243,6 +263,16 @@ if ($cargue_hoy) {
                     <div class="pci-info">
                         <div class="pci-nombre"><?php echo htmlspecialchars($p['nombre']); ?></div>
                         <div class="pci-cat"><?php echo htmlspecialchars($p['categoria']); ?></div>
+                        <?php if (isset($restante_ayer_map[$p['id_producto']])): ?>
+                        <div class="restante-wrap">
+                            <label class="restante-label">
+                                <input type="checkbox" id="check_rest_<?php echo $p['id_producto']; ?>" checked onchange="validarCant(<?php echo $p['id_producto']; ?>)">
+                                <span class="restante-badge">
+                                    <i class="bi bi-box-seam-fill"></i> Ayer: <?php echo $restante_ayer_map[$p['id_producto']]; ?>
+                                </span>
+                            </label>
+                        </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
@@ -329,9 +359,10 @@ if ($cargue_hoy) {
 <script>
 // Datos de productos desde PHP
 const PRODUCTOS = <?php echo json_encode(array_values($productos)); ?>;
+const RESTANTE_AYER = <?php echo json_encode($restante_ayer_map); ?>;
 const UPLOAD    = '../uploads/productos/';
 
-// Cantidades seleccionadas { id_producto: cantidad }
+// Cantidades seleccionadas { id_producto: {cant, rest, total} }
 let seleccion = {};
 
 // Confirmados en paso 3
@@ -356,7 +387,10 @@ function validarCant(id) {
 
 function actualizarEstiloItem(id, cant) {
     const item = document.querySelector(`.prod-cargue-item[data-id="${id}"]`);
-    if (cant > 0) {
+    const checkRest = document.getElementById('check_rest_' + id);
+    const rest = (checkRest && checkRest.checked) ? (RESTANTE_AYER[id] || 0) : 0;
+    
+    if (cant > 0 || rest > 0) {
         item.classList.add('item-activo');
     } else {
         item.classList.remove('item-activo');
@@ -371,16 +405,23 @@ function filtrarProductos() {
 }
 
 function irAResumen() {
-    // Recoger cantidades > 0
+    // Recoger cantidades > 0 y restantes chequeados
     seleccion = {};
     PRODUCTOS.forEach(p => {
-        const input = document.getElementById('cant_' + p.id_producto);
+        const id = p.id_producto;
+        const input = document.getElementById('cant_' + id);
         const cant  = parseInt(input?.value) || 0;
-        if (cant > 0) seleccion[p.id_producto] = cant;
+        const checkRest = document.getElementById('check_rest_' + id);
+        const rest = (checkRest && checkRest.checked) ? (RESTANTE_AYER[id] || 0) : 0;
+        
+        const total = cant + rest;
+        if (total > 0) {
+            seleccion[id] = { cant: cant, rest: rest, total: total };
+        }
     });
 
     if (Object.keys(seleccion).length === 0) {
-        alert('Debes cargar al menos un producto.');
+        alert('Debes cargar al menos un producto (nuevo o sobrante del día anterior).');
         return;
     }
 
@@ -400,17 +441,26 @@ function renderResumen() {
 
     ids.forEach(id => {
         const prod = PRODUCTOS.find(p => p.id_producto == id);
-        const cant = seleccion[id];
+        const obj  = seleccion[id];
         const img  = prod.imagen
             ? `<img src="${UPLOAD}${prod.imagen}" class="resumen-img">`
             : `<div class="resumen-img-placeholder"><i class="bi bi-image"></i></div>`;
+
+        let desglose = `<div class="resumen-uds">${obj.total} pac.</div>`;
+        if (obj.rest > 0 && obj.cant > 0) {
+            desglose = `<div class="resumen-uds">${obj.total} pac <span class="resumen-desglose">(Ayer: ${obj.rest} + Hoy: ${obj.cant})</span></div>`;
+        } else if (obj.rest > 0) {
+            desglose = `<div class="resumen-uds">${obj.total} pac <span class="resumen-desglose">(Todo de ayer)</span></div>`;
+        } else {
+            desglose = `<div class="resumen-uds">${obj.total} pac <span class="resumen-desglose">(Todo nuevo)</span></div>`;
+        }
 
         lista.innerHTML += `
             <div class="resumen-item">
                 <div class="resumen-img-wrap">${img}</div>
                 <div class="resumen-info">
                     <div class="resumen-nombre">${prod.nombre}</div>
-                    <div class="resumen-uds">${cant} pac.</div>
+                    ${desglose}
                 </div>
                 <div class="resumen-check">
                     <i class="bi bi-check-circle-fill"></i>
@@ -436,28 +486,52 @@ function renderPaso3() {
 
     Object.keys(seleccion).forEach(id => {
         const prod = PRODUCTOS.find(p => p.id_producto == id);
-        const cant = seleccion[id];
+        const obj  = seleccion[id];
         const img  = prod.imagen
             ? `<img src="${UPLOAD}${prod.imagen}" class="pci-img">`
             : `<div class="pci-img-placeholder"><i class="bi bi-image"></i></div>`;
 
+        let cantText = `${obj.total} pac. a cargar`;
+        let autoConfirm = false;
+
+        if (obj.cant > 0 && obj.rest > 0) {
+            cantText = `${obj.cant} pac. nuevas a cargar`;
+        } else if (obj.cant === 0 && obj.rest > 0) {
+            cantText = `<span class="texto-cargado" style="color: #64748b;"><i class="bi bi-truck"></i> Ya en camión</span>`;
+            autoConfirm = true;
+        }
+
+        const btnHtml = autoConfirm 
+            ? `<button class="btn-confirmar-item" disabled id="btnconf_${id}"><i class="bi bi-check-all"></i></button>`
+            : `<button class="btn-confirmar-item" id="btnconf_${id}" onclick="confirmarItem(${id})"><i class="bi bi-check-lg"></i></button>`;
+
+        const extraClass = autoConfirm ? 'item-confirmado' : '';
+
         lista.innerHTML += `
-            <div class="paso3-item" id="p3item_${id}" data-id="${id}">
+            <div class="paso3-item ${extraClass}" id="p3item_${id}" data-id="${id}">
                 <div class="pci-left">
                     <div class="pci-img-wrap">${img}</div>
                     <div class="pci-info">
                         <div class="pci-nombre">${prod.nombre}</div>
-                        <div class="paso3-cant">${cant} pac. a cargar</div>
+                        <div class="paso3-cant">${cantText}</div>
                     </div>
                 </div>
-                <button class="btn-confirmar-item" id="btnconf_${id}"
-                        onclick="confirmarItem(${id})">
-                    <i class="bi bi-check-lg"></i>
-                </button>
+                ${btnHtml}
             </div>`;
+            
+        if (autoConfirm) {
+            confirmados[id] = true;
+        }
     });
 
     actualizarPendienteCount();
+    
+    if (Object.keys(confirmados).length === Object.keys(seleccion).length) {
+        document.getElementById('finalizarWrap').style.display = 'block';
+        document.getElementById('pendienteCount').textContent  = '0';
+    } else {
+        document.getElementById('finalizarWrap').style.display = 'none';
+    }
 }
 
 function confirmarItem(id) {
@@ -494,7 +568,7 @@ function enviarCargue() {
     const wrap = document.getElementById('hiddenCantidades');
     wrap.innerHTML = '';
     Object.keys(seleccion).forEach(id => {
-        wrap.innerHTML += `<input type="hidden" name="cantidades[${id}]" value="${seleccion[id]}">`;
+        wrap.innerHTML += `<input type="hidden" name="cantidades[${id}]" value="${seleccion[id].total}">`;
     });
     document.getElementById('formCargue').submit();
 }
