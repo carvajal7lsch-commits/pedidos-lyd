@@ -300,8 +300,8 @@ if ($cierres_realizados > 0) {
 </button>
 
 <!-- ══ MODAL DE AYUDA ══ -->
-<div class="modal-overlay" id="modalAyuda" style="display:none;">
-    <div class="bottom-sheet" id="sheetAyuda">
+<div class="modal-ayuda-overlay" id="modalAyuda" style="display:none;">
+    <div class="ayuda-sheet" id="sheetAyuda">
         <div class="sheet-handle"></div>
         <button class="sheet-cerrar" onclick="cerrarAyuda()">
             <i class="bi bi-x-lg"></i>
