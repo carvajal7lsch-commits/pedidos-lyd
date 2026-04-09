@@ -27,13 +27,16 @@
             <li><a href="#how">¿Cómo funciona?</a></li>
             <li><a href="#roles">Roles</a></li>
             <li><a href="#tech">Tecnología</a></li>
-            <li><a href="manual.html" style="color:var(--accent); font-weight:700;"><i class="bi bi-book"></i>
+            <li class="nav-manual"><a href="manual.html" style="color:var(--primary); font-weight:700;"><i class="bi bi-book"></i>
                     Manual</a></li>
             <li><a href="public/login.php" class="btn-login"><i class="bi bi-box-arrow-in-right"></i> Iniciar sesión</a>
             </li>
         </ul>
         <button class="nav-toggle" id="navToggle" aria-label="Menú"><i class="bi bi-list"></i></button>
     </nav>
+
+    <!-- Overlay para menú móvil -->
+    <div class="menu-overlay" id="menuOverlay"></div>
 
     <!-- ── HERO ── -->
     <section class="hero" id="home">
@@ -462,6 +465,11 @@
         <p>© 2026 <span>Pedidos LYD</span> · Depósito LYD · Todos los derechos reservados.</p>
     </footer>
 
+    <!-- ── BOTÓN FLOTANTE MANUAL (Solo móvil) ── -->
+    <a href="manual.html" class="btn-manual-float" title="Ver manual de usuario">
+        <i class="bi bi-book-half"></i>
+    </a>
+
     <script>
         // Navbar scroll effect
         const nav = document.getElementById('navbar');
@@ -472,14 +480,19 @@
         // Mobile nav toggle
         const toggle = document.getElementById('navToggle');
         const links = document.getElementById('navLinks');
-        toggle.addEventListener('click', () => {
-            links.classList.toggle('open');
-            toggle.querySelector('i').className =
-                links.classList.contains('open') ? 'bi bi-x-lg' : 'bi bi-list';
-        });
+        const overlay = document.getElementById('menuOverlay');
+
+        function toggleMenu() {
+            const isOpen = links.classList.toggle('open');
+            overlay.classList.toggle('active');
+            toggle.querySelector('i').className = isOpen ? 'bi bi-x-lg' : 'bi bi-list';
+        }
+
+        toggle.addEventListener('click', toggleMenu);
+        overlay.addEventListener('click', toggleMenu);
+        
         links.querySelectorAll('a').forEach(a => a.addEventListener('click', () => {
-            links.classList.remove('open');
-            toggle.querySelector('i').className = 'bi bi-list';
+            if (links.classList.contains('open')) toggleMenu();
         }));
 
         // Tab switcher
