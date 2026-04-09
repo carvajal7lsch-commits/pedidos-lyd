@@ -81,7 +81,6 @@ $fecha_fmt = fecha_es('d \d\e F, Y · g:i A', strtotime($fecha_completa));
         </a>
         <div>
             <div class="page-subtitle-top">COMPROBANTE</div>
-            <!-- FIX OFFLINE: id para que JS pueda actualizar el número de orden -->
             <h1 class="page-title" id="tituloOrden">#<?php echo $num_orden; ?></h1>
         </div>
     </div>
@@ -129,7 +128,6 @@ $fecha_fmt = fecha_es('d \d\e F, Y · g:i A', strtotime($fecha_completa));
             <span class="comp-th-sub">SUBTOTAL</span>
         </div>
 
-        <!-- FIX OFFLINE: contenedor separado para las filas, JS puede limpiarlo y rellenarlo -->
         <div id="compTablaFilas">
             <?php foreach ($detalles as $d): ?>
             <div class="comp-tabla-row">
@@ -155,7 +153,6 @@ $fecha_fmt = fecha_es('d \d\e F, Y · g:i A', strtotime($fecha_completa));
             </span>
         </div>
 
-        <!-- FIX OFFLINE: contenedor para abono/saldo, JS lo llena si aplica -->
         <div id="compAbonoWrap">
             <?php if ($total_abonado > 0): ?>
             <div class="comp-abono-row">
@@ -369,12 +366,6 @@ function generarPDF() {
     }
 }
 
-// ── DOMContentLoaded ─────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
-    const badge = document.getElementById('badge-pendientes');
-    if (badge) badge.style.display = 'none';
-});
 </script>
-
 </body>
 </html>

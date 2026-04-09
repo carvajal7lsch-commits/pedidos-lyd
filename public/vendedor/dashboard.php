@@ -294,6 +294,55 @@ if ($cierres_realizados > 0) {
 
 </main>
 
+<!-- ══ AYUDA FLOTANTE ══ -->
+<button class="btn-ayuda-float" onclick="abrirAyuda()">
+    <i class="bi bi-question-lg"></i>
+</button>
+
+<!-- ══ MODAL DE AYUDA ══ -->
+<div class="modal-overlay" id="modalAyuda" style="display:none;">
+    <div class="bottom-sheet" id="sheetAyuda">
+        <div class="sheet-handle"></div>
+        <button class="sheet-cerrar" onclick="cerrarAyuda()">
+            <i class="bi bi-x-lg"></i>
+        </button>
+        <h2 class="ayuda-title">¿Cómo funciona?</h2>
+        <p class="ayuda-sub">Guía rápida de uso diario</p>
+
+        <div class="ayuda-item">
+            <div class="ayuda-icon"><i class="bi bi-layers-fill"></i></div>
+            <div class="ayuda-text">
+                <h4>1. Carga de Inicio</h4>
+                <p>Al empezar tu día, ingresa a <strong>Carga</strong> para registrar qué productos y cantidades llevas hoy en el camión. Esto actualizará tu inventario.</p>
+            </div>
+        </div>
+
+        <div class="ayuda-item">
+            <div class="ayuda-icon"><i class="bi bi-cart-plus-fill"></i></div>
+            <div class="ayuda-text">
+                <h4>2. Tomar un Pedido</h4>
+                <p>Usa el botón gigante verde o ve a <strong>Clientes</strong> -> Selecciona el lugar -> Busca los productos y pon las cantidades. Arriba te saldrá una barra para proceder al cobro.</p>
+            </div>
+        </div>
+
+        <div class="ayuda-item">
+            <div class="ayuda-icon"><i class="bi bi-receipt"></i></div>
+            <div class="ayuda-text">
+                <h4>3. Venta y Abonos</h4>
+                <p>Al confirmar tu pedido podrás elegir si lo pagan de contado ahora mismo, o darlo a <strong>Crédito</strong>. Si es a crédito podrás ingresarle un abono de dinero inicial.</p>
+            </div>
+        </div>
+
+        <div class="ayuda-item">
+            <div class="ayuda-icon"><i class="bi bi-flag-fill"></i></div>
+            <div class="ayuda-text">
+                <h4>4. Cierre de Ruta</h4>
+                <p>Al finalizar tu tarde es indispensable que vayas a <strong>Cierre de Ruta</strong> y le des confirmar. Esto enviará la consolidación de toda la plata ingresada ese día.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
 <?php require_once __DIR__ . '/partials/navbar.php'; ?>
 
 <script>
@@ -435,7 +484,6 @@ function pintarDashboard(d) {
     setInterval(tick, 30000);
 })();
 
-// ── Toast ─────────────────────────────────────────────────
 function mostrarToast(msg) {
     const t = document.createElement('div');
     t.textContent = msg;
@@ -445,6 +493,25 @@ function mostrarToast(msg) {
     document.body.appendChild(t);
     setTimeout(() => t.remove(), 4000);
 }
+
+// ── Ayuda ──────────────────────────────────────────────────
+function abrirAyuda() {
+    document.getElementById('modalAyuda').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => document.getElementById('sheetAyuda').classList.add('sheet-open'), 10);
+}
+
+function cerrarAyuda() {
+    document.getElementById('sheetAyuda').classList.remove('sheet-open');
+    setTimeout(() => {
+        document.getElementById('modalAyuda').style.display = 'none';
+        document.body.style.overflow = '';
+    }, 300);
+}
+
+document.getElementById('modalAyuda').addEventListener('click', function(e) {
+    if (e.target === this) cerrarAyuda();
+});
 </script>
 
 </body>

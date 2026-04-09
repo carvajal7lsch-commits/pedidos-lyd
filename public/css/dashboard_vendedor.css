@@ -477,3 +477,138 @@ a {
 }
 
 /* Navbar del vendedor → ver navbar.css */
+
+/* ══════════════════════════════════════════
+   AYUDA FLOTANTE Y MODAL
+   ══════════════════════════════════════════ */
+.btn-ayuda-float {
+    position: fixed;
+    bottom: 85px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background: #1A2B6B;
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    box-shadow: 0 4px 14px rgba(26, 43, 107, 0.4);
+    z-index: 40;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn-ayuda-float:active {
+    transform: scale(0.9);
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    opacity: 1;
+    transition: opacity 0.3s;
+}
+
+.bottom-sheet {
+    background: #fff;
+    border-radius: 24px 24px 0 0;
+    padding: 24px 20px 30px;
+    transform: translateY(100%);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1);
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+}
+
+.bottom-sheet.sheet-open {
+    transform: translateY(0);
+}
+
+.sheet-handle {
+    width: 40px;
+    height: 4px;
+    background: #E2E8F0;
+    border-radius: 4px;
+    margin: 0 auto 20px;
+}
+
+.ayuda-title {
+    font-size: 18px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    color: #0F1623;
+    margin-bottom: 6px;
+    padding-right: 30px;
+}
+
+.ayuda-sub {
+    font-size: 13px;
+    color: #64748B;
+    margin-bottom: 20px;
+}
+
+.sheet-cerrar {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #F1F5F9;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748B;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.ayuda-item {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #F1F5F9;
+}
+
+.ayuda-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.ayuda-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: #F8FAFC;
+    color: #1A2B6B;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.ayuda-text h4 {
+    font-size: 14px;
+    font-family: 'Sora', sans-serif;
+    color: #0F1623;
+    margin-bottom: 4px;
+}
+
+.ayuda-text p {
+    font-size: 12.5px;
+    color: #475569;
+    line-height: 1.4;
+}

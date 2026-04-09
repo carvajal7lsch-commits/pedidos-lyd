@@ -22,9 +22,6 @@ if ($cierre_hoy > 0) {
 }
 
 // ── Validar cliente seleccionado ─────────────
-// FIX OFFLINE: No redirigir si no hay cliente en sesión.
-// En offline la página viene del caché del SW sin sesión PHP activa.
-// El JS leerá el id_cliente desde sessionStorage y lo manejará.
 $id_cliente = $_SESSION['pedido_id_cliente'] ?? 0;
 $cliente    = null;
 
@@ -192,7 +189,6 @@ foreach ($prods_camion as $p) {
         </a>
         <div>
             <div class="page-subtitle-top">CLIENTE SELECCIONADO</div>
-            <!-- FIX OFFLINE: id en el h1 para que JS pueda actualizarlo en offline -->
             <h1 class="page-title" id="tituloCliente">
                 <?php echo $cliente ? htmlspecialchars($cliente['nombre']) : '...'; ?>
             </h1>
@@ -309,13 +305,11 @@ foreach ($prods_camion as $p) {
 </div>
 
 <script>
-// FIX OFFLINE: PRODS_MAP empieza con los datos del servidor (si hay).
-// En offline se rellenará desde IndexedDB en el bloque DOMContentLoaded.
+
 let PRODS_MAP  = <?php echo json_encode($prods_map); ?>;
 const UPLOAD   = '../uploads/productos/';
 
-// FIX OFFLINE: CLIENTE_ACTUAL viene del PHP cuando hay conexión.
-// En offline, el bloque DOMContentLoaded lo recupera de sessionStorage + IndexedDB.
+
 let CLIENTE_ACTUAL = {
     id:       <?php echo $cliente ? $cliente['id_cliente'] : 'null'; ?>,
     nombre:   '<?php echo $cliente ? addslashes($cliente['nombre']) : ''; ?>',
@@ -457,10 +451,7 @@ function confirmarPedido() {
     }
 
     // Contado — enviar directo
-    if (!navigator.onLine) {
-        alert('No hay conexión. Debes estar conectado para guardar el pedido.');
-        return;
-    }
+
 
     document.getElementById('inputItems').value = JSON.stringify(items);
     document.getElementById('inputAbono').value = '0';
@@ -545,10 +536,7 @@ function confirmarCredito() {
     }
 
     cerrarModalCredito();
-    if (!navigator.onLine) {
-        alert('No hay conexión. Debes estar conectado para guardar el pedido a crédito.');
-        return;
-    }
+
 
     document.getElementById('inputItems').value = JSON.stringify(items);
     document.getElementById('inputAbono').value = abono;
@@ -565,7 +553,6 @@ document.getElementById('modalCredito').addEventListener('click', function(e) {
 
 
 <script>
-    // Solo modo online
     document.addEventListener('DOMContentLoaded', () => {
         renderCarrito();
     });
