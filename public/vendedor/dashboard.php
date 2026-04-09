@@ -321,7 +321,7 @@ if ($cierres_realizados > 0) {
             <div class="ayuda-icon"><i class="bi bi-cart-plus-fill"></i></div>
             <div class="ayuda-text">
                 <h4>2. Tomar un Pedido</h4>
-                <p>Usa el botón gigante verde o ve a <strong>Clientes</strong> -> Selecciona el lugar -> Busca los productos y pon las cantidades. Arriba te saldrá una barra para proceder al cobro.</p>
+                <p>Usa el botón gigante verde o ve a <strong>Clientes</strong> -> Selecciona cliente y haz click en 'hacer pedido' -> Busca los productos y pon las cantidades. Abajo te saldrá una barra para proceder al resumen del pedido.</p>
             </div>
         </div>
 
@@ -339,6 +339,12 @@ if ($cierres_realizados > 0) {
                 <h4>4. Cierre de Ruta</h4>
                 <p>Al finalizar tu tarde es indispensable que vayas a <strong>Cierre de Ruta</strong> y le des confirmar. Esto enviará la consolidación de toda la plata ingresada ese día.</p>
             </div>
+        </div>
+
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="../../manual.html" target="_blank" style="color: #1A2B6B; font-weight: 700; text-decoration: none; font-size: 14px;">
+                <i class="bi bi-file-earmark-pdf"></i> Ver Manual Completo (Web/PDF)
+            </a>
         </div>
     </div>
 </div>

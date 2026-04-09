@@ -1,0 +1,256 @@
+/* =============================================
+   manual.css
+   Estilos premium para el manual de usuario
+   ============================================= */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --primary: #1A2B6B;
+    --primary-light: #2C3E8A;
+    --accent: #22C55E;
+    --bg: #F8FAFC;
+    --text: #0F1623;
+    --text-muted: #64748B;
+    --border: #E2E8F0;
+    
+    --warning: #F59E0B;
+    --warning-bg: #FEF3C7;
+    --danger: #EF4444;
+    --danger-bg: #FEE2E2;
+}
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, strong {
+    font-family: 'Sora', sans-serif;
+    color: var(--primary);
+}
+
+/* ── NAVBAR (simplificado para el manual) ── */
+nav {
+    background: #fff;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.brand {
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    font-size: 1.25rem;
+    color: var(--primary);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.brand i {
+    color: var(--accent);
+}
+
+.btn-back {
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: color 0.2s;
+}
+
+.btn-back:hover {
+    color: var(--primary);
+}
+
+/* ── LAYOUT MANUAL ── */
+.manual-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 3rem;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+    position: sticky;
+    top: 80px;
+    height: calc(100vh - 100px);
+    overflow-y: auto;
+}
+
+.sidebar h3 {
+    font-size: 1rem;
+    margin-bottom: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+}
+
+.sidebar ul {
+    list-style: none;
+}
+
+.sidebar li {
+    margin-bottom: 0.5rem;
+}
+
+.sidebar a {
+    text-decoration: none;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    display: block;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.sidebar a:hover {
+    background: #F1F5F9;
+    color: var(--primary);
+}
+
+.sidebar a.active {
+    background: rgba(26, 43, 107, 0.05);
+    color: var(--primary);
+    font-weight: 600;
+    border-left: 3px solid var(--primary);
+}
+
+/* ── CONTENT ── */
+.content {
+    background: #fff;
+    padding: 3rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.content h1 {
+    font-size: 2.2rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+}
+
+.content h2 {
+    font-size: 1.5rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #F1F5F9;
+}
+
+.content h3 {
+    font-size: 1.2rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.8rem;
+}
+
+.content p {
+    margin-bottom: 1rem;
+    color: #334155;
+    font-size: 1rem;
+}
+
+.content ul {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+    color: #334155;
+}
+
+.content li {
+    margin-bottom: 0.5rem;
+}
+
+/* ── ALERTAS ── */
+.alert {
+    padding: 1rem 1.2rem;
+    border-radius: 8px;
+    margin: 1.5rem 0;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.alert-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+.alert-content strong {
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.alert-warning {
+    background: var(--warning-bg);
+    border-left: 4px solid var(--warning);
+}
+.alert-warning .alert-icon, .alert-warning strong { color: #B45309; }
+.alert-warning p { color: #92400E; margin: 0; }
+
+.alert-tip {
+    background: #EFF6FF;
+    border-left: 4px solid #3B82F6;
+}
+.alert-tip .alert-icon, .alert-tip strong { color: #1D4ED8; }
+.alert-tip p { color: #1E3A8A; margin: 0; }
+
+/* ── BADGES & ICONS ── */
+.badge {
+    background: #F1F5F9;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    font-family: monospace;
+    color: var(--primary);
+    font-weight: bold;
+}
+
+hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 3rem 0;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 768px) {
+    .manual-container {
+        grid-template-columns: 1fr;
+        padding: 1rem;
+    }
+
+    .sidebar {
+        position: static;
+        height: auto;
+        margin-bottom: 2rem;
+        background: #fff;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+
+    .content {
+        padding: 1.5rem;
+    }
+}

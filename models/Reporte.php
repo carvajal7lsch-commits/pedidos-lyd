@@ -196,6 +196,52 @@ function getCierresDiarios($conexion, $desde = null, $hasta = null) {
     return $rows;
 }
 
+// ── 6. DETALLE DE FACTURAS ──────────────────────────────
+function getDetalleFacturas($conexion, $id_vendedor = null, $desde = null, $hasta = null) {
+    $where = '';
+    if ($id_vendedor) {
+        $id_vendedor = (int) $id_vendedor;
+        $where .= " AND v.id_vendedor = $id_vendedor";
+    }
+    if ($desde && $hasta) {
+        $desde = mysqli_real_escape_string($conexion, $desde);
+        $hasta = mysqli_real_escape_string($conexion, $hasta);
+        $where .= " AND v.fecha BETWEEN '$desde' AND '$hasta'";
+    }
+
+    $sql = "
+        SELECT 
+            v.id_venta,
+            v.fecha,
+            cl.nombre AS cliente,
+            u.nombre  AS vendedor,
+            v.tipo_venta,
+            v.total,
+            CASE 
+                WHEN v.tipo_venta = 'contado' THEN v.total 
+                ELSE (SELECT COALESCE(SUM(monto), 0) FROM abono WHERE id_venta = v.id_venta)
+            END AS recaudado
+        FROM venta v
+        INNER JOIN usuario u ON u.id_usuario = v.id_vendedor
+        LEFT JOIN cliente cl ON cl.id_cliente = v.id_cliente
+        WHERE 1=1 $where
+        ORDER BY v.id_venta DESC
+    ";
+    $result = mysqli_query($conexion, $sql);
+    $rows = [];
+    while ($r = mysqli_fetch_assoc($result)) $rows[] = $r;
+    return $rows;
+}
+
+// ── 7. LISTADO DE VENDEDORES ─────────────────────────────
+function getVendedoresActivos($conexion) {
+    $sql = "SELECT id_usuario, nombre FROM usuario WHERE rol = 'vendedor' AND estado = 1 ORDER BY nombre ASC";
+    $result = mysqli_query($conexion, $sql);
+    $rows = [];
+    while ($r = mysqli_fetch_assoc($result)) $rows[] = $r;
+    return $rows;
+}
+
 // ── HELPERS ──────────────────────────────────────────────
 function formatPesos($valor) {
     return '$ ' . number_format((float)$valor, 0, ',', '.');

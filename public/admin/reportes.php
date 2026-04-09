@@ -12,8 +12,10 @@ $desde      = $_GET['desde']      ?? date('Y-m-01');       // primer día del me
 $hasta      = $_GET['hasta']      ?? date('Y-m-d');        // hoy
 $agrupacion = $_GET['agrupacion'] ?? 'dia';
 
-$reportes_validos    = ['vendedor', 'periodo', 'productos', 'deuda', 'cierres'];
+$reportes_validos    = ['vendedor', 'periodo', 'productos', 'deuda', 'cierres', 'facturas'];
 $agrupaciones_validas = ['dia', 'semana', 'mes'];
+$vendedor_id = $_GET['vendedor_id'] ?? '';
+$vendedores_select = getVendedoresActivos($conexion);
 
 if (!in_array($reporte,    $reportes_validos))    $reporte    = 'vendedor';
 if (!in_array($agrupacion, $agrupaciones_validas)) $agrupacion = 'dia';
@@ -71,12 +73,25 @@ switch ($reporte) {
             'general'  => array_sum(array_column($datos, 'total_general')),
         ];
         break;
+
+    case 'facturas':
+        $datos = getDetalleFacturas($conexion, $vendedor_id, $desde, $hasta);
+        $recaudado_total = array_sum(array_column($datos, 'recaudado'));
+        $totales = [
+            'ventas'   => count($datos),
+            'general'  => array_sum(array_column($datos, 'total')),
+            'contado'  => array_sum(array_map(fn($d) => $d['tipo_venta'] === 'contado' ? $d['total'] : 0, $datos)),
+            'credito'  => array_sum(array_map(fn($d) => $d['tipo_venta'] === 'credito' ? $d['total'] : 0, $datos)),
+            'recaudado' => $recaudado_total,
+        ];
+        break;
 }
 
 // ── Etiquetas de tabs ──────────────────────────────────────
 $tabs = [
     'vendedor'  => ['icon' => 'bi-person-lines-fill',  'label' => 'Por Vendedor'],
     'periodo'   => ['icon' => 'bi-calendar3',           'label' => 'Por Período'],
+    'facturas'  => ['icon' => 'bi-receipt-cutoff',      'label' => 'Control Facturas'],
     'productos' => ['icon' => 'bi-bag-fill',            'label' => 'Más Vendidos'],
     'deuda'     => ['icon' => 'bi-credit-card-2-back',  'label' => 'Deuda Clientes'],
     'cierres'   => ['icon' => 'bi-journal-check',       'label' => 'Cierres Diarios'],
@@ -148,8 +163,7 @@ $tabs = [
                 <input type="date" id="hasta" name="hasta" value="<?php echo htmlspecialchars($hasta); ?>">
             </div>
 
-            <?php if ($reporte === 'periodo'): ?>
-            <div class="filtro-grupo">
+            <div class="filtro-grupo" id="grupo-agrupacion" style="<?php echo $reporte === 'periodo' ? '' : 'display:none;'; ?>">
                 <label for="agrupacion">Agrupar por</label>
                 <select id="agrupacion" name="agrupacion">
                     <option value="dia" <?php echo $agrupacion==='dia' ? 'selected' : '' ; ?>>Día</option>
@@ -157,7 +171,18 @@ $tabs = [
                     <option value="mes" <?php echo $agrupacion==='mes' ? 'selected' : '' ; ?>>Mes</option>
                 </select>
             </div>
-            <?php endif; ?>
+
+            <div class="filtro-grupo" id="grupo-vendedor" style="<?php echo in_array($reporte, ['facturas', 'vendedor']) ? '' : 'display:none;'; ?>">
+                <label for="vendedor_id">Vendedor</label>
+                <select id="vendedor_id" name="vendedor_id">
+                    <option value="">Todos los vendedores</option>
+                    <?php foreach ($vendedores_select as $v): ?>
+                    <option value="<?php echo $v['id_usuario']; ?>" <?php echo (int)$vendedor_id === (int)$v['id_usuario'] ? 'selected' : '' ; ?>>
+                        <?php echo htmlspecialchars($v['nombre']); ?>
+                    </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
             <div class="filtros-acciones">
                 <button type="submit" class="btn-filtrar">
@@ -210,6 +235,15 @@ $tabs = [
                     total
                 </div>
             </div>
+            <?php if ($reporte === 'facturas'): ?>
+            <div class="kpi-card highlight">
+                <div class="kpi-label">Total Recaudado</div>
+                <div class="kpi-value" style="color:#15803d">
+                    <?php echo formatPesos($totales['recaudado']); ?>
+                </div>
+                <div class="kpi-sub">Efectivo + Abonos hoy</div>
+            </div>
+            <?php endif; ?>
             <?php if ($reporte === 'vendedor'): ?>
             <div class="kpi-card">
                 <div class="kpi-label">Vendedores</div>
@@ -570,6 +604,51 @@ $tabs = [
                     </tfoot>
                 </table>
 
+                <?php elseif ($reporte === 'facturas'): ?>
+                <table class="tabla-reporte" id="tablaReporte">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTabla(0)">ID <i class="bi bi-chevron-expand sort-icon"></i></th>
+                            <th onclick="sortTabla(1)">Fecha <i class="bi bi-chevron-expand sort-icon"></i></th>
+                            <th onclick="sortTabla(2)">Cliente <i class="bi bi-chevron-expand sort-icon"></i></th>
+                            <th onclick="sortTabla(3)">Vendedor <i class="bi bi-chevron-expand sort-icon"></i></th>
+                            <th onclick="sortTabla(4)">Tipo <i class="bi bi-chevron-expand sort-icon"></i></th>
+                            <th class="num" onclick="sortTabla(5)">Total <i class="bi bi-chevron-expand sort-icon"></i></th>
+                            <th class="num" onclick="sortTabla(6)">Recaudado <i class="bi bi-chevron-expand sort-icon"></i></th>
+                            <th style="text-align:center;">Detalle</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($datos as $row): ?>
+                        <tr>
+                            <td>#<?php echo $row['id_venta']; ?></td>
+                            <td><?php echo $row['fecha']; ?></td>
+                            <td><strong><?php echo htmlspecialchars($row['cliente'] ?? '—'); ?></strong></td>
+                            <td class="muted"><?php echo htmlspecialchars($row['vendedor']); ?></td>
+                            <td>
+                                <span class="badge-tipo <?php echo $row['tipo_venta'] === 'contado' ? 'badge-contado' : 'badge-credito'; ?>">
+                                    <?php echo ucfirst($row['tipo_venta']); ?>
+                                </span>
+                            </td>
+                            <td class="num"><strong><?php echo formatPesos($row['total']); ?></strong></td>
+                            <td class="num monto-positivo"><?php echo formatPesos($row['recaudado']); ?></td>
+                            <td style="text-align:center;">
+                                <button type="button" class="btn-tabla-ver" title="Ver Comprobante" onclick="verComprobante(<?php echo $row['id_venta']; ?>)">
+                                    <i class="bi bi-receipt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                    <tfoot class="tabla-footer">
+                        <tr>
+                            <td colspan="5"><strong>TOTAL (<?php echo $totales['ventas']; ?> facturas)</strong></td>
+                            <td class="num"><?php echo formatPesos($totales['general']); ?></td>
+                            <td class="num"><?php echo formatPesos($totales['recaudado']); ?></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
                 <?php elseif ($reporte === 'cierres'): ?>
                 <table class="tabla-reporte" id="tablaReporte">
                     <thead>
@@ -646,6 +725,48 @@ $tabs = [
         const TITULO_TAB = <?php echo json_encode($tabs[$reporte]['label']); ?>;
         const EMPRESA = '<?php echo EMPRESA_NOMBRE; ?>';
         const NIT = '<?php echo EMPRESA_NIT; ?>';
+
+        function verComprobante(id) {
+            const modal = document.getElementById('modalComprobante');
+            const body = document.getElementById('modalBody');
+            
+            modal.style.display = 'flex';
+            body.innerHTML = `
+                <div style="padding:48px; text-align:center; color:#64748b;">
+                    <div class="spinner" style="margin: 0 auto 16px; width:30px; height:30px;"></div>
+                    <p style="font-size:14px; margin:0;">Cargando comprobante...</p>
+                </div>
+            `;
+            
+            fetch('ajax/get_comprobante.php?id=' + id)
+                .then(res => {
+                    if(!res.ok) throw new Error('Error en la respuesta');
+                    return res.text();
+                })
+                .then(html => {
+                    body.innerHTML = html;
+                })
+                .catch(err => {
+                    console.error(err);
+                    body.innerHTML = `
+                        <div style="padding:40px; text-align:center; color:#ef4444;">
+                            <i class="bi bi-exclamation-triangle" style="font-size:32px; display:block; margin-bottom:10px;"></i>
+                            <p style="font-size:14px; margin:0;">No se pudo cargar el comprobante</p>
+                            <button class="btn-filtrar" style="margin:16px auto 0;" onclick="verComprobante(${id})">Reintentar</button>
+                        </div>
+                    `;
+                });
+        }
+
+        function cerrarModal() {
+            document.getElementById('modalComprobante').style.display = 'none';
+        }
+
+        // Cerrar con Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') cerrarModal();
+        });
+
 
         // ── Ordenar tabla ─────────────────────────────────────────
         let sortDir = {};
@@ -727,9 +848,18 @@ $tabs = [
                 return clone.textContent.trim();
             });
 
+            // Si es reporte de facturas, quitamos la última columna (Detalle) del PDF
+            if (REPORTE === 'facturas') {
+                headData.pop();
+            }
+
             const bodyData = Array.from(tabla.querySelectorAll('tbody tr'))
                 .filter(r => r.style.display !== 'none')
-                .map(row => Array.from(row.querySelectorAll('td')).map(td => td.textContent.trim().replace(/\s+/g, ' ')));
+                .map(row => {
+                    let cells = Array.from(row.querySelectorAll('td')).map(td => td.textContent.trim().replace(/\s+/g, ' '));
+                    if (REPORTE === 'facturas') cells.pop();
+                    return cells;
+                });
 
             doc.autoTable({
                 head: [headData],
@@ -759,10 +889,20 @@ $tabs = [
                 clone.querySelector('.sort-icon')?.remove();
                 return clone.textContent.trim();
             });
+
+            if (REPORTE === 'facturas') headRow.pop();
+
             const bodyRows = Array.from(tabla.querySelectorAll('tbody tr'))
                 .filter(r => r.style.display !== 'none')
-                .map(row => Array.from(row.querySelectorAll('td')).map(td => td.textContent.trim().replace(/\s+/g, ' ')));
-            const footRows = [Array.from(tabla.querySelectorAll('tfoot td')).map(td => td.textContent.trim())];
+                .map(row => {
+                    let cells = Array.from(row.querySelectorAll('td')).map(td => td.textContent.trim().replace(/\s+/g, ' '));
+                    if (REPORTE === 'facturas') cells.pop();
+                    return cells;
+                });
+
+            const footCells = Array.from(tabla.querySelectorAll('tfoot td')).map(td => td.textContent.trim());
+            if (REPORTE === 'facturas') footCells.pop();
+            const footRows = [footCells];
 
             const wsData = [headRow, ...bodyRows, [], ...footRows];
             const ws = XLSX.utils.aoa_to_sheet(wsData);
@@ -776,6 +916,21 @@ $tabs = [
             XLSX.writeFile(wb, 'reporte_' + REPORTE + '_' + DESDE + '_' + HASTA + '.xlsx');
         }
     </script>
+
+    <!-- Modal de Comprobante -->
+    <div class="modal-overlay" id="modalComprobante" onclick="if(event.target===this) cerrarModal()">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title"><i class="bi bi-receipt"></i> Detalle de Comprobante</span>
+                <button type="button" class="btn-cerrar-modal" onclick="cerrarModal()">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Se carga vía AJAX -->
+            </div>
+        </div>
+    </div>
 
 </body>
 
