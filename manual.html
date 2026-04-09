@@ -16,6 +16,9 @@
 
     <!-- CSS del Manual -->
     <link rel="stylesheet" href="public/css/manual.css" />
+
+    <!-- Librería para generar PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 
 <body>
@@ -25,8 +28,8 @@
         <a href="index.html" class="brand">
             <i class="bi bi-truck"></i> Pedidos LYD
         </a>
-        <a href="index.html" class="btn-back">
-            <i class="bi bi-arrow-left"></i> Volver a la web
+        <a href="javascript:void(0)" class="btn-back" onclick="irAtras()">
+            <i class="bi bi-arrow-left"></i> Volver
         </a>
     </nav>
 
@@ -187,6 +190,12 @@
         </main>
     </div>
 
+    <!-- Botón Flotante para Descargar PDF -->
+    <button class="btn-pdf-float" onclick="descargarPDF()" title="Descargar Manual en PDF">
+        <i class="bi bi-file-earmark-pdf-fill"></i>
+        <span>PDF</span>
+    </button>
+
     <!-- Script para control del scroll espía del sidebar -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -210,6 +219,42 @@
                 });
             });
         });
+
+        function irAtras() {
+            // Si hay historial de navegación en nuestro sitio, volvemos atrás
+            if (document.referrer && document.referrer !== "" && document.referrer !== window.location.href) {
+                window.history.back();
+            } else {
+                // Si no, volvemos al index por defecto
+                window.location.href = 'index.html';
+            }
+        }
+
+        function descargarPDF() {
+            const element = document.querySelector('.content');
+            const btn = document.querySelector('.btn-pdf-float');
+            
+            // Opciones de configuración del PDF
+            const opt = {
+                margin:       10,
+                filename:     'Manual_Pedidos_LYD.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+            };
+
+            // Estilo temporal para el PDF (ajustar paddings si es necesario)
+            element.style.boxShadow = 'none';
+            element.style.padding = '0';
+
+            // Ejecutar conversión
+            html2pdf().set(opt).from(element).save().then(() => {
+                // Restaurar estilos
+                element.style.boxShadow = '';
+                element.style.padding = '';
+            });
+        }
     </script>
 </body>
 

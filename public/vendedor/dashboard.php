@@ -342,7 +342,7 @@ if ($cierres_realizados > 0) {
         </div>
 
         <div style="margin-top: 20px; text-align: center;">
-            <a href="../../manual.html" target="_blank" style="color: #1A2B6B; font-weight: 700; text-decoration: none; font-size: 14px;">
+            <a href="../../manual.html" style="color: #1A2B6B; font-weight: 700; text-decoration: none; font-size: 14px;">
                 <i class="bi bi-file-earmark-pdf"></i> Ver Manual Completo (Web/PDF)
             </a>
         </div>

@@ -254,3 +254,57 @@ hr {
         padding: 1.5rem;
     }
 }
+
+/* ── BOTON FLOTANTE PDF ── */
+.btn-pdf-float {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 50px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    box-shadow: 0 8px 25px rgba(26, 43, 107, 0.4);
+    cursor: pointer;
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.btn-pdf-float:hover {
+    background: #000;
+    transform: translateY(-5px) scale(1.05);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+}
+
+.btn-pdf-float i {
+    font-size: 20px;
+}
+
+/* Ocultar elementos en la generacion del PDF o Impresion */
+@media print {
+    nav, .sidebar, .btn-pdf-float {
+        display: none !important;
+    }
+    .manual-container {
+        grid-template-columns: 1fr;
+        padding: 0;
+        margin: 0;
+    }
+    .content {
+        box-shadow: none;
+        padding: 0;
+        width: 100% !important;
+    }
+    /* Evitar que se corten secciones a la mitad */
+    h2, h3, .alert, .content li, p {
+        page-break-inside: avoid;
+        break-inside: avoid;
+    }
+}
