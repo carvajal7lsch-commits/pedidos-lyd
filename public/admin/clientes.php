@@ -97,11 +97,11 @@ $abrir_modal_editar = ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'edi
             </div>
             <select class="filtro-select" id="filtroEtiqueta" onchange="filtrar()">
                 <option value="">Todas las etiquetas</option>
-                <option value="nuevo">🆕 Nuevo</option>
-                <option value="frecuente">⭐ Frecuente</option>
-                <option value="vip">👑 VIP</option>
-                <option value="inactivo">😴 Inactivo</option>
-                <option value="deuda">💳 Con deuda</option>
+                <option value="nuevo">✨ Nuevo</option>
+                <option value="frecuente">🔄 Frecuente</option>
+                <option value="vip">💎 VIP</option>
+                <option value="inactivo">🌙 Inactivo</option>
+                <option value="deuda">⚠️ Con deuda</option>
             </select>
             <div class="vista-toggle">
                 <button class="vista-btn" id="btnVista1" onclick="cambiarVista('tabla')" title="Vista tabla">

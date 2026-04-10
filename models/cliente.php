@@ -18,7 +18,7 @@ function etiquetarCliente($c) {
     $hace30 = date('Y-m-d', strtotime('-30 days'));
     $hace15 = date('Y-m-d', strtotime('-15 days'));
 
-    // 🆕 Nuevo — registrado hace menos de 30 días
+    // Nuevo — registrado hace menos de 30 días
     // Usamos el id como proxy si no hay fecha de registro
     // Si la BD tiene fecha_registro úsala; si no, comparamos por id relativo
     $stmt = mysqli_prepare($conexion,
@@ -31,7 +31,7 @@ function etiquetarCliente($c) {
         $tags[] = ['clave' => 'nuevo', 'label' => 'Nuevo', 'icon' => '<i class="bi bi-stars"></i>', 'color' => '#3b82f6'];
     }
 
-    // 📊 Compras en los últimos 30 días
+    // Compras en los últimos 30 días
     $stmt = mysqli_prepare($conexion,
         "SELECT COUNT(*) AS compras, COALESCE(SUM(total), 0) AS volumen
          FROM venta WHERE id_cliente = ? AND fecha >= ?"
@@ -42,12 +42,12 @@ function etiquetarCliente($c) {
     $compras30  = (int)   $row30['compras'];
     $volumen30  = (float) $row30['volumen'];
 
-    // ⭐ Frecuente — 3 o más compras en últimos 30 días
+    // Frecuente — 3 o más compras en últimos 30 días
     if ($compras30 >= 3) {
         $tags[] = ['clave' => 'frecuente', 'label' => 'Frecuente', 'icon' => '<i class="bi bi-arrow-repeat"></i>', 'color' => '#f59e0b'];
     }
 
-    // 😴 Inactivo — sin compras en los últimos 15 días (solo si tenía historial)
+    // Inactivo — sin compras en los últimos 15 días (solo si tenía historial)
     $stmt2 = mysqli_prepare($conexion,
         "SELECT COUNT(*) AS total FROM venta WHERE id_cliente = ?"
     );
@@ -59,7 +59,7 @@ function etiquetarCliente($c) {
         $tags[] = ['clave' => 'inactivo', 'label' => 'Inactivo', 'icon' => '<i class="bi bi-moon-stars"></i>', 'color' => '#94a3b8'];
     }
 
-    // 💳 Con deuda — saldo pendiente de crédito
+    // Con deuda — saldo pendiente de crédito
     $stmt3 = mysqli_prepare($conexion,
         "SELECT COALESCE(SUM(v.total - COALESCE(
             (SELECT SUM(a.monto) FROM abono a WHERE a.id_venta = v.id_venta), 0
@@ -74,7 +74,7 @@ function etiquetarCliente($c) {
         $tags[] = ['clave' => 'deuda', 'label' => 'Con deuda', 'icon' => '<i class="bi bi-exclamation-circle"></i>', 'color' => '#ef4444'];
     }
 
-    // 👑 VIP — volumen total en top 20%
+    // VIP — volumen total en top 20%
     $stmt4 = mysqli_prepare($conexion,
         "SELECT COALESCE(SUM(total), 0) AS volumen_total FROM venta WHERE id_cliente = ?"
     );
