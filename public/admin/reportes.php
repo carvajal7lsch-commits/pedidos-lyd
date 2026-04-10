@@ -4,7 +4,7 @@ soloAdmin();
 
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../config/conexion.php';
-require_once __DIR__ . '/../../models/Reporte.php';
+require_once __DIR__ . '/../../models/reporte.php';
 
 // ── Parámetros de filtro ───────────────────────────────────
 $reporte    = $_GET['reporte']    ?? 'vendedor';

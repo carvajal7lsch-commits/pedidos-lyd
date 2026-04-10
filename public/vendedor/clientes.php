@@ -5,7 +5,7 @@ soloVendedor();
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../config/conexion.php';
 require_once __DIR__ . '/../../controllers/ClienteController.php';
-require_once __DIR__ . '/../../models/Cliente.php';
+require_once __DIR__ . '/../../models/cliente.php';
 
 $hoy = date('Y-m-d');
 $stmt = mysqli_prepare($conexion,

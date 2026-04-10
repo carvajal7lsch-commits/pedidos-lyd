@@ -3,7 +3,7 @@
 // controllers/ProductoController.php
 // =============================================
 
-require_once __DIR__ . '/../models/Producto.php';
+require_once __DIR__ . '/../models/producto.php';
 
 define('RUTA_IMAGENES', __DIR__ . '/../public/uploads/productos/');
 define('URL_IMAGENES',  'uploads/productos/');
