@@ -110,6 +110,17 @@ $productos = mysqli_fetch_all(mysqli_query($conexion,
     </div>
     <?php endif; ?>
 
+    <?php if (!$cliente): ?>
+    <div class="alerta alerta-info" style="margin: 1rem;">
+        <i class="bi bi-person-fill-exclamation"></i>
+        <div>
+            <span>No has seleccionado un cliente.</span>
+            <br>
+            <a href="clientes.php?intent=nuevo_pedido" style="color:inherit; font-weight:700; text-decoration:underline;">Seleccionar cliente</a>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <!-- Buscador -->
     <div class="search-box">
         <i class="bi bi-search"></i>

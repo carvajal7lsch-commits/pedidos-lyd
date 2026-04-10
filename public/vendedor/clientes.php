@@ -20,6 +20,18 @@ $mensaje  = '';
 $tipo_msg = '';
 $accion   = $_GET['accion'] ?? 'listar';
 
+// Mensajes contextuales
+$intent = $_GET['intent'] ?? '';
+$msg_get = $_GET['msg'] ?? '';
+
+if ($intent === 'nuevo_pedido') {
+    $mensaje = 'Por favor selecciona un cliente para iniciar el pedido.';
+    $tipo_msg = 'info';
+} elseif ($msg_get === 'selecciona_cliente') {
+    $mensaje = 'Debes seleccionar un cliente antes de ver el pedido.';
+    $tipo_msg = 'warning';
+}
+
 // ── Crear cliente ────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'crear') {
     $resultado = procesarCrearCliente();

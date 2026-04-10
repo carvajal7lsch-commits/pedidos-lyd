@@ -248,7 +248,7 @@ if ($cierres_realizados > 0) {
 
     <!-- CTA Tomar pedido -->
     <div id="dash-cta-wrap">
-        <a href="clientes.php" class="cta-btn" id="dash-cta-activo">
+        <a href="clientes.php?intent=nuevo_pedido" class="cta-btn" id="dash-cta-activo">
             <div class="cta-left">
                 <span class="cta-title">Tomar Pedido</span>
                 <span class="cta-sub">Iniciar nueva venta</span>
