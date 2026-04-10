@@ -186,15 +186,9 @@ $rutas = ['Guayabal', 'Cruce', 'Acevedo', 'Gallardo', 'El Brasil', 'Quemadas'];
                     </div>
                     <div class="card-info">
                         <div class="card-nombre"><?php echo htmlspecialchars($c['nombre']); ?></div>
-                        <?php if (!empty($c['etiquetas'])): ?>
                         <div class="card-etiquetas">
-                            <?php foreach ($c['etiquetas'] as $t): ?>
-                            <span class="etiqueta etiqueta-<?php echo $t['clave']; ?>">
-                                <?php echo $t['icon'] . ' ' . $t['label']; ?>
-                            </span>
-                            <?php endforeach; ?>
+                            <?php echo renderEtiquetas($c['etiquetas']); ?>
                         </div>
-                        <?php endif; ?>
                     </div>
                 </div>
                 <div class="card-bottom">
