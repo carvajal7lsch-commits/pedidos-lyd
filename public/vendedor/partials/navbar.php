@@ -8,7 +8,7 @@
 $pagina_actual = basename($_SERVER['PHP_SELF']);
 ?>
 <head>
-<link rel="stylesheet" href="/./public/css/navbar_vendedor.css">
+<link rel="stylesheet" href="../css/navbar_vendedor.css">
 <style>
 
 .vend-nav-item { position: relative; }
@@ -16,7 +16,7 @@ $pagina_actual = basename($_SERVER['PHP_SELF']);
 </head>
 
 <nav class="vend-navbar">
-    <a href="<?php echo BASE_URL; ?>public/vendedor/dashboard.php"
+    <a href="dashboard.php"
        class="vend-nav-item <?php echo $pagina_actual === 'dashboard.php' ? 'vend-nav-active' : 'vend-nav-inactive'; ?>">
         <i class="bi bi-house-fill"></i>
         <span class="vend-nav-label">Inicio</span>
@@ -26,7 +26,7 @@ $pagina_actual = basename($_SERVER['PHP_SELF']);
         <?php endif; ?>
     </a>
 
-    <a href="<?php echo BASE_URL; ?>public/vendedor/productos.php"
+    <a href="productos.php"
        class="vend-nav-item <?php echo $pagina_actual === 'productos.php' ? 'vend-nav-active' : 'vend-nav-inactive'; ?>">
         <i class="bi bi-box-seam"></i>
         <span class="vend-nav-label">Productos</span>
@@ -35,7 +35,7 @@ $pagina_actual = basename($_SERVER['PHP_SELF']);
         <?php endif; ?>
     </a>
 
-    <a href="<?php echo BASE_URL; ?>public/vendedor/carga.php"
+    <a href="carga.php"
        class="vend-nav-item <?php echo $pagina_actual === 'carga.php' ? 'vend-nav-active' : 'vend-nav-inactive'; ?>">
         <i class="bi bi-layers-fill"></i>
         <span class="vend-nav-label">Carga</span>
@@ -44,7 +44,7 @@ $pagina_actual = basename($_SERVER['PHP_SELF']);
         <?php endif; ?>
     </a>
 
-    <a href="<?php echo BASE_URL; ?>controllers/logout.php"
+    <a href="../../controllers/logout.php"
        class="vend-nav-item vend-nav-inactive">
         <i class="bi bi-box-arrow-right"></i>
         <span class="vend-nav-label">Salir</span>

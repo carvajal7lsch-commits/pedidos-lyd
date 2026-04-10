@@ -10,7 +10,7 @@ $pagina_actual = basename($_SERVER['PHP_SELF']);
 ?>
 
 <head>
-    <link rel="stylesheet" href="/public/css/navbar.css">
+    <link rel="stylesheet" href="../css/navbar.css">
 </head>
 
 <script>
@@ -39,28 +39,28 @@ $pagina_actual = basename($_SERVER['PHP_SELF']);
 
     <ul class="lista">
         <li>
-            <a href="<?php echo BASE_URL; ?>public/admin/dashboard.php"
+            <a href="dashboard.php"
                 class="a <?php echo $pagina_actual === 'dashboard.php' ? 'activo' : ''; ?>">
                 <i class="bi bi-columns-gap"></i>
                 <span>Inicio</span>
             </a>
         </li>
         <li>
-            <a href="<?php echo BASE_URL; ?>public/admin/productos.php"
+            <a href="productos.php"
                 class="a <?php echo $pagina_actual === 'productos.php' ? 'activo' : ''; ?>">
                 <i class="bi bi-bag"></i>
                 <span>Productos</span>
             </a>
         </li>
         <li>
-            <a href="<?php echo BASE_URL; ?>public/admin/categorias.php"
+            <a href="categorias.php"
                 class="a <?php echo $pagina_actual === 'categorias.php' ? 'activo' : ''; ?>">
                 <i class="bi bi-bookmarks"></i>
                 <span>Categorías</span>
             </a>
         </li>
         <li>
-            <a href="<?php echo BASE_URL; ?>public/admin/reportes.php"
+            <a href="reportes.php"
                 class="a <?php echo $pagina_actual === 'reportes.php' ? 'activo' : ''; ?>">
                 <i class="bi bi-bar-chart"></i>
                 <span>Reportes</span>
@@ -75,12 +75,12 @@ $pagina_actual = basename($_SERVER['PHP_SELF']);
             </a>
             <ul class="submenu">
                 <li>
-                    <a href="<?php echo BASE_URL; ?>public/admin/clientes.php" class="sub-a">
+                    <a href="clientes.php" class="sub-a">
                         Clientes
                     </a>
                 </li>
                 <li>
-                    <a href="<?php echo BASE_URL; ?>public/admin/vendedores.php" class="sub-a">
+                    <a href="vendedores.php" class="sub-a">
                         Vendedores
                     </a>
                 </li>
@@ -91,7 +91,7 @@ $pagina_actual = basename($_SERVER['PHP_SELF']);
     </ul>
 
     <div class="salir">
-        <a href="<?php echo BASE_URL; ?>controllers/logout.php" class="logout">
+        <a href="../../controllers/logout.php" class="logout">
             <i class="bi bi-box-arrow-right"></i>
             <span>Cerrar Sesión</span>
         </a>

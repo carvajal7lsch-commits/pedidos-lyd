@@ -6,14 +6,10 @@
 // Zona horaria Colombia (UTC-5)
 date_default_timezone_set('America/Bogota');
 
-// URL base del proyecto - detecta automáticamente host y subcarpeta
+// URL base del proyecto - detecta automáticamente el host (localhost o Ngrok)
 $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-$script = $_SERVER['SCRIPT_NAME'];
-$base_dir = str_replace(basename($script), '', $script);
-// Asegurarnos de que termine en /public/ para las redirecciones si es necesario, 
-// o simplemente la raíz del proyecto.
-define('BASE_URL', $protocol . '://' . $host . $base_dir . '../');
+$host = $_SERVER['HTTP_HOST'] ?? 'localhost:3000';
+define('BASE_URL', $protocol . '://' . $host . '/');
 
 // Nombre del sistema
 define('APP_NAME', 'Pedidos LYD');

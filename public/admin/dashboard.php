@@ -251,22 +251,22 @@ $fecha_hoy      = $dia_semana . ', ' . date('j') . ' de ' . [
                         <div class="dc-title"><i class="bi bi-grid-3x3-gap-fill"></i>Accesos Rápidos</div>
                     </div>
                     <div class="ql-grid">
-                        <a href="<?php echo BASE_URL; ?>public/admin/productos.php" class="ql-btn">
+                        <a href="productos.php" class="ql-btn">
                             <i class="bi bi-bag-fill qlb-icon"></i>
                             <span class="qlb-label">Productos</span>
                             <span class="qlb-desc">Gestionar catálogo</span>
                         </a>
-                        <a href="<?php echo BASE_URL; ?>public/admin/categorias.php" class="ql-btn v-green">
+                        <a href="categorias.php" class="ql-btn v-green">
                             <i class="bi bi-bookmarks-fill qlb-icon"></i>
                             <span class="qlb-label">Categorías</span>
                             <span class="qlb-desc">Organizar grupos</span>
                         </a>
-                        <a href="<?php echo BASE_URL; ?>public/admin/clientes.php" class="ql-btn v-purple">
+                        <a href="clientes.php" class="ql-btn v-purple">
                             <i class="bi bi-people-fill qlb-icon"></i>
                             <span class="qlb-label">Clientes</span>
                             <span class="qlb-desc">Ver y editar</span>
                         </a>
-                        <a href="<?php echo BASE_URL; ?>public/admin/vendedores.php" class="ql-btn v-orange">
+                        <a href="vendedores.php" class="ql-btn v-orange">
                             <i class="bi bi-person-badge-fill qlb-icon"></i>
                             <span class="qlb-label">Vendedores</span>
                             <span class="qlb-desc">Gestionar equipo</span>

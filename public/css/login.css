@@ -149,23 +149,25 @@ body {
 
 /* ── card-login ── */
 .card-login {
-    background: white;
+    /* glassmorphism style better for both but subtle for desktop */
+    background: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    
     display: flex;
-    box-shadow: -2px 17px 26px -4px rgba(0, 0, 0, 0.29);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    /* deja que el contenido dicte la altura */
-    border-radius: 1rem;
+    border-radius: 1.25rem;
     width: 70%;
     height: auto;
-    /* altura automática según contenido */
-    padding: 2rem 0 0 0;
-    /* espacio interno superior */
+    padding: 2.2rem 0 0 0;
     gap: 0.5rem;
     position: relative;
     overflow: hidden;
-    transition: border-color 0.4s ease, box-shadow 0.4s ease;
+    transition: all 0.4s ease;
 }
 
 /* ── Borde rojo ── */
@@ -295,7 +297,8 @@ body {
 
 .saludo>p {
     color: gray;
-    margin-top: -0.5rem;
+    margin-top: 0.25rem;
+    font-size: 0.95rem;
 }
 
 /* ── form ── */
@@ -651,8 +654,11 @@ body {
         overflow-y: auto;
         height: auto;
         min-height: 100dvh;
-        /* dynamic viewport height — evita el salto de barra de URL */
         align-items: center;
+    }
+
+    #antigravity-bg {
+        opacity: 0.4;
     }
 
     .cont1 {
@@ -669,9 +675,12 @@ body {
     .card-login {
         width: 100%;
         max-width: 100%;
-        border-radius: 1.25rem;
-        padding: 1.75rem 0 0 0;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
+        border-radius: 1.75rem;
+        padding: 2.25rem 0 0 0;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        background: rgba(255, 255, 255, 0.82);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
     }
 
     /* Ícono camión un poco más pequeño */
@@ -686,12 +695,14 @@ body {
 
     /* Títulos del saludo */
     .saludo h2 {
-        font-size: 1.3rem;
-        margin-bottom: 0.1rem;
+        font-size: 1.4rem;
+        margin-bottom: 0.3rem;
+        font-weight: 700;
     }
 
     .saludo p {
-        font-size: 0.85rem;
+        font-size: 0.9rem;
+        margin-top: 0;
     }
 
     /* Form con mayor padding lateral */

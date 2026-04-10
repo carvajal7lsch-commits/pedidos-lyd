@@ -3,6 +3,7 @@ require_once __DIR__ . '/../../middlewares/AuthMiddleware.php';
 soloAdmin();
 
 require_once __DIR__ . '/../../controllers/CategoriaController.php';
+require_once __DIR__ . '/../../models/categoria.php';
 require_once __DIR__ . '/../../config/config.php'; /* BASE URL */
 
 

@@ -4,7 +4,7 @@
 // Lógica del CRUD de Categorías
 // =============================================
 
-require_once __DIR__ . '/../models/Categoria.php';
+require_once __DIR__ . '/../models/categoria.php';
 
 // ---------------------------------------------
 // Procesar creación

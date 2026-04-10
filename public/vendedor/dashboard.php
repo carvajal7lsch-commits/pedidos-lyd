@@ -168,12 +168,12 @@ if ($cierres_realizados > 0) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="manifest" href="/public/manifest.json">
+    <link rel="manifest" href="../manifest.json">
     <meta name="theme-color" content="#1855CF">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="LYD">
-    <link rel="apple-touch-icon" href="/public/icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="../icons/icon-192x192.png">
 
     <title>Inicio — <?php echo APP_NAME; ?></title>
     <link rel="stylesheet" href="../css/dashboard_vendedor.css?v=<?php echo filemtime('../css/dashboard_vendedor.css'); ?>">
@@ -195,7 +195,7 @@ if ($cierres_realizados > 0) {
             <div class="greeting-name" id="dash-nombre"><?php echo htmlspecialchars($nombre); ?></div>
         </div>
     </div>
-    <a href="<?php echo BASE_URL; ?>controllers/logout.php" class="topbar-btn" title="Cerrar sesión">
+    <a href="../../controllers/logout.php" class="topbar-btn" title="Cerrar sesión">
         <i class="bi bi-box-arrow-right"></i>
     </a>
 </header>

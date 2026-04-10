@@ -80,12 +80,12 @@ $rutas = ['Guayabal', 'Cruce', 'Acevedo', 'Gallardo', 'El Brasil', 'Quemadas'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="manifest" href="../manifest.json">
+    <link rel="manifest" href="/public/manifest.json">
     <meta name="theme-color" content="#1855CF">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="LYD">
-    <link rel="apple-touch-icon" href="../icons/icon-192x192.png">
+    <link rel="apple-touch-icon" href="/public/icons/icon-192x192.png">
 
     <title>Clientes — <?php echo APP_NAME; ?></title>
     <link rel="stylesheet" href="../css/dashboard_vendedor.css?v=<?php echo filemtime('../css/dashboard_vendedor.css'); ?>">
@@ -100,14 +100,15 @@ $rutas = ['Guayabal', 'Cruce', 'Acevedo', 'Gallardo', 'El Brasil', 'Quemadas'];
 <!-- ══ TOP BAR ══ -->
 <header class="topbar">
     <div class="topbar-left">
-        <div>
-            <h1 class="page-title">
-                Clientes
-                <button type="button" class="btn-info-guia" onclick="abrirGuia()" title="Ver guía de etiquetas">
-                    <i class="bi bi-info-circle"></i>
-                </button>
-            </h1>
-        </div>
+        <a href="dashboard.php" class="topbar-btn">
+            <i class="bi bi-arrow-left"></i>
+        </a>
+        <h1 class="page-title">
+            Clientes
+            <button type="button" class="btn-info-guia" onclick="abrirGuia()" title="Ver guía de etiquetas">
+                <i class="bi bi-info-circle"></i>
+            </button>
+        </h1>
     </div>
     <button class="btn-add" onclick="abrirModal()" title="Nuevo cliente">
         <i class="bi bi-plus-lg"></i>
