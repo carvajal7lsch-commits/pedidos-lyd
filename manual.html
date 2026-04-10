@@ -56,14 +56,14 @@
 
         <!-- CONTENIDO DEL MANUAL -->
         <main class="content">
-            <h1 id="intro">📦 Manual de Usuario: Pedidos LYD</h1>
+            <h1 id="intro"> Manual de Usuario: Pedidos LYD</h1>
             <p>Bienvenido al manual de uso del sistema <strong>Pedidos LYD</strong>. Este documento explica paso a paso
                 el funcionamiento de la aplicación móvil para los Vendedores/Repartidores y ofrece un vistazo general a
                 las operaciones principales para el área administrativa.</p>
 
             <hr>
 
-            <h2 id="sec-vendedores">📱 SECCIÓN I: Guía para Vendedores (Aplicación Móvil)</h2>
+            <h2 id="sec-vendedores"> SECCIÓN I: Guía para Vendedores (Aplicación Móvil)</h2>
             <p>Tu aplicación de ventas está diseñada para ser rápida, funcionar en la calle e indicarte exactamente los
                 pasos que debes seguir durante todo tu día de trabajo.</p>
 
@@ -97,14 +97,16 @@
                 <li><strong>Paso 4 (Registro Final):</strong> El sistema te mostrará una lista (checklist) de todos los
                     productos que llevarás. Pulsa el botón del <strong>visto bueno ( ✓ )</strong> en los productos que
                     debas subir. <em>(Los que ya estaban en el camión de ayer, se marcan solos)</em>. Al final, presiona
-                    <strong>Finalizar y Guardar</strong>.</li>
+                    <strong>Finalizar y Guardar</strong>.
+                </li>
             </ul>
 
             <h3 id="pedidos">2. Tomar un Pedido <i class="bi bi-cart3"></i></h3>
             <p>Una vez frente al cliente, puedes procesar su venta de forma rápida:</p>
             <ul>
                 <li><strong>Paso 1:</strong> Usa el botón gigante verde de "Tomar un Pedido" o ve a
-                    <strong>Clientes</strong> en tu pantalla principal.</li>
+                    <strong>Clientes</strong> en tu pantalla principal.
+                </li>
                 <li><strong>Paso 2:</strong> Selecciona al cliente del directorio y haz click en "hacer pedido".</li>
                 <li><strong>Paso 3:</strong> Busca los productos y pon las cantidades. Utiliza el buscador de arriba si
                     lo requieres.</li>
@@ -141,7 +143,24 @@
                     entrar ahí y volverle a re-enviar la factura por Bluetooth o Whatsapp.</li>
             </ul>
 
-            <h3 id="cierre">5. Terminar el Día: Cierre de Ruta <i class="bi bi-flag"></i></h3>
+            <h3 id="etiquetas">5. Etiquetas y Preferencias <i class="bi bi-tags"></i></h3>
+            <p>La aplicación analiza el comportamiento de tus clientes y les asigna "etiquetas" automáticas para que
+                sepas
+                cómo tratarlos:</p>
+            <ul>
+                <li><strong><i class="bi bi-stars"></i> Nuevo:</strong> Clientes registrados recientemente en el sistema.</li>
+                <li><strong><i class="bi bi-arrow-repeat"></i> Frecuente:</strong> Clientes constantes que realizan 3 o más pedidos al mes.</li>
+                <li><strong><i class="bi bi-moon-stars"></i> Inactivo:</strong> Clientes que han comprado antes pero llevan más de 15 días sin hacer un
+                    pedido.
+                    <em>¡Aprovecha para visitarlos y reactivarlos!</em>
+                </li>
+                <li><strong><i class="bi bi-exclamation-circle"></i> Con deuda:</strong> Clientes que tienen facturas de crédito con saldos pendientes por
+                    pagar.</li>
+                <li><strong><i class="bi bi-gem"></i> VIP:</strong> Tus mejores clientes. Son el 20% que genera mayor volumen de ventas para la
+                    empresa.</li>
+            </ul>
+
+            <h3 id="cierre">6. Terminar el Día: Cierre de Ruta <i class="bi bi-flag"></i></h3>
             <p>Este paso es <strong>obligatorio</strong> al terminar tu jornada de cobros y repartos.</p>
             <ul>
                 <li><strong>Paso 1:</strong> Ve al Inicio y entra en el botón cuadriculado rojo de <strong>Cierre de
@@ -166,7 +185,7 @@
 
             <hr>
 
-            <h2 id="sec-admin">💻 SECCIÓN II: Tareas Administrativas</h2>
+            <h2 id="sec-admin"> SECCIÓN II: Tareas Administrativas</h2>
             <p><em>(Para uso exclusivo del Panel Central en PC)</em></p>
             <p>El Administrador tiene una consola global para supervisar y ejecutar acciones sobre toda la red.</p>
             <ul>
@@ -183,7 +202,8 @@
                     <strong>Boton de Ayuda Rápida</strong>
                     <p>Si te surge alguna duda trabajando con el celular, recuerda que siempre podrás pulsar el botón
                         <strong>[ ? ]</strong> en la esquina del Menú de Inicio para abrir un recordatorio veloz de tus
-                        funciones.</p>
+                        funciones.
+                    </p>
                 </div>
             </div>
 
@@ -233,15 +253,15 @@
         function descargarPDF() {
             const element = document.querySelector('.content');
             const btn = document.querySelector('.btn-pdf-float');
-            
+
             // Opciones de configuración del PDF
             const opt = {
-                margin:       10,
-                filename:     'Manual_Pedidos_LYD.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true, letterRendering: true, scrollY: 0, scrollX: 0 },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-                pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+                margin: 10,
+                filename: 'Manual_Pedidos_LYD.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, letterRendering: true, scrollY: 0, scrollX: 0 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
             };
 
             // Estilo temporal para el PDF (ajustar paddings si es necesario)

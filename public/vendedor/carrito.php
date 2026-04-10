@@ -173,8 +173,8 @@ foreach ($prods_camion as $p) {
     <link rel="apple-touch-icon" href="/public/icons/icon-192x192.png">
 
     <title>Carrito — <?php echo APP_NAME; ?></title>
-    <link rel="stylesheet" href="../css/dashboard_vendedor.css">
-    <link rel="stylesheet" href="../css/carrito.css">
+    <link rel="stylesheet" href="../css/dashboard_vendedor.css?v=<?php echo filemtime('../css/dashboard_vendedor.css'); ?>">
+    <link rel="stylesheet" href="../css/carrito.css?v=<?php echo filemtime('../css/carrito.css'); ?>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

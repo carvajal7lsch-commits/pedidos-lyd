@@ -176,7 +176,7 @@ if ($cierres_realizados > 0) {
     <link rel="apple-touch-icon" href="/public/icons/icon-192x192.png">
 
     <title>Inicio — <?php echo APP_NAME; ?></title>
-    <link rel="stylesheet" href="../css/dashboard_vendedor.css">
+    <link rel="stylesheet" href="../css/dashboard_vendedor.css?v=<?php echo filemtime('../css/dashboard_vendedor.css'); ?>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

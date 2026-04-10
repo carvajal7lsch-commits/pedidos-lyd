@@ -88,8 +88,8 @@ $rutas = ['Guayabal', 'Cruce', 'Acevedo', 'Gallardo', 'El Brasil', 'Quemadas'];
     <link rel="apple-touch-icon" href="/public/icons/icon-192x192.png">
 
     <title>Clientes — <?php echo APP_NAME; ?></title>
-    <link rel="stylesheet" href="../css/dashboard_vendedor.css">
-    <link rel="stylesheet" href="../css/clientes_vendedor.css">
+    <link rel="stylesheet" href="../css/dashboard_vendedor.css?v=<?php echo filemtime('../css/dashboard_vendedor.css'); ?>">
+    <link rel="stylesheet" href="../css/clientes_vendedor.css?v=<?php echo filemtime('../css/clientes_vendedor.css'); ?>">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -100,10 +100,14 @@ $rutas = ['Guayabal', 'Cruce', 'Acevedo', 'Gallardo', 'El Brasil', 'Quemadas'];
 <!-- ══ TOP BAR ══ -->
 <header class="topbar">
     <div class="topbar-left">
-        <a href="dashboard.php" class="topbar-btn">
-            <i class="bi bi-arrow-left"></i>
-        </a>
-        <h1 class="page-title">Clientes</h1>
+        <div>
+            <h1 class="page-title">
+                Clientes
+                <button type="button" class="btn-info-guia" onclick="abrirGuia()" title="Ver guía de etiquetas">
+                    <i class="bi bi-info-circle"></i>
+                </button>
+            </h1>
+        </div>
     </div>
     <button class="btn-add" onclick="abrirModal()" title="Nuevo cliente">
         <i class="bi bi-plus-lg"></i>
@@ -308,6 +312,67 @@ $rutas = ['Guayabal', 'Cruce', 'Acevedo', 'Gallardo', 'El Brasil', 'Quemadas'];
     </div>
 </div>
 
+<!-- ══ MODAL GUÍA ETIQUETAS ══ -->
+<div class="modal-overlay" id="modalGuia" style="display:none;">
+    <div class="bottom-sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+            <h2 class="sheet-title">Guía de Etiquetas</h2>
+            <button class="sheet-cerrar" onclick="cerrarGuia()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        
+        <div class="guia-cuerpo">
+            <p class="guia-intro">El sistema asigna estas etiquetas automáticamente según el comportamiento de compra del cliente:</p>
+            
+            <div class="guia-item">
+                <div class="guia-icon nuevo"><i class="bi bi-stars"></i></div>
+                <div class="guia-info">
+                    <h4>Nuevo</h4>
+                    <p>Clientes registrados recientemente (dentro del 20% más nuevo de la base de datos).</p>
+                </div>
+            </div>
+
+            <div class="guia-item">
+                <div class="guia-icon frecuente"><i class="bi bi-arrow-repeat"></i></div>
+                <div class="guia-info">
+                    <h4>Frecuente</h4>
+                    <p>Tiene un ritmo de compra constante: **3 o más pedidos** en los últimos 30 días.</p>
+                </div>
+            </div>
+
+            <div class="guia-item">
+                <div class="guia-icon inactivo"><i class="bi bi-moon-stars"></i></div>
+                <div class="guia-info">
+                    <h4>Inactivo</h4>
+                    <p>Ha comprado antes, pero lleva **más de 15 días** sin realizar un nuevo pedido.</p>
+                </div>
+            </div>
+
+            <div class="guia-item">
+                <div class="guia-icon deuda"><i class="bi bi-exclamation-circle"></i></div>
+                <div class="guia-info">
+                    <h4>Con deuda</h4>
+                    <p>Tiene facturas de crédito con saldos pendientes por pagar.</p>
+                </div>
+            </div>
+
+            <div class="guia-item">
+                <div class="guia-icon vip"><i class="bi bi-gem"></i></div>
+                <div class="guia-info">
+                    <h4>VIP</h4>
+                    <p>Clientes con mayor volumen histórico de compras (Top 20% de la empresa).</p>
+                </div>
+            </div>
+        </div>
+
+        <button class="btn-guardar-sheet" onclick="cerrarGuia()">
+            Entendido
+        </button>
+    </div>
+</div>
+
 <script>
 let filtroRuta  = '';
 let filtroSaldo = '';
@@ -347,20 +412,39 @@ function abrirModal() {
     document.getElementById('modalCrear').style.display = 'flex';
     document.body.style.overflow = 'hidden';
     setTimeout(() => {
-        document.querySelector('.bottom-sheet').classList.add('sheet-open');
+        document.querySelector('#modalCrear .bottom-sheet').classList.add('sheet-open');
     }, 10);
 }
 
 function cerrarModal() {
-    document.querySelector('.bottom-sheet').classList.remove('sheet-open');
+    document.querySelector('#modalCrear .bottom-sheet').classList.remove('sheet-open');
     setTimeout(() => {
         document.getElementById('modalCrear').style.display = 'none';
         document.body.style.overflow = '';
     }, 280);
 }
 
+function abrirGuia() {
+    document.getElementById('modalGuia').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => {
+        document.querySelector('#modalGuia .bottom-sheet').classList.add('sheet-open');
+    }, 10);
+}
+
+function cerrarGuia() {
+    document.querySelector('#modalGuia .bottom-sheet').classList.remove('sheet-open');
+    setTimeout(() => {
+        document.getElementById('modalGuia').style.display = 'none';
+        document.body.style.overflow = '';
+    }, 280);
+}
+
 document.getElementById('modalCrear').addEventListener('click', function(e) {
     if (e.target === this) cerrarModal();
+});
+document.getElementById('modalGuia').addEventListener('click', function(e) {
+    if (e.target === this) cerrarGuia();
 });
 
 <?php if ($abrir_modal): ?>

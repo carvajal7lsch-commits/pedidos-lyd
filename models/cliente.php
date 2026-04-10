@@ -28,7 +28,7 @@ function etiquetarCliente($c) {
     $total_cli = mysqli_fetch_row(mysqli_query($conexion, "SELECT COUNT(*) FROM cliente"))[0];
     $umbral_nuevo = $total_cli - max(1, (int)($total_cli * 0.2));
     if ($id > $umbral_nuevo) {
-        $tags[] = ['clave' => 'nuevo', 'label' => 'Nuevo', 'icon' => '🆕', 'color' => '#3b82f6'];
+        $tags[] = ['clave' => 'nuevo', 'label' => 'Nuevo', 'icon' => '<i class="bi bi-stars"></i>', 'color' => '#3b82f6'];
     }
 
     // 📊 Compras en los últimos 30 días
@@ -44,7 +44,7 @@ function etiquetarCliente($c) {
 
     // ⭐ Frecuente — 3 o más compras en últimos 30 días
     if ($compras30 >= 3) {
-        $tags[] = ['clave' => 'frecuente', 'label' => 'Frecuente', 'icon' => '⭐', 'color' => '#f59e0b'];
+        $tags[] = ['clave' => 'frecuente', 'label' => 'Frecuente', 'icon' => '<i class="bi bi-arrow-repeat"></i>', 'color' => '#f59e0b'];
     }
 
     // 😴 Inactivo — sin compras en los últimos 15 días (solo si tenía historial)
@@ -56,7 +56,7 @@ function etiquetarCliente($c) {
     $total_compras = (int) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt2))['total'];
 
     if ($total_compras > 0 && $compras30 === 0) {
-        $tags[] = ['clave' => 'inactivo', 'label' => 'Inactivo', 'icon' => '😴', 'color' => '#94a3b8'];
+        $tags[] = ['clave' => 'inactivo', 'label' => 'Inactivo', 'icon' => '<i class="bi bi-moon-stars"></i>', 'color' => '#94a3b8'];
     }
 
     // 💳 Con deuda — saldo pendiente de crédito
@@ -71,7 +71,7 @@ function etiquetarCliente($c) {
     mysqli_stmt_execute($stmt3);
     $saldo = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt3))['saldo'];
     if ($saldo > 0) {
-        $tags[] = ['clave' => 'deuda', 'label' => 'Con deuda', 'icon' => '💳', 'color' => '#ef4444'];
+        $tags[] = ['clave' => 'deuda', 'label' => 'Con deuda', 'icon' => '<i class="bi bi-exclamation-circle"></i>', 'color' => '#ef4444'];
     }
 
     // 👑 VIP — volumen total en top 20%
@@ -97,7 +97,7 @@ function etiquetarCliente($c) {
     $umbral_vip = $vip_row ? (float)$vip_row[0] : PHP_INT_MAX;
 
     if ($vol_total > 0 && $vol_total >= $umbral_vip && !in_array('nuevo', array_column($tags, 'clave'))) {
-        $tags[] = ['clave' => 'vip', 'label' => 'VIP', 'icon' => '👑', 'color' => '#8b5cf6'];
+        $tags[] = ['clave' => 'vip', 'label' => 'VIP', 'icon' => '<i class="bi bi-gem"></i>', 'color' => '#8b5cf6'];
     }
 
     return $tags;
