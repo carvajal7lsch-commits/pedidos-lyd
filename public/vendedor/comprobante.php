@@ -70,7 +70,7 @@ $fecha_fmt = fecha_es('d \d\e F, Y · g:i A', strtotime($fecha_completa));
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
@@ -218,38 +218,8 @@ $fecha_fmt = fecha_es('d \d\e F, Y · g:i A', strtotime($fecha_completa));
 
 <!-- PDF inline helpers -->
 <script>
-// ── Helpers ─────────────────────────────────
+// Helpers
 const fmt = n => '$' + Number(n).toLocaleString('es-CO');
-
-function fechaLegible() {
-    const hoy   = new Date();
-    const meses = ['enero','febrero','marzo','abril','mayo','junio',
-                   'julio','agosto','septiembre','octubre','noviembre','diciembre'];
-    const hora  = hoy.toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' });
-    return `${hoy.getDate()} de ${meses[hoy.getMonth()]}, ${hoy.getFullYear()} · ${hora}`;
-}
-
-// DATOS para el PDF (modo online)
-const DATOS = {
-    orden:          '<?php echo $num_orden; ?>',
-    empresa:        '<?php echo addslashes(EMPRESA_NOMBRE); ?>',
-    nit:            '<?php echo EMPRESA_NIT; ?>',
-    cliente:        '<?php echo addslashes(strtoupper($venta['cliente_nombre'] ?? '')); ?>',
-    dir:            '<?php echo addslashes($venta['cliente_dir'] ?? ''); ?>',
-    fecha:          '<?php echo $fecha_fmt; ?>',
-    tipo:           '<?php echo $venta['tipo_venta']; ?>',
-    total:          '<?php echo number_format($venta['total'], 0, ',', '.'); ?>',
-    totalAbonado:   '<?php echo $total_abonado > 0 ? number_format($total_abonado, 0, ',', '.') : ''; ?>',
-    saldoRestante:  '<?php echo $total_abonado > 0 ? number_format($saldo_restante, 0, ',', '.') : ''; ?>',
-    detalles: <?php echo json_encode(array_map(function($d) {
-        return [
-            'nombre'   => $d['producto'],
-            'precio'   => number_format($d['precio_unitario'], 0, ',', '.'),
-            'cantidad' => $d['cantidad'],
-            'subtotal' => number_format($d['subtotal'], 0, ',', '.'),
-        ];
-    }, $detalles)); ?>
-};
 
 // ── PDF ─────────────────────────────────────
 function imprimirComprobante() {
@@ -257,114 +227,60 @@ function imprimirComprobante() {
 }
 
 function generarPDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit: 'mm', format: [80, 200], orientation: 'portrait' });
-
-    let y = 10;
-    const lm = 5;
-    const pw = 70;
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(11);
-    doc.text(DATOS.empresa, 40, y, { align: 'center' });
-    y += 5;
-
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(8);
-    doc.text('NIT: ' + DATOS.nit, 40, y, { align: 'center' });
-    y += 5;
-    doc.text('Comprobante ' + DATOS.orden, 40, y, { align: 'center' });
-    y += 6;
-
-    doc.setLineWidth(0.3);
-    doc.line(lm, y, lm + pw, y);
-    y += 4;
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8);
-    doc.text('CLIENTE', lm, y);
-    y += 4;
-    doc.setFont('helvetica', 'normal');
-    doc.text(DATOS.cliente, lm, y);
-    y += 4;
-    if (DATOS.dir) { doc.text(DATOS.dir, lm, y); y += 4; }
-    doc.text(DATOS.fecha, lm, y);
-    y += 5;
-
-    doc.line(lm, y, lm + pw, y);
-    y += 4;
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(7.5);
-    doc.text('DESCRIPCIÓN', lm, y);
-    doc.text('CANT', lm + 42, y);
-    doc.text('SUBTOTAL', lm + 54, y);
-    y += 4;
-    doc.line(lm, y, lm + pw, y);
-    y += 3;
-
-    DATOS.detalles.forEach(d => {
-        doc.setFontSize(7.5);
-        doc.setFont('helvetica', 'bold');
-        doc.text(d.nombre, lm, y);
-        doc.setFont('helvetica', 'normal');
-        doc.text(String(d.cantidad), lm + 44, y);
-        doc.text('$' + d.subtotal, lm + 54, y);
-        y += 4;
-        doc.setFontSize(7);
-        doc.text('Paca: $' + d.precio, lm + 2, y);
-        y += 5;
-    });
-
-    doc.line(lm, y, lm + pw, y);
-    y += 4;
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(9);
-    doc.text('TOTAL:', lm, y);
-    doc.text('$' + DATOS.total, lm + pw, y, { align: 'right' });
-    y += 5;
-
-    if (DATOS.totalAbonado) {
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8);
-        doc.text('Abono inicial:', lm, y);
-        doc.text('- $' + DATOS.totalAbonado, lm + pw, y, { align: 'right' });
-        y += 4;
-        doc.setFont('helvetica', 'bold');
-        doc.text('Saldo pendiente:', lm, y);
-        doc.text('$' + DATOS.saldoRestante, lm + pw, y, { align: 'right' });
-        y += 5;
-    }
-
-    doc.setFontSize(7.5);
-    doc.setFont('helvetica', 'normal');
-    doc.text(DATOS.tipo === 'contado' ? 'Pago de contado' : 'Venta a crédito', 40, y, { align: 'center' });
-
-    doc.internal.pageSize.height = y + 15;
-
-    const nombre = `comprobante_${DATOS.orden}.pdf`;
+    const element = document.getElementById('comprobanteCard');
+    const orden = '<?php echo $num_orden; ?>';
     
-    try {
+    // Configuración para formato ticket (80mm ancho)
+    // Se usa un largo alto (400mm) para evitar cortes en pedidos largos
+    const opt = {
+        margin:       [5, 2],
+        filename:     `comprobante_${orden}.pdf`,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { 
+            scale: 3, 
+            useCORS: true, 
+            scrollY: 0, 
+            letterRendering: true,
+            backgroundColor: '#ffffff'
+        },
+        jsPDF:        { unit: 'mm', format: [80, 400], orientation: 'portrait' },
+        pagebreak:    { mode: ['avoid-all'] }
+    };
+
+    // Generar el PDF
+    html2pdf().set(opt).from(element).toPdf().get('pdf').then((pdf) => {
+        // Ajustar el alto de la página al contenido real antes de finalizar
+        const pageCount = pdf.internal.getNumberOfPages();
+        // Nota: en tickets de una sola página larga es más estable dejar el formato base
+        // o recortar si la librería lo permite. html2pdf maneja bien el blob directamente.
+    }).output('blob').then((blob) => {
+        const nombre = `comprobante_${orden}.pdf`;
+        
         if (navigator.share) {
-            const blob = doc.output('blob');
             const file = new File([blob], nombre, { type: 'application/pdf' });
-            
             navigator.share({
                 files: [file],
-                title: 'Comprobante ' + DATOS.orden
-            }).catch((err) => {
-                console.log('Error al compartir o cancelado:', err);
-                doc.save(nombre); // Si cancela o falla, al menos lo intenta descargar
+                title: 'Comprobante ' + orden,
+                text: 'Aquí tienes el comprobante de tu pedido.'
+            }).catch(err => {
+                console.log('Compartir cancelado o error:', err);
+                // Fallback: descargar
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = nombre;
+                a.click();
             });
         } else {
-            doc.save(nombre);
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = nombre;
+            a.click();
         }
-    } catch (e) {
-        console.error('Error generando PDF:', e);
-        doc.save(nombre);
-    }
+    });
 }
+</script>
 
 </script>
 </body>

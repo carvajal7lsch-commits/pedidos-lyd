@@ -389,7 +389,7 @@ function renderCarrito() {
     });
 
     document.getElementById('totalMonto').textContent =
-        '$' + total.toLocaleString('es-CO');
+        '$' + total.toLocaleString('es-CO') + ' COP';
 }
 
 function filtrarCarrito() {

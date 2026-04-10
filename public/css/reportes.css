@@ -200,7 +200,8 @@
     background: #fff;
     border: 1px solid #e2e8f0;
     border-radius: 12px;
-    overflow: hidden;
+    /* overflow: visible para permitir ver la barra de scroll hija si es necesario */
+    overflow: visible;
 }
 
 .report-section-header {
@@ -239,12 +240,42 @@
 /* ── TABLA ── */
 .tabla-scroll {
     overflow-x: auto;
+    overflow-y: auto;
+    max-height: 520px;
+    /* Altura maxima para scroll interno */
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+    /* Redondear la base para coincidir con el panel */
+    border-radius: 0 0 12px 12px;
+    position: relative;
+}
+
+/* Scrollbar personalizada para que sea visible y moderna */
+.tabla-scroll::-webkit-scrollbar {
+    height: 8px;
+}
+
+.tabla-scroll::-webkit-scrollbar-track {
+    background: #f8fafc;
+    border-radius: 0 0 12px 12px;
+}
+
+.tabla-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+    border: 2px solid #f8fafc;
+}
+
+.tabla-scroll::-webkit-scrollbar-thumb:hover {
+    background: #1855CF;
 }
 
 .tabla-reporte {
     width: 100%;
     border-collapse: collapse;
     font-size: 13.5px;
+    /* Ancho minimo para forzar el scroll en pantallas pequeñas o muchas columnas */
+    min-width: 900px;
 }
 
 .tabla-reporte thead th {
@@ -261,6 +292,10 @@
     cursor: pointer;
     user-select: none;
     transition: background 0.12s;
+    /* Sticky header */
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
 .tabla-reporte thead th:hover {
@@ -626,6 +661,7 @@
     border-radius: 8px;
     text-decoration: none;
     transition: all 0.2s;
+    border: none;
 }
 
 .btn-tabla-ver:hover {
@@ -641,7 +677,7 @@
     inset: 0;
     background: rgba(15, 23, 42, 0.6);
     backdrop-filter: blur(4px);
-    display: none; 
+    display: none;
     align-items: center;
     justify-content: center;
     z-index: 2000;
@@ -655,13 +691,20 @@
     border-radius: 20px;
     overflow: hidden;
     position: relative;
-    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
     animation: modalSlideUp 0.3s ease;
 }
 
 @keyframes modalSlideUp {
-    from { transform: translateY(30px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .modal-header {
@@ -704,17 +747,82 @@
 }
 
 /* Estilos internos repetidos del comprobante para independencia */
-.comprobante-card { background: #fff; }
-.comp-empresa { padding: 24px 20px; text-align: center; }
-.comp-empresa-icon { font-size: 32px; color: #1855CF; margin-bottom: 8px; }
-.comp-empresa-nombre { font-size: 18px; font-weight: 800; color: #0F1623; }
-.comp-divider { height: 1px; background: #e2e8f0; margin: 0 20px; }
-.comp-seccion { padding: 15px 20px; }
-.comp-sec-label { font-size: 10px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
-.comp-cliente-nombre { font-size: 15px; font-weight: 700; color: #0f1623; }
-.comp-sec-valor-sub { font-size: 13px; color: #64748b; }
-.comp-total-row { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 10px; }
-.comp-total-label { font-size: 12px; font-weight: 700; color: #64748b; }
-.comp-total-monto { font-size: 22px; font-weight: 800; color: #1855CF; }
-.badge-contado { background: #d1fae5; color: #065f46; }
-.badge-credito { background: #dbeafe; color: #1e40af; }
+.comprobante-card {
+    background: #fff;
+}
+
+.comp-empresa {
+    padding: 24px 20px;
+    text-align: center;
+}
+
+.comp-empresa-icon {
+    font-size: 32px;
+    color: #1855CF;
+    margin-bottom: 8px;
+}
+
+.comp-empresa-nombre {
+    font-size: 18px;
+    font-weight: 800;
+    color: #0F1623;
+}
+
+.comp-divider {
+    height: 1px;
+    background: #e2e8f0;
+    margin: 0 20px;
+}
+
+.comp-seccion {
+    padding: 15px 20px;
+}
+
+.comp-sec-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.comp-cliente-nombre {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f1623;
+}
+
+.comp-sec-valor-sub {
+    font-size: 13px;
+    color: #64748b;
+}
+
+.comp-total-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px 10px;
+}
+
+.comp-total-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: #64748b;
+}
+
+.comp-total-monto {
+    font-size: 22px;
+    font-weight: 800;
+    color: #1855CF;
+}
+
+.badge-contado {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badge-credito {
+    background: #dbeafe;
+    color: #1e40af;
+}
