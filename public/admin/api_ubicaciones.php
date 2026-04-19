@@ -14,7 +14,8 @@ header('Content-Type: application/json');
 $resultado = mysqli_query($conexion,
     "SELECT u.id_usuario, u.nombre,
             uv.latitud, uv.longitud,
-            uv.actualizado_en
+            uv.actualizado_en,
+            UNIX_TIMESTAMP(uv.actualizado_en) AS actualizado_ts
      FROM ubicacion_vendedor uv
      JOIN usuario u ON u.id_usuario = uv.id_vendedor
      WHERE u.estado = 1

@@ -37,6 +37,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'crear') {
     $resultado = procesarCrearCliente();
     $mensaje   = isset($resultado['exito']) ? $resultado['mensaje'] : implode('<br>', $resultado['errores']);
     $tipo_msg  = isset($resultado['exito']) ? 'exito' : 'error';
+    
+    if (isset($resultado['exito'])) {
+        $_POST = [];
+    }
 }
 
 $abrir_modal = ($_SERVER['REQUEST_METHOD'] === 'POST' && $tipo_msg === 'error');
@@ -265,6 +269,12 @@ $rutas = ['Guayabal', 'Cruce', 'Acevedo', 'Gallardo', 'El Brasil', 'Quemadas'];
             </button>
         </div>
         <form method="POST" action="?accion=crear" class="sheet-form">
+            <?php if ($abrir_modal && !empty($mensaje)): ?>
+            <div class="alerta alerta-error" style="margin-bottom: 20px;">
+                <i class="bi bi-exclamation-triangle-fill"></i> <?php echo $mensaje; ?>
+            </div>
+            <?php endif; ?>
+            
             <div class="form-campo">
                 <label>Nombre de la tienda</label>
                 <input type="text" name="nombre"

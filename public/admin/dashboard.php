@@ -350,8 +350,13 @@ $fecha_hoy      = $dia_semana . ', ' . date('j') . ' de ' . [
                 });
             }
 
-            function tiempoRelativo(fechaStr) {
-                const diff = Math.floor((Date.now() - new Date(fechaStr)) / 1000);
+            function tiempoRelativo(timestampServer) {
+                // Usamos Unix Timestamps (segundos). Son absolutos e independientes de la zona horaria.
+                const tsServidor = parseInt(timestampServer, 10);
+                const diff = Math.floor(Date.now() / 1000) - tsServidor;
+                
+                if (isNaN(diff)) return '';
+                if (diff < 0) return 'Hace 0s'; // Prevenir negativos por mínima desincronización
                 if (diff < 60) return 'Hace ' + diff + 's';
                 if (diff < 3600) return 'Hace ' + Math.floor(diff / 60) + 'min';
                 return 'Hace ' + Math.floor(diff / 3600) + 'h';
@@ -378,7 +383,7 @@ $fecha_hoy      = $dia_semana . ', ' . date('j') . ' de ' . [
                             const color = colores[i % colores.length];
                             const lat = parseFloat(v.latitud);
                             const lng = parseFloat(v.longitud);
-                            const popup = `<b>${v.nombre}</b><br><small>${tiempoRelativo(v.actualizado_en)}</small>`;
+                            const popup = `<b>${v.nombre}</b><br><small>${tiempoRelativo(v.actualizado_ts)}</small>`;
 
                             if (markers[v.id_usuario]) {
                                 markers[v.id_usuario].setLatLng([lat, lng]).setPopupContent(popup);
@@ -393,7 +398,7 @@ $fecha_hoy      = $dia_semana . ', ' . date('j') . ' de ' . [
                         <div class="mapa-leyenda-item">
                             <span class="mapa-leyenda-dot" style="background:${color}"></span>
                             <span class="mapa-leyenda-nombre">${v.nombre}</span>
-                            <span class="mapa-leyenda-tiempo">${tiempoRelativo(v.actualizado_en)}</span>
+                            <span class="mapa-leyenda-tiempo">${tiempoRelativo(v.actualizado_ts)}</span>
                         </div>`;
                         });
 

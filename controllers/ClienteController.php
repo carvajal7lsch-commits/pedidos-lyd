@@ -19,8 +19,8 @@ function procesarCrearCliente() {
     $telefono  = trim($_POST['telefono']);
     $direccion = trim($_POST['direccion']);
 
-    if (existeCliente($nombre, $telefono)) {
-        return ['error' => true, 'errores' => ['Ya existe un cliente con ese nombre y teléfono.']];
+    if (existeCliente($nombre, $telefono, $direccion)) {
+        return ['error' => true, 'errores' => ['Ya existe un cliente con ese mismo nombre en esta ruta (o con el mismo teléfono).']];
     }
 
     if (crearCliente($nombre, $telefono, $direccion)) {
@@ -42,8 +42,8 @@ function procesarEditarCliente($id) {
     $telefono  = trim($_POST['telefono']);
     $direccion = trim($_POST['direccion']);
 
-    if (existeCliente($nombre, $telefono, $id)) {
-        return ['error' => true, 'errores' => ['Ya existe otro cliente con ese nombre y teléfono.']];
+    if (existeCliente($nombre, $telefono, $direccion, $id)) {
+        return ['error' => true, 'errores' => ['Ya existe otro cliente con ese mismo nombre en esta ruta (o con el mismo teléfono).']];
     }
 
     if (editarCliente($id, $nombre, $telefono, $direccion)) {

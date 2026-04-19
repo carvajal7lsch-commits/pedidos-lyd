@@ -260,7 +260,7 @@
     font-family: 'Sora', sans-serif;
     font-weight: 700;
     cursor: pointer;
-    margin-top: 4px;
+    margin-top: auto;
     -webkit-tap-highlight-color: transparent;
     transition: transform 0.15s;
 }

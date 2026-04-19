@@ -18,17 +18,21 @@ function etiquetarCliente($c) {
     $hace30 = date('Y-m-d', strtotime('-30 days'));
     $hace15 = date('Y-m-d', strtotime('-15 days'));
 
-    // Nuevo — registrado hace menos de 30 días
-    // Usamos el id como proxy si no hay fecha de registro
-    // Si la BD tiene fecha_registro úsala; si no, comparamos por id relativo
-    $stmt = mysqli_prepare($conexion,
-        "SELECT COUNT(*) FROM cliente WHERE id_cliente > ? AND estado = 1"
-    );
-    // Alternativa sin fecha: compara por rango de IDs recientes (top 20% más nuevo)
-    $total_cli = mysqli_fetch_row(mysqli_query($conexion, "SELECT COUNT(*) FROM cliente"))[0];
-    $umbral_nuevo = $total_cli - max(1, (int)($total_cli * 0.2));
-    if ($id > $umbral_nuevo) {
-        $tags[] = ['clave' => 'nuevo', 'label' => 'Nuevo', 'icon' => '<i class="bi bi-stars"></i>', 'color' => '#3b82f6'];
+    // Nuevo — registrado hace menos de 30 días exactos
+    // Ahora dependemos de la fecha de registro en la base de datos
+    $fecha_reg_str = $c['fecha_registro'] ?? null;
+    if (!$fecha_reg_str) {
+        // Fallback en caso de que no se haya seleccionado fecha_registro en la consulta original
+        $res_freg = mysqli_query($conexion, "SELECT fecha_registro FROM cliente WHERE id_cliente = $id LIMIT 1");
+        $row_freg = $res_freg ? mysqli_fetch_row($res_freg) : null;
+        $fecha_reg_str = $row_freg ? $row_freg[0] : null;
+    }
+
+    if ($fecha_reg_str) {
+        $dias_registro = floor((time() - strtotime($fecha_reg_str)) / 86400);
+        if ($dias_registro <= 30) {
+            $tags[] = ['clave' => 'nuevo', 'label' => 'Nuevo', 'icon' => '<i class="bi bi-stars"></i>', 'color' => '#3b82f6'];
+        }
     }
 
     // Compras en los últimos 30 días
@@ -86,6 +90,10 @@ function etiquetarCliente($c) {
     $p80_row = mysqli_fetch_row(mysqli_query($conexion,
         "SELECT COALESCE(SUM(total), 0) AS v FROM venta GROUP BY id_cliente ORDER BY v DESC"
     ));
+    // Calculamos el total de clientes activos para el umbral VIP
+    $total_cli_res = mysqli_query($conexion, "SELECT COUNT(*) FROM cliente WHERE estado = 1");
+    $total_cli = $total_cli_res ? (int)mysqli_fetch_row($total_cli_res)[0] : 0;
+
     // Calculamos el umbral VIP con una subconsulta
     $vip_stmt = mysqli_query($conexion,
         "SELECT vol FROM (
@@ -165,13 +173,27 @@ function buscarClientes($termino) {
 // ---------------------------------------------
 // Verificar si ya existe un cliente con ese nombre y teléfono
 // ---------------------------------------------
-function existeCliente($nombre, $telefono, $excluir_id = 0) {
+function existeCliente($nombre, $telefono, $direccion, $excluir_id = 0) {
     global $conexion;
-    $stmt = mysqli_prepare($conexion,
-        "SELECT id_cliente FROM cliente
-         WHERE nombre = ? AND telefono = ? AND id_cliente != ? LIMIT 1"
-    );
-    mysqli_stmt_bind_param($stmt, 'ssi', $nombre, $telefono, $excluir_id);
+    
+    // Quitar espacios para comparar (MySQL ya ignora mayúsculas y tildes por defecto)
+    $nombre_norm = str_replace(' ', '', $nombre);
+    
+    $sql = "SELECT id_cliente FROM cliente 
+            WHERE id_cliente != ? 
+            AND (
+                (REPLACE(nombre, ' ', '') = ? AND direccion = ?)
+                " . (!empty($telefono) ? "OR (telefono != '' AND telefono = ?)" : "") . "
+            ) LIMIT 1";
+            
+    $stmt = mysqli_prepare($conexion, $sql);
+    
+    if (!empty($telefono)) {
+        mysqli_stmt_bind_param($stmt, 'isss', $excluir_id, $nombre_norm, $direccion, $telefono);
+    } else {
+        mysqli_stmt_bind_param($stmt, 'iss', $excluir_id, $nombre_norm, $direccion);
+    }
+    
     mysqli_stmt_execute($stmt);
     $resultado = mysqli_stmt_get_result($stmt);
     return mysqli_num_rows($resultado) > 0;
