@@ -53,7 +53,7 @@ switch ($reporte) {
         break;
 
     case 'deuda':
-        $datos = getClientesConDeuda($conexion);
+        $datos = getClientesConDeuda($conexion, $desde, $hasta);
         $totales = [
             'clientes'  => count($datos),
             'credito'   => array_sum(array_column($datos, 'total_credito')),
@@ -117,6 +117,14 @@ $tabs = [
     <!-- SheetJS para exportar Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
+        /* Quick Date Filters */
+        .btn-quick-date {
+            background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; padding: 0 16px;
+            border-radius: 12px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s;
+            height: 42px; display: flex; align-items: center; justify-content: center;
+        }
+        .btn-quick-date:hover { background: #e2e8f0; color: #0f172a; }
+
         /* Sleek Button */
         .btn-sleek {
             background: rgba(24, 85, 207, 0.1); color: #1855CF; border: none; padding: 6px 14px;
@@ -210,23 +218,29 @@ $tabs = [
         </div>
 
         <!-- ══ FILTROS ═══════════════════════════════════════════ -->
-        <form method="GET" action="" class="filtros-panel" id="formFiltros">
+        <form method="GET" action="" class="filtros-panel" id="formFiltros" style="align-items: flex-end;">
             <input type="hidden" name="reporte" value="<?php echo $reporte; ?>">
+
+            <div class="filtro-grupo" style="flex-direction: row; align-items: flex-end; gap: 8px; margin-right: 15px;">
+                <button type="button" class="btn-quick-date" onclick="setQuickDate('hoy')">Hoy</button>
+                <button type="button" class="btn-quick-date" onclick="setQuickDate('ayer')">Ayer</button>
+                <button type="button" class="btn-quick-date" onclick="setQuickDate('mes')">Este Mes</button>
+            </div>
 
             <div class="filtro-grupo">
                 <label for="desde">Desde</label>
-                <input type="date" id="desde" name="desde" value="<?php echo htmlspecialchars($desde); ?>">
+                <input type="date" id="desde" name="desde" value="<?php echo htmlspecialchars($desde); ?>" onchange="document.getElementById('formFiltros').submit()">
             </div>
 
             <div class="filtro-grupo">
                 <label for="hasta">Hasta</label>
-                <input type="date" id="hasta" name="hasta" value="<?php echo htmlspecialchars($hasta); ?>">
+                <input type="date" id="hasta" name="hasta" value="<?php echo htmlspecialchars($hasta); ?>" onchange="document.getElementById('formFiltros').submit()">
             </div>
 
             <?php if ($reporte === 'periodo'): ?>
             <div class="filtro-grupo">
                 <label for="agrupacion">Agrupar por</label>
-                <select id="agrupacion" name="agrupacion">
+                <select id="agrupacion" name="agrupacion" onchange="document.getElementById('formFiltros').submit()">
                     <option value="dia" <?php echo $agrupacion==='dia' ? 'selected' : '' ; ?>>Día</option>
                     <option value="semana" <?php echo $agrupacion==='semana' ? 'selected' : '' ; ?>>Semana</option>
                     <option value="mes" <?php echo $agrupacion==='mes' ? 'selected' : '' ; ?>>Mes</option>
@@ -235,9 +249,6 @@ $tabs = [
             <?php endif; ?>
 
             <div class="filtros-acciones">
-                <button type="submit" class="btn-filtrar">
-                    <i class="bi bi-funnel-fill"></i> Aplicar
-                </button>
                 <button type="button" class="btn-export pdf" onclick="exportarPDF()" title="Exportar PDF">
                     <i class="bi bi-file-earmark-pdf-fill"></i> PDF
                 </button>
@@ -745,7 +756,8 @@ $tabs = [
                     <tbody>
                         <?php foreach ($datos as $row): ?>
                         <tr>
-                            <td><strong>#FAC-<?php echo str_pad($row['id_venta'], 3, '0', STR_PAD_LEFT); ?></strong></td>
+                            <?php $anio = date('Y', strtotime($row['fecha'])); ?>
+                            <td><strong>#ORD-<?php echo $anio . '-' . str_pad($row['id_venta'], 4, '0', STR_PAD_LEFT); ?></strong></td>
                             <td class="muted"><?php echo $row['fecha']; ?></td>
                             <td><strong><?php echo htmlspecialchars($row['cliente'] ?? 'Consumidor Final'); ?></strong></td>
                             <td class="muted"><?php echo htmlspecialchars($row['vendedor']); ?></td>
@@ -761,7 +773,7 @@ $tabs = [
                                 <?php echo formatPesos($row['recaudado']); ?>
                             </td>
                             <td style="text-align:right;">
-                                <button type="button" onclick="verFactura(<?php echo $row['id_venta']; ?>)" class="btn-sleek">
+                                <button type="button" onclick="verFactura(<?php echo $row['id_venta']; ?>, '<?php echo $anio; ?>')" class="btn-sleek">
                                     <i class="bi bi-eye"></i> Ver Detalle
                                 </button>
                             </td>
@@ -801,12 +813,40 @@ $tabs = [
     </div>
 
     <script>
-        function verFactura(id) {
+        function setQuickDate(rango) {
+            const form = document.getElementById('formFiltros');
+            const dDesde = document.getElementById('desde');
+            const dHasta = document.getElementById('hasta');
+            
+            const hoy = new Date();
+            const format = date => {
+                const tzoffset = date.getTimezoneOffset() * 60000; 
+                return new Date(date - tzoffset).toISOString().split('T')[0];
+            };
+
+            if (rango === 'hoy') {
+                dDesde.value = format(hoy);
+                dHasta.value = format(hoy);
+            } else if (rango === 'ayer') {
+                const ayer = new Date(hoy);
+                ayer.setDate(ayer.getDate() - 1);
+                dDesde.value = format(ayer);
+                dHasta.value = format(ayer);
+            } else if (rango === 'mes') {
+                const primerDia = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+                dDesde.value = format(primerDia);
+                dHasta.value = format(hoy);
+            }
+            
+            form.submit();
+        }
+
+        function verFactura(id, anioVenta = '') {
             const overlay = document.getElementById('modalFactura');
             const bodyContent = document.getElementById('mfBodyContent');
             const title = document.getElementById('mfIdFactura');
 
-            title.innerHTML = `<i class="bi bi-receipt"></i> Ticket #FAC-${String(id).padStart(3, '0')}`;
+            title.innerHTML = `<i class="bi bi-receipt"></i> Ticket #ORD-${anioVenta}-${String(id).padStart(4, '0')}`;
             
             bodyContent.innerHTML = `
                 <div class="loader-wrap" style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">

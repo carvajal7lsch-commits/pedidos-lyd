@@ -48,7 +48,7 @@ $detalles = mysqli_fetch_all(mysqli_stmt_get_result($stmt), MYSQLI_ASSOC);
 
 // Número de orden formateado
 $fecha_completa = $venta['fecha'] . ' ' . ($venta['hora'] ?? '00:00:00');
-$num_orden = 'ORD-' . date('Y') . '-' . str_pad($id_venta, 4, '0', STR_PAD_LEFT);
+$num_orden = 'ORD-' . date('Y', strtotime($venta['fecha'])) . '-' . str_pad($id_venta, 4, '0', STR_PAD_LEFT);
 $fecha_fmt = fecha_es('d \d\e F, Y · g:i A', strtotime($fecha_completa));
 ?>
 <!DOCTYPE html>

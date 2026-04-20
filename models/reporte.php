@@ -132,7 +132,20 @@ function getProductosMasVendidos($conexion, $desde = null, $hasta = null, $limit
 }
 
 // ── 4. CLIENTES CON DEUDA ─────────────────────────────────
-function getClientesConDeuda($conexion) {
+function getClientesConDeuda($conexion, $desde = null, $hasta = null) {
+    $where = '';
+    if ($desde && $hasta) {
+        $desde = mysqli_real_escape_string($conexion, $desde);
+        $hasta = mysqli_real_escape_string($conexion, $hasta);
+        $where = " AND v.fecha BETWEEN '$desde' AND '$hasta'";
+    } elseif ($desde) {
+        $desde = mysqli_real_escape_string($conexion, $desde);
+        $where = " AND v.fecha >= '$desde'";
+    } elseif ($hasta) {
+        $hasta = mysqli_real_escape_string($conexion, $hasta);
+        $where = " AND v.fecha <= '$hasta'";
+    }
+
     $sql = "
         SELECT
             cl.id_cliente,
@@ -145,7 +158,7 @@ function getClientesConDeuda($conexion) {
             SUM(v.total) - COALESCE(SUM(ab.monto_abonado), 0)             AS saldo_pendiente,
             MAX(v.fecha)                                                    AS ultima_compra
         FROM cliente cl
-        INNER JOIN venta v ON v.id_cliente = cl.id_cliente AND v.tipo_venta = 'credito'
+        INNER JOIN venta v ON v.id_cliente = cl.id_cliente AND v.tipo_venta = 'credito' $where
         LEFT JOIN (
             SELECT id_venta, SUM(monto) AS monto_abonado
             FROM abono
