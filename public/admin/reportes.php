@@ -12,7 +12,7 @@ $desde      = $_GET['desde']      ?? date('Y-m-01');       // primer día del me
 $hasta      = $_GET['hasta']      ?? date('Y-m-d');        // hoy
 $agrupacion = $_GET['agrupacion'] ?? 'dia';
 
-$reportes_validos    = ['vendedor', 'periodo', 'productos', 'deuda', 'cierres'];
+$reportes_validos    = ['vendedor', 'periodo', 'productos', 'deuda', 'cierres', 'facturas'];
 $agrupaciones_validas = ['dia', 'semana', 'mes'];
 
 if (!in_array($reporte,    $reportes_validos))    $reporte    = 'vendedor';
@@ -71,10 +71,22 @@ switch ($reporte) {
             'general'  => array_sum(array_column($datos, 'total_general')),
         ];
         break;
+
+    case 'facturas':
+        $datos = getDetalleFacturas($conexion, null, $desde, $hasta);
+        $totales = [
+            'facturas' => count($datos),
+            'contado'  => array_sum(array_column(array_filter($datos, fn($d) => $d['tipo_venta'] == 'contado'), 'total')),
+            'credito'  => array_sum(array_column(array_filter($datos, fn($d) => $d['tipo_venta'] == 'credito'), 'total')),
+            'general'  => array_sum(array_column($datos, 'total')),
+            'recaudado'=> array_sum(array_column($datos, 'recaudado')),
+        ];
+        break;
 }
 
 // ── Etiquetas de tabs ──────────────────────────────────────
 $tabs = [
+    'facturas'  => ['icon' => 'bi-receipt',             'label' => 'Historial Ventas'],
     'vendedor'  => ['icon' => 'bi-person-lines-fill',  'label' => 'Por Vendedor'],
     'periodo'   => ['icon' => 'bi-calendar3',           'label' => 'Por Período'],
     'productos' => ['icon' => 'bi-bag-fill',            'label' => 'Más Vendidos'],
@@ -104,6 +116,69 @@ $tabs = [
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
     <!-- SheetJS para exportar Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        /* Sleek Button */
+        .btn-sleek {
+            background: rgba(24, 85, 207, 0.1); color: #1855CF; border: none; padding: 6px 14px;
+            border-radius: 20px; font-weight: 600; font-size: 0.8rem; cursor: pointer;
+            transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .btn-sleek:hover { background: #1855CF; color: white; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(24,85,207,0.2); }
+        
+        /* Premium Modal */
+        .modal-factura-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px); z-index: 1000; display: none; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.3s ease; padding: 20px;
+        }
+        .modal-factura-overlay.show { display: flex; opacity: 1; }
+        .modal-factura-content {
+            background: #ffffff; border-radius: 20px; width: 100%; max-width: 600px;
+            max-height: 90vh; display: flex; flex-direction: column; overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); transform: translateY(20px) scale(0.95);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .modal-factura-overlay.show .modal-factura-content { transform: translateY(0) scale(1); }
+        .mf-header {
+            padding: 24px 30px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between;
+            align-items: center; background: #f8fafc;
+        }
+        .mf-title-wrap { display: flex; flex-direction: column; gap: 4px; }
+        .mf-title { font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 0; display:flex; align-items:center; gap:8px;}
+        .mf-subtitle { font-size: 0.85rem; color: #64748b; font-weight: 500; }
+        .mf-close {
+            background: white; border: 1px solid #e2e8f0; width: 36px; height: 36px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b;
+            transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .mf-close:hover { background: #f1f5f9; color: #ef4444; border-color: #ef4444; transform: rotate(90deg); }
+        .mf-body { padding: 30px; overflow-y: auto; flex: 1; }
+        .mf-info-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 24px; }
+        .mf-info-item { background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #f1f5f9; }
+        .mf-info-item label { display: block; font-size: 0.75rem; color: #64748b; font-weight: 700; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px; }
+        .mf-info-item .value { font-size: 0.95rem; font-weight: 600; color: #0f172a; display:flex; align-items:center; gap:6px; }
+        .mf-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+        .mf-table th { background: #f8fafc; color: #64748b; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; padding: 12px 16px; text-align: left; }
+        .mf-table th:first-child { border-top-left-radius: 8px; border-bottom-left-radius: 8px; }
+        .mf-table th:last-child { border-top-right-radius: 8px; border-bottom-right-radius: 8px; text-align: right;}
+        .mf-table td { padding: 16px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        .mf-prod-name { font-weight: 600; color: #1e293b; font-size: 0.9rem;}
+        .mf-prod-price { font-size: 0.8rem; color: #64748b; margin-top: 2px;}
+        .mf-footer { padding: 24px 30px; background: #f8fafc; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .mf-total-wrap { display: flex; flex-direction: column; }
+        .mf-total-label { font-size: 0.85rem; color: #64748b; font-weight: 600; text-transform: uppercase; }
+        .mf-total-monto { font-size: 1.8rem; font-weight: 800; color: #1855CF; line-height: 1; margin-top: 4px;}
+        .btn-download-pdf {
+            background: linear-gradient(135deg, #1855CF 0%, #113a91 100%); color: white; border: none; padding: 12px 24px;
+            border-radius: 12px; font-weight: 600; font-size: 0.95rem; cursor: pointer; transition: all 0.3s;
+            display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 10px 20px -10px rgba(24,85,207,0.5);
+        }
+        .btn-download-pdf:hover { transform: translateY(-2px); box-shadow: 0 15px 25px -10px rgba(24,85,207,0.6); }
+        .btn-download-pdf:disabled { background: #94a3b8; cursor: not-allowed; transform: none; box-shadow: none; }
+        .loader-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; color: #64748b; }
+        .loader-spinner { width: 40px; height: 40px; border: 3px solid #e2e8f0; border-top-color: #1855CF; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 16px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
 </head>
 
 <body>
@@ -271,6 +346,26 @@ $tabs = [
                     <?php echo $totales['credito'] > 0 ? round($totales['abonado']/$totales['credito']*100) : 0; ?>%
                     recuperado
                 </div>
+            </div>
+
+            <?php elseif ($reporte === 'facturas'): ?>
+            <div class="kpi-card accent">
+                <div class="kpi-label">Total Vendido</div>
+                <div class="kpi-value"><?php echo formatPesos($totales['general']); ?></div>
+                <div class="kpi-sub"><?php echo $totales['facturas']; ?> facturas en el período</div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Contado</div>
+                <div class="kpi-value"><?php echo formatPesos($totales['contado']); ?></div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Crédito</div>
+                <div class="kpi-value"><?php echo formatPesos($totales['credito']); ?></div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-label">Recaudado</div>
+                <div class="kpi-value"><?php echo formatPesos($totales['recaudado']); ?></div>
+                <div class="kpi-sub">Total dinero ingresado</div>
             </div>
             <?php endif; ?>
 
@@ -632,13 +727,215 @@ $tabs = [
                         </tr>
                     </tfoot>
                 </table>
+
+                <?php elseif ($reporte === 'facturas'): ?>
+                <table class="tabla-reporte" id="tablaReporte">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTabla(0)">Factura <i class="bi bi-chevron-expand sort-icon"></i></th>
+                            <th onclick="sortTabla(1)">Fecha <i class="bi bi-chevron-expand sort-icon"></i></th>
+                            <th onclick="sortTabla(2)">Cliente <i class="bi bi-chevron-expand sort-icon"></i></th>
+                            <th onclick="sortTabla(3)">Vendedor <i class="bi bi-chevron-expand sort-icon"></i></th>
+                            <th onclick="sortTabla(4)">Tipo <i class="bi bi-chevron-expand sort-icon"></i></th>
+                            <th class="num" onclick="sortTabla(5)">Total <i class="bi bi-chevron-expand sort-icon"></i></th>
+                            <th class="num" onclick="sortTabla(6)">Recaudado <i class="bi bi-chevron-expand sort-icon"></i></th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($datos as $row): ?>
+                        <tr>
+                            <td><strong>#FAC-<?php echo str_pad($row['id_venta'], 3, '0', STR_PAD_LEFT); ?></strong></td>
+                            <td class="muted"><?php echo $row['fecha']; ?></td>
+                            <td><strong><?php echo htmlspecialchars($row['cliente'] ?? 'Consumidor Final'); ?></strong></td>
+                            <td class="muted"><?php echo htmlspecialchars($row['vendedor']); ?></td>
+                            <td>
+                                <?php if ($row['tipo_venta'] === 'contado'): ?>
+                                <span style="color:#10b981;background:#ecfdf5;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:600;">Contado</span>
+                                <?php else: ?>
+                                <span style="color:#f59e0b;background:#fffbeb;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:600;">Crédito</span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="num"><strong><?php echo formatPesos($row['total']); ?></strong></td>
+                            <td class="num <?php echo $row['recaudado'] >= $row['total'] ? 'monto-positivo' : 'monto-alerta'; ?>">
+                                <?php echo formatPesos($row['recaudado']); ?>
+                            </td>
+                            <td style="text-align:right;">
+                                <button type="button" onclick="verFactura(<?php echo $row['id_venta']; ?>)" class="btn-sleek">
+                                    <i class="bi bi-eye"></i> Ver Detalle
+                                </button>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                    <tfoot class="tabla-footer">
+                        <tr>
+                            <td colspan="5"><strong>TOTAL (<?php echo $totales['facturas']; ?> facturas)</strong></td>
+                            <td class="num"><?php echo formatPesos($totales['general']); ?></td>
+                            <td class="num"><?php echo formatPesos($totales['recaudado']); ?></td>
+                            <td></td>
+                        </tr>
+                    </tfoot>
+                </table>
                 <?php endif; ?>
             </div><!-- /tabla-scroll -->
         </div><!-- /report-section -->
 
     </div><!-- /cont -->
 
+    <!-- ══ MODAL FACTURA ══════════════════════════════════════════ -->
+    <div class="modal-factura-overlay" id="modalFactura" onclick="if(event.target === this) cerrarModalFactura()">
+        <div class="modal-factura-content" style="max-width: 420px; padding: 0; background: transparent; box-shadow: none;">
+            <div style="background: #fff; border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; height: 85vh; position: relative; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);">
+                <div class="mf-header" style="padding: 16px 20px;">
+                    <div class="mf-title-wrap">
+                        <h3 class="mf-title" id="mfIdFactura"><i class="bi bi-receipt"></i> Ticket</h3>
+                    </div>
+                    <button class="mf-close" onclick="cerrarModalFactura()"><i class="bi bi-x-lg"></i></button>
+                </div>
+                <div class="mf-body" id="mfBodyContent" style="padding: 0; flex: 1; overflow: hidden; background: #f4f5f7;">
+                    <!-- Iframe se inyectará aquí -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        function verFactura(id) {
+            const overlay = document.getElementById('modalFactura');
+            const bodyContent = document.getElementById('mfBodyContent');
+            const title = document.getElementById('mfIdFactura');
+
+            title.innerHTML = `<i class="bi bi-receipt"></i> Ticket #FAC-${String(id).padStart(3, '0')}`;
+            
+            bodyContent.innerHTML = `
+                <div class="loader-wrap" style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <div class="loader-spinner"></div>
+                    <div>Cargando ticket...</div>
+                </div>
+            `;
+            
+            overlay.classList.add('show');
+            document.body.style.overflow = 'hidden';
+
+            // Usar setTimeout para permitir que el modal se anime antes de inyectar el iframe
+            setTimeout(() => {
+                bodyContent.innerHTML = `<iframe src="comprobante_ticket.php?id=${id}&iframe=1" style="width: 100%; height: 100%; border: none; background: #fff;"></iframe>`;
+            }, 300);
+        }
+
+        function cerrarModalFactura() {
+            document.getElementById('modalFactura').classList.remove('show');
+            document.body.style.overflow = '';
+            setTimeout(() => {
+                document.getElementById('mfBodyContent').innerHTML = ''; // Limpiar iframe al cerrar
+            }, 300);
+        }
+
+        function descargarFacturaPDF() {
+            if (!facturaActualData) return;
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'letter' });
+            
+            const f = facturaActualData.factura;
+            const d = facturaActualData.detalles;
+            const formatPesos = val => '$ ' + parseFloat(val).toLocaleString('es-CO');
+
+            // Header
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(22);
+            doc.setTextColor(24, 85, 207);
+            doc.text(EMPRESA, 15, 20);
+            
+            doc.setFontSize(10);
+            doc.setTextColor(100, 116, 139);
+            doc.text('NIT: ' + NIT, 15, 26);
+            
+            doc.setFont('helvetica', 'normal');
+            doc.setTextColor(15, 23, 42);
+            doc.text('Factura: ', 140, 20);
+            doc.setFont('helvetica', 'bold');
+            doc.text('FAC-' + String(f.id_venta).padStart(3, '0'), 160, 20);
+            
+            doc.setFont('helvetica', 'normal');
+            doc.text('Fecha: ', 140, 26);
+            doc.setFont('helvetica', 'bold');
+            doc.text(f.fecha, 160, 26);
+
+            doc.setFont('helvetica', 'normal');
+            doc.text('Tipo: ', 140, 32);
+            doc.setFont('helvetica', 'bold');
+            doc.text(f.tipo_venta.toUpperCase(), 160, 32);
+
+            // Line
+            doc.setDrawColor(226, 232, 240);
+            doc.line(15, 40, 200, 40);
+
+            // Info Box
+            doc.setFontSize(11);
+            doc.setTextColor(100, 116, 139);
+            doc.setFont('helvetica', 'normal');
+            doc.text('CLIENTE', 15, 50);
+            doc.setTextColor(15, 23, 42);
+            doc.setFont('helvetica', 'bold');
+            doc.text(f.cliente_nombre, 15, 56);
+            if (f.telefono) {
+                doc.setFont('helvetica', 'normal');
+                doc.text(f.telefono, 15, 62);
+            }
+
+            doc.setTextColor(100, 116, 139);
+            doc.setFont('helvetica', 'normal');
+            doc.text('VENDEDOR', 110, 50);
+            doc.setTextColor(15, 23, 42);
+            doc.setFont('helvetica', 'bold');
+            doc.text(f.vendedor_nombre, 110, 56);
+
+            // Table
+            const bodyData = d.map(prod => [
+                prod.producto,
+                prod.cantidad,
+                formatPesos(prod.precio_unitario),
+                formatPesos(prod.subtotal)
+            ]);
+
+            doc.autoTable({
+                startY: 75,
+                head: [['Producto', 'Cant.', 'V. Unitario', 'Subtotal']],
+                body: bodyData,
+                theme: 'striped',
+                headStyles: { fillColor: [24, 85, 207], textColor: 255, fontStyle: 'bold' },
+                columnStyles: {
+                    1: { halign: 'center' },
+                    2: { halign: 'right' },
+                    3: { halign: 'right', fontStyle: 'bold' }
+                },
+                styles: { fontSize: 10, cellPadding: 6 }
+            });
+
+            const finalY = doc.lastAutoTable.finalY + 15;
+            
+            doc.setFontSize(12);
+            doc.setTextColor(100, 116, 139);
+            doc.setFont('helvetica', 'normal');
+            doc.text('TOTAL A PAGAR:', 130, finalY);
+            doc.setFontSize(16);
+            doc.setTextColor(24, 85, 207);
+            doc.setFont('helvetica', 'bold');
+            doc.text(formatPesos(f.total), 170, finalY, { align: 'left' });
+
+            if (f.tipo_venta === 'credito') {
+                doc.setFontSize(10);
+                doc.setTextColor(22, 101, 52); // green
+                doc.text('Recaudado: ' + formatPesos(f.recaudado), 130, finalY + 8);
+                doc.setTextColor(153, 27, 27); // red
+                doc.text('Saldo Pendiente: ' + formatPesos(f.total - f.recaudado), 130, finalY + 14);
+            }
+
+            doc.save(`Factura_FAC-${String(f.id_venta).padStart(3, '0')}.pdf`);
+        }
+
         // ── Constantes para exports ──────────────────────────────
         const REPORTE = '<?php echo $reporte; ?>';
         const DESDE = '<?php echo $desde; ?>';
