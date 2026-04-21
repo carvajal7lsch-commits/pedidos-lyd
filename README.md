@@ -1,41 +1,31 @@
 # 🚛 Pedidos LYD
 
-Sistema de gestión de pedidos y ventas para **Depósito LYD**, diseñado para vendedores que trabajan rutas de distribución desde un camión.
+Sistema de gestión de pedidos y ventas para **Depósito LYD**, diseñado para vendedores que trabajan rutas de distribución desde un camión. Una solución moderna para el control de inventario, ventas y geolocalización.
+
+> [!TIP]
+> **Documentación Técnica Avanzada:** Para ver detalles profundos sobre la arquitectura, el stack tecnológico y los requerimientos, consulte la [📄 Ficha Técnica (Digital)](FICHA_TECNICA.html) o el archivo [Markdown](FICHA_TECNICA.md).
 
 ---
 
 ## ✨ Características principales
 
 ### Panel Administrador
-- Dashboard con métricas del negocio y mapa de ubicación de vendedores en tiempo real
-- Gestión de productos con imágenes, categorías y control de estado activo/inactivo
-- Gestión de clientes con etiquetado automático (VIP, Frecuente, Con deuda, Inactivo, Nuevo)
-- Gestión de vendedores
-- Filtros por estado activo por defecto en todos los módulos
+- **Dashboard Bento:** Métricas clave del negocio y monitoreo de actividad.
+- **Seguimiento GPS:** Mapa en tiempo real con la ubicación de todos los vendedores.
+- **Gestión Total:** Control de productos, imágenes, categorías y estados.
+- **CRM Inteligente:** Gestión de clientes con etiquetado automático (VIP, Frecuente, Con deuda, etc.).
 
-### Panel Vendedor (mobile-first)
-- Cargue diario del camión con inventario por producto
-- Catálogo de productos con stock disponible en tiempo real
-- Carrito de compras con soporte para ventas de **contado** y **crédito**
-- Registro de abonos a ventas a crédito
-- Comprobante de venta con descarga en PDF y opción de compartir
-- Historial de facturas del día
-- Vista de inventario del camión (cargadas / vendidas / restantes)
-- Detalle de cliente con historial, saldo pendiente y producto favorito
-- Cierre de jornada con resumen contado/crédito
-- Tracking de ubicación GPS en tiempo real
-
-### Modo Online (ahora obligatorio)
-- La aplicación requiere conexión a Internet para todas las operaciones.
-- No se utiliza Service Worker ni IndexedDB para datos de ventas.
-- Sincronización offline y reporte de pendientes se han deshabilitado.
+### Panel Vendedor (Mobile-First)
+- **Cargue Inteligente:** Gestión de inventario del camión con control de sobrantes.
+- **Catálogo Digital:** Productos con stock en tiempo real y buscador integrado.
+- **Ventas Dinámicas:** Soporte para contado, crédito y registro de abonos.
+- **Comprobantes PDF:** Generación y descarga inmediata de facturas para compartir.
+- **Cierre Automatizado:** Resumen contable al final del día para cuadre de caja.
 
 ### PWA (Progressive Web App)
-- Instalable en Android desde Chrome ("Agregar a pantalla de inicio")
-- Modo pantalla completa sin barra del navegador
-- Ícono personalizado del camión en la pantalla de inicio
-
- **Nota:** La aplicación funciona 100% online. El PWA es solo para instalación y experiencia de usuario, no incluye funcionalidades offline.
+- Instalable en Android e iOS como una aplicación nativa.
+- Experiencia de pantalla completa y acceso rápido desde el inicio.
+- Iconografía personalizada y branding del Depósito LYD.
 
 ---
 
@@ -43,64 +33,31 @@ Sistema de gestión de pedidos y ventas para **Depósito LYD**, diseñado para v
 
 ```
 Pedidos_LYD/
-├── config/
-│   ├── conexion.php          # Credenciales BD (NO incluido en el repo)
-│   ├── conexion.example.php  # Plantilla de conexión
-│   └── config.php            # Constantes globales + helper fecha_es()
-│
-├── controllers/              # Lógica de negocio
-│   ├── CategoriaController.php
-│   ├── ClienteController.php
-│   ├── ProductoController.php
-│   ├── UsuarioController.php
-│   └── Logout.php
-│
-├── models/                   # Consultas a la base de datos
-│   ├── Producto.php
-│   ├── categoria.php
-│   ├── cliente.php
-│   └── Usuario.php
-│
-├── middlewares/
-│   └── AuthMiddleware.php    # Protección de rutas por rol
-│
-├── database/
-│   └── BD                    # Dump SQL completo con datos de ejemplo
-│
-└── public/
-    ├── login.php
-    ├── manifest.json         # Configuración PWA
-    ├── icons/                # Íconos PWA (72px → 512px)
-    ├── css/                  # Estilos por módulo
-    ├── js/
-    │   ├── db-vendedor.js    # Capa IndexedDB para modo offline
-    │   └── validacion_login.js
-    ├── uploads/
-    │   └── productos/        # Imágenes subidas de productos
-    ├── admin/                # Panel administrador
-    │   ├── dashboard.php
-    │   ├── productos.php
-    │   ├── categorias.php
-    │   ├── clientes.php
-    │   ├── vendedores.php
-    │   └── partials/navbar.php
-    └── vendedor/             # Panel vendedor
-        ├── dashboard.php
-        ├── carga.php
-        ├── productos.php
-        ├── clientes.php
-        ├── carrito.php
-        ├── comprobante.php
-        ├── facturas.php
-        ├── inventario.php
-        ├── cierre.php
-        ├── detalle_cliente.php
-        ├── detalle_factura.php
-        ├── sync.php          # Endpoint de sincronización offline
-        ├── sw-vendedor.js    # Service Worker
-        ├── offline.php       # Página fallback sin conexión
-        └── partials/navbar.php
+├── FICHA_TECNICA.md          # Especificaciones técnicas detalladas
+├── FICHA_TECNICA.html        # Versión digital interactiva de la ficha
+├── config/                   # Configuración y conexión
+├── controllers/              # Lógica de negocio (MVC)
+├── models/                   # Capa de datos (MySQLi)
+├── public/                   # Archivos públicos y vistas
+│   ├── admin/                # Panel de control central
+│   └── vendedor/             # Aplicación móvil para rutas
+└── database/                 # Estructura de la base de datos
 ```
+
+---
+
+## 🛠️ Stack Tecnológico Principal
+
+| Capa | Tecnología |
+|---|---|
+| **Backend** | PHP 8.2+ (MVC Manual) |
+| **Base de Datos** | MySQL / MariaDB |
+| **Frontend** | HTML5 + CSS3 (Modern) + Vanilla JS |
+| **Mapas** | Leaflet.js |
+| **Documentos** | jsPDF |
+| **Iconografía** | Bootstrap Icons |
+
+> **Nota:** La aplicación funciona 100% online. El PWA requiere **HTTPS** en producción. En localhost funcionan sin configuración adicional.
 
 ---
 
@@ -195,9 +152,6 @@ http://localhost/Pedidos_LYD/public/login.php
 
 ---
 
-## 🛠️ Stack tecnológico
-
-| Capa | Tecnología |
 |---|---|
 | Backend | PHP 8.x (sin framework, patrón MVC manual) |
 | Base de datos | MySQL / MariaDB via `mysqli` |

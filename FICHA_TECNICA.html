@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ficha Técnica — Pedidos LYD</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --accent: #10b981;
+            --bg: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 40%);
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* --- Header --- */
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .badge-version {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            border: 1px solid var(--primary);
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        header h1 {
+            font-size: 3.5rem;
+            font-weight: 900;
+            letter-spacing: -2px;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #fff, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-dim);
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* --- Bento Grid --- */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-auto-rows: minmax(180px, auto);
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+
+        .bento-item {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 30px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bento-item:hover {
+            transform: translateY(-5px);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+        }
+
+        /* Spans */
+        .span-2 { grid-column: span 2; }
+        .span-3 { grid-column: span 3; }
+        .row-2 { grid-row: span 2; }
+
+        .icon-box {
+            width: 50px;
+            height: 50px;
+            background: rgba(99, 102, 241, 0.15);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            color: var(--primary);
+            font-size: 1.5rem;
+        }
+
+        .bento-item h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bento-item p {
+            color: var(--text-dim);
+            font-size: 0.95rem;
+        }
+
+        /* List styling */
+        .tech-list {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .tech-tag {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            border: 1px solid var(--glass-border);
+            color: #fff;
+        }
+
+        /* Special Items */
+        .v-gradient {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.8), rgba(79, 70, 229, 0.9));
+            color: #fff;
+        }
+        .v-gradient p, .v-gradient .icon-box { color: #fff; }
+        .v-gradient .icon-box { background: rgba(255, 255, 255, 0.2); }
+
+        /* --- Specifications Table --- */
+        .specs-section {
+            margin-top: 60px;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+        }
+
+        .specs-section h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            letter-spacing: -1px;
+        }
+
+        .specs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+
+        .spec-group h4 {
+            color: var(--primary);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .spec-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .spec-label { color: var(--text-dim); }
+        .spec-value { font-weight: 600; }
+
+        /* --- Footer Actions --- */
+        .actions {
+            margin-top: 50px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+            text-decoration: none;
+            border: none;
+        }
+
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-primary:hover { background: var(--primary-dark); transform: scale(1.05); }
+
+        .btn-outline { background: transparent; color: #fff; border: 1px solid var(--glass-border); }
+        .btn-outline:hover { background: rgba(255, 255, 255, 0.05); }
+
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Print styles */
+        @media print {
+            body { background: #fff; color: #000; }
+            .bento-grid { display: block; }
+            .bento-item { border: 1px solid #ddd; margin-bottom: 20px; page-break-inside: avoid; }
+            .actions, .badge-version { display: none; }
+            .specs-section { border: 1px solid #ddd; }
+            header h1 { -webkit-text-fill-color: #000; }
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .bento-grid { grid-template-columns: repeat(2, 1fr); }
+            .span-3 { grid-column: span 2; }
+        }
+
+        @media (max-width: 600px) {
+            .bento-grid { grid-template-columns: 1fr; }
+            .span-2, .span-3 { grid-column: span 1; }
+            .specs-grid { grid-template-columns: 1fr; }
+            header h1 { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <span class="badge-version">VERSIÓN 2.0.0 — ESTABLE</span>
+            <h1>Ficha Técnica</h1>
+            <p>Especificaciones técnicas y funcionales del ecosistema logístico de distribución <strong>Pedidos LYD</strong>.</p>
+        </header>
+
+        <div class="bento-grid">
+            
+            <!-- Arquitectura -->
+            <div class="bento-item span-2 v-gradient">
+                <div class="icon-box"><i class="bi bi-layer-forward"></i></div>
+                <h3>Arquitectura MVC</h3>
+                <p>Estructura monolítica optimizada para alto rendimiento, implementada sin dependencias de frameworks externos para garantizar control total y mínima huella de memoria.</p>
+                <ul class="tech-list">
+                    <li class="tech-tag">Clean Logic</li>
+                    <li class="tech-tag">Modular</li>
+                    <li class="tech-tag">Scalable</li>
+                </ul>
+            </div>
+
+            <!-- Stack Backend -->
+            <div class="bento-item row-2">
+                <div class="icon-box"><i class="bi bi-database-fill-gear"></i></div>
+                <h3>Core & Data</h3>
+                <p>Backend robusto basado en PHP 8.2 con una capa de persistencia en MariaDB.</p>
+                <ul class="tech-list" style="flex-direction: column;">
+                    <li class="tech-tag">PHP 8.2 (Strict Types)</li>
+                    <li class="tech-tag">MySQL / MariaDB</li>
+                    <li class="tech-tag">MySQLi (Native)</li>
+                    <li class="tech-tag">Secure Auth</li>
+                </ul>
+            </div>
+
+            <!-- PWA -->
+            <div class="bento-item">
+                <div class="icon-box"><i class="bi bi-phone-vibrate"></i></div>
+                <h3>PWA Native</h3>
+                <p>Experiencia de aplicación instalable con manifest y soporte para pantalla completa en móviles.</p>
+            </div>
+
+            <!-- GPS Tracking -->
+            <div class="bento-item span-2">
+                <div class="icon-box"><i class="bi bi-geo-alt-fill"></i></div>
+                <h3>GPS & Mapas en Tiempo Real</h3>
+                <p>Integración profunda con Leaflet.js para el seguimiento en vivo de la flota de vendedores, permitiendo auditoría geográfica inmediata desde el panel central.</p>
+            </div>
+
+            <!-- Frontend -->
+            <div class="bento-item">
+                <div class="icon-box"><i class="bi bi-shield-lock-fill"></i></div>
+                <h3>Security Core</h3>
+                <p>Protección contra SQL Injection mediante Sentencias Preparadas en todo el sistema.</p>
+            </div>
+
+            <!-- Modulos -->
+            <div class="bento-item span-3">
+                <div class="icon-box"><i class="bi bi-grid-fill"></i></div>
+                <h3>Ecosistema de Módulos</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 10px;">
+                    <div>
+                        <strong style="color: var(--primary); display: block; margin-bottom: 5px;">ADMIN</strong>
+                        <p style="font-size: 0.85rem;">Dashboard Bento, Gestión de Carteras, KPIs de Ventas, Control de Inventario Global.</p>
+                    </div>
+                    <div>
+                        <strong style="color: var(--accent); display: block; margin-bottom: 5px;">VENDEDOR</strong>
+                        <p style="font-size: 0.85rem;">Cargue de Camión, Carrito de Compras, Abonos a Créditos, Generación de PDFs.</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="specs-section">
+            <h2>Especificaciones de Hardware</h2>
+            <div class="specs-grid">
+                <div class="spec-group">
+                    <h4>Servidor Web</h4>
+                    <div class="spec-item">
+                        <span class="spec-label">Procesador</span>
+                        <span class="spec-value">2 Cores+ (Recomendado)</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">Memoria RAM</span>
+                        <span class="spec-value">2 GB RAM Mínimo</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">Almacenamiento</span>
+                        <span class="spec-value">SSD para imágenes de prod.</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">Protocolo</span>
+                        <span class="spec-value">HTTPS Requerido</span>
+                    </div>
+                </div>
+                <div class="spec-group">
+                    <h4>Dispositivos Móviles</h4>
+                    <div class="spec-item">
+                        <span class="spec-label">SO Android</span>
+                        <span class="spec-value">Versión 9.0 o superior</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">SO iOS</span>
+                        <span class="spec-value">Versión 14+ (Safari)</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">Conectividad</span>
+                        <span class="spec-value">4G / LTE / GPS</span>
+                    </div>
+                    <div class="spec-item">
+                        <span class="spec-label">Navegador</span>
+                        <span class="spec-value">Chrome / Safari</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-primary" onclick="window.print()">
+                <i class="bi bi-printer-fill"></i> Imprimir / Exportar PDF
+            </button>
+            <a href="index.html" class="btn btn-outline">
+                <i class="bi bi-arrow-left"></i> Volver al Sistema
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>

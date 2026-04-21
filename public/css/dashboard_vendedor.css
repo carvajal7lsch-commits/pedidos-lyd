@@ -104,7 +104,7 @@ a {
    SCROLL BODY
    ══════════════════════════════════════════ */
 .scroll-body {
-    padding: 16px 16px 100px;
+    padding: 16px 16px 160px; /* Aumentado para no tapar con el carrito bar flotante */
     display: flex;
     flex-direction: column;
     gap: 12px;

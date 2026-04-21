@@ -14,12 +14,16 @@ function login($usuario, $contrasena) {
         return ['error' => true, 'mensaje' => 'Por favor completa todos los campos.'];
     }
 
-    $sql   = "SELECT * FROM usuario
-              WHERE (nombre = '$usuario' OR correo = '$usuario')
-              AND estado = 1
-              LIMIT 1";
-    $query = mysqli_query($conexion, $sql);
-    $user  = mysqli_fetch_assoc($query);
+    $sql = "SELECT * FROM usuario 
+            WHERE (nombre = ? OR correo = ?) 
+            AND estado = 1 
+            LIMIT 1";
+    
+    $stmt = mysqli_prepare($conexion, $sql);
+    mysqli_stmt_bind_param($stmt, 'ss', $usuario, $usuario);
+    mysqli_stmt_execute($stmt);
+    $resultado = mysqli_stmt_get_result($stmt);
+    $user = mysqli_fetch_assoc($resultado);
 
     if (!$user) {
         return ['error' => true, 'mensaje' => 'Usuario o contraseña incorrectos.'];
