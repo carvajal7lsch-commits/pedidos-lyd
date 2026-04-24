@@ -630,7 +630,8 @@ a {
 }
 .alerta i { font-size: 16px; }
 
-.alerta-exito {
+.alerta-exito,
+.alerta-success {
     background: #f0fdf4;
     color: #15803d;
     border: 1px solid #bbf7d0;

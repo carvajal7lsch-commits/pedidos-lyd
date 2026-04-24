@@ -1,12 +1,14 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ficha Técnica — Pedidos LYD</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         :root {
@@ -32,7 +34,7 @@
             color: var(--text);
             line-height: 1.6;
             overflow-x: hidden;
-            background-image: 
+            background-image:
                 radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 40%),
                 radial-gradient(circle at 90% 80%, rgba(16, 185, 129, 0.1) 0%, transparent 40%);
             min-height: 100vh;
@@ -70,7 +72,6 @@
             letter-spacing: -2px;
             margin-bottom: 10px;
             background: linear-gradient(to right, #fff, #94a3b8);
-            -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -104,13 +105,21 @@
         .bento-item:hover {
             transform: translateY(-5px);
             border-color: rgba(99, 102, 241, 0.4);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
         }
 
         /* Spans */
-        .span-2 { grid-column: span 2; }
-        .span-3 { grid-column: span 3; }
-        .row-2 { grid-row: span 2; }
+        .span-2 {
+            grid-column: span 2;
+        }
+
+        .span-3 {
+            grid-column: span 3;
+        }
+
+        .row-2 {
+            grid-row: span 2;
+        }
 
         .icon-box {
             width: 50px;
@@ -162,8 +171,15 @@
             background: linear-gradient(135deg, rgba(99, 102, 241, 0.8), rgba(79, 70, 229, 0.9));
             color: #fff;
         }
-        .v-gradient p, .v-gradient .icon-box { color: #fff; }
-        .v-gradient .icon-box { background: rgba(255, 255, 255, 0.2); }
+
+        .v-gradient p,
+        .v-gradient .icon-box {
+            color: #fff;
+        }
+
+        .v-gradient .icon-box {
+            background: rgba(255, 255, 255, 0.2);
+        }
 
         /* --- Specifications Table --- */
         .specs-section {
@@ -203,8 +219,13 @@
             border-bottom: 1px solid var(--glass-border);
         }
 
-        .spec-label { color: var(--text-dim); }
-        .spec-value { font-weight: 600; }
+        .spec-label {
+            color: var(--text-dim);
+        }
+
+        .spec-value {
+            font-weight: 600;
+        }
 
         /* --- Footer Actions --- */
         .actions {
@@ -227,58 +248,120 @@
             border: none;
         }
 
-        .btn-primary { background: var(--primary); color: #fff; }
-        .btn-primary:hover { background: var(--primary-dark); transform: scale(1.05); }
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
 
-        .btn-outline { background: transparent; color: #fff; border: 1px solid var(--glass-border); }
-        .btn-outline:hover { background: rgba(255, 255, 255, 0.05); }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #fff;
+            border: 1px solid var(--glass-border);
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
 
         /* Animations */
         @keyframes fadeInDown {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Print styles */
         @media print {
-            body { background: #fff; color: #000; }
-            .bento-grid { display: block; }
-            .bento-item { border: 1px solid #ddd; margin-bottom: 20px; page-break-inside: avoid; }
-            .actions, .badge-version { display: none; }
-            .specs-section { border: 1px solid #ddd; }
-            header h1 { -webkit-text-fill-color: #000; }
+            body {
+                background: #fff;
+                color: #000;
+            }
+
+            .bento-grid {
+                display: block;
+            }
+
+            .bento-item {
+                border: 1px solid #ddd;
+                margin-bottom: 20px;
+                page-break-inside: avoid;
+            }
+
+            .actions,
+            .badge-version {
+                display: none;
+            }
+
+            .specs-section {
+                border: 1px solid #ddd;
+            }
+
+            header h1 {
+                -webkit-text-fill-color: #000;
+            }
         }
 
         /* Responsive */
         @media (max-width: 992px) {
-            .bento-grid { grid-template-columns: repeat(2, 1fr); }
-            .span-3 { grid-column: span 2; }
+            .bento-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .span-3 {
+                grid-column: span 2;
+            }
         }
 
         @media (max-width: 600px) {
-            .bento-grid { grid-template-columns: 1fr; }
-            .span-2, .span-3 { grid-column: span 1; }
-            .specs-grid { grid-template-columns: 1fr; }
-            header h1 { font-size: 2.5rem; }
+            .bento-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .span-2,
+            .span-3 {
+                grid-column: span 1;
+            }
+
+            .specs-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 2.5rem;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <div class="container">
         <header>
             <span class="badge-version">VERSIÓN 2.0.0 — ESTABLE</span>
             <h1>Ficha Técnica</h1>
-            <p>Especificaciones técnicas y funcionales del ecosistema logístico de distribución <strong>Pedidos LYD</strong>.</p>
+            <p>Especificaciones técnicas y funcionales del ecosistema logístico de distribución <strong>Pedidos
+                    LYD</strong>.</p>
         </header>
 
         <div class="bento-grid">
-            
+
             <!-- Arquitectura -->
             <div class="bento-item span-2 v-gradient">
                 <div class="icon-box"><i class="bi bi-layer-forward"></i></div>
                 <h3>Arquitectura MVC</h3>
-                <p>Estructura monolítica optimizada para alto rendimiento, implementada sin dependencias de frameworks externos para garantizar control total y mínima huella de memoria.</p>
+                <p>Estructura monolítica optimizada para alto rendimiento, implementada sin dependencias de frameworks
+                    externos para garantizar control total y mínima huella de memoria.</p>
                 <ul class="tech-list">
                     <li class="tech-tag">Clean Logic</li>
                     <li class="tech-tag">Modular</li>
@@ -310,7 +393,8 @@
             <div class="bento-item span-2">
                 <div class="icon-box"><i class="bi bi-geo-alt-fill"></i></div>
                 <h3>GPS & Mapas en Tiempo Real</h3>
-                <p>Integración profunda con Leaflet.js para el seguimiento en vivo de la flota de vendedores, permitiendo auditoría geográfica inmediata desde el panel central.</p>
+                <p>Integración profunda con Leaflet.js para el seguimiento en vivo de la flota de vendedores,
+                    permitiendo auditoría geográfica inmediata desde el panel central.</p>
             </div>
 
             <!-- Frontend -->
@@ -327,11 +411,13 @@
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 10px;">
                     <div>
                         <strong style="color: var(--primary); display: block; margin-bottom: 5px;">ADMIN</strong>
-                        <p style="font-size: 0.85rem;">Dashboard Bento, Gestión de Carteras, KPIs de Ventas, Control de Inventario Global.</p>
+                        <p style="font-size: 0.85rem;">Dashboard Bento, Gestión de Carteras, KPIs de Ventas, Control de
+                            Inventario Global.</p>
                     </div>
                     <div>
                         <strong style="color: var(--accent); display: block; margin-bottom: 5px;">VENDEDOR</strong>
-                        <p style="font-size: 0.85rem;">Cargue de Camión, Carrito de Compras, Abonos a Créditos, Generación de PDFs.</p>
+                        <p style="font-size: 0.85rem;">Cargue de Camión, Carrito de Compras, Abonos a Créditos,
+                            Generación de PDFs.</p>
                     </div>
                 </div>
             </div>
@@ -393,4 +479,5 @@
     </div>
 
 </body>
+
 </html>

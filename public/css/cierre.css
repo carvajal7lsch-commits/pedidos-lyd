@@ -500,3 +500,99 @@
 .btn-finalizar-jornada:active {
     transform: scale(0.98);
 }
+
+/* ══════════════════════════════════════════
+   DETALLE DE COBRANZA
+   ══════════════════════════════════════════ */
+.cobranza-lista {
+    background: #fff;
+    border: 1px solid #E8EAF0;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.cobranza-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid #F4F5F7;
+}
+
+.cobranza-item:last-child {
+    border-bottom: none;
+}
+
+.cobranza-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cobranza-cliente {
+    font-size: 14px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 700;
+    color: #0F1623;
+}
+
+.cobranza-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.badge-venta {
+    font-size: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+
+.badge-hoy {
+    background: #EBF1FD;
+    color: #1A51C5;
+}
+
+.badge-pasada {
+    background: #FFF7ED;
+    color: #C2410C;
+}
+
+.cobranza-id {
+    font-size: 11px;
+    color: #94A3B8;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.cobranza-monto {
+    font-size: 15px;
+    font-family: 'Sora', sans-serif;
+    font-weight: 800;
+    color: #15803d;
+}
+
+.cobranza-vacia {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    background: #FAFBFF;
+    border: 1px dashed #D1D5DB;
+    border-radius: 16px;
+    color: #94A3B8;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.cobranza-vacia i {
+    font-size: 24px;
+}
+
+.cobranza-vacia span {
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+}

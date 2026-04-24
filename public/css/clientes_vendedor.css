@@ -1403,7 +1403,7 @@
     user-select: none;
 }
 
-.abono-input-wrap input[type="number"] {
+.abono-input-wrap input {
     flex: 1;
     height: 54px;
     padding: 0 16px 0 6px;
@@ -1416,13 +1416,13 @@
     outline: none;
 }
 
-.abono-input-wrap input[type="number"]::-webkit-outer-spin-button,
-.abono-input-wrap input[type="number"]::-webkit-inner-spin-button {
+.abono-input-wrap input::-webkit-outer-spin-button,
+.abono-input-wrap input::-webkit-inner-spin-button {
     -webkit-appearance: none;
     margin: 0;
 }
 
-.abono-input-wrap input[type="number"]::placeholder {
+.abono-input-wrap input::placeholder {
     color: #D1D5E0;
     font-weight: 600;
 }

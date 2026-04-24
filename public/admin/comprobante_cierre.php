@@ -1,28 +1,34 @@
 <?php
 require_once __DIR__ . '/../../middlewares/AuthMiddleware.php';
-soloVendedor();
+soloAdmin();
 
 require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../config/conexion.php';
 
-$id_cierre   = isset($_GET['id']) ? (int)$_GET['id'] : 0;
-$id_vendedor = $_SESSION['id_usuario'];
+$id_cierre = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+$is_iframe = isset($_GET['iframe']) && $_GET['iframe'] == 1;
 
-if (!$id_cierre) { header('Location: dashboard.php'); exit(); }
+if (!$id_cierre) {
+    die("ID de cierre no proporcionado.");
+}
 
 // ── Datos del cierre ─────────────────────────
 $stmt = mysqli_prepare($conexion,
     "SELECT cd.*, u.nombre AS vendedor
      FROM cierrediario cd
      JOIN usuario u ON u.id_usuario = cd.id_usuario
-     WHERE cd.id_cierre = ? AND cd.id_usuario = ?
+     WHERE cd.id_cierre = ?
      LIMIT 1"
 );
-mysqli_stmt_bind_param($stmt, 'ii', $id_cierre, $id_vendedor);
+mysqli_stmt_bind_param($stmt, 'i', $id_cierre);
 mysqli_stmt_execute($stmt);
 $cierre = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
 
-if (!$cierre) { header('Location: dashboard.php'); exit(); }
+if (!$cierre) {
+    die("Cierre no encontrado.");
+}
+
+$id_vendedor = $cierre['id_usuario'];
 
 // Abonos del día (todos los recaudados hoy por este vendedor)
 $stmt = mysqli_prepare($conexion,
@@ -62,47 +68,36 @@ $fecha_fmt = fecha_es('d M, Y', strtotime($cierre['fecha']));
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="manifest" href="/public/manifest.json">
-    <meta name="theme-color" content="#1855CF">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="LYD">
-    <link rel="apple-touch-icon" href="/public/icons/icon-192x192.png">
-
-    <title>Comprobante de Cierre</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comprobante de Cierre #<?php echo $id_cierre; ?></title>
     <link rel="stylesheet" href="../css/dashboard_vendedor.css">
     <link rel="stylesheet" href="../css/cierre.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        body { background: <?php echo $is_iframe ? '#fff' : '#F0F2F7'; ?>; }
+        .scroll-body { padding: <?php echo $is_iframe ? '10px' : '20px'; ?>; }
+        <?php if($is_iframe): ?>
+        .topbar, .btn-finalizar-jornada { display: none; }
+        .cierre-comp-card { margin-top: 0; box-shadow: none; border: 1px solid #eee; }
+        <?php endif; ?>
+    </style>
 </head>
 <body>
 
+<?php if(!$is_iframe): ?>
 <header class="topbar">
     <div class="topbar-left">
-        <a href="dashboard.php" class="topbar-btn">
+        <a href="reportes.php?reporte=cierres" class="topbar-btn">
             <i class="bi bi-arrow-left"></i>
         </a>
         <h1 class="page-title">Comprobante de Cierre</h1>
     </div>
 </header>
+<?php endif; ?>
 
 <main class="scroll-body">
-
-    <!-- Éxito -->
-    <div class="cierre-exito-wrap">
-        <div class="cierre-check">
-            <i class="bi bi-check-lg"></i>
-        </div>
-        <div class="cierre-exito-titulo">Cierre Exitoso</div>
-        <div class="cierre-exito-fecha"><?php echo $fecha_fmt; ?></div>
-    </div>
-
-    <!-- Card comprobante -->
     <div class="cierre-comp-card">
-
         <!-- Logística -->
         <div class="cierre-seccion">
             <div class="cierre-sec-label">DETALLES DE LOGÍSTICA</div>
@@ -121,87 +116,52 @@ $fecha_fmt = fecha_es('d M, Y', strtotime($cierre['fecha']));
         <!-- Resumen financiero -->
         <div class="cierre-seccion">
             <div class="cierre-sec-label">RESUMEN FINANCIERO</div>
-
             <div class="cierre-sec-row">
                 <span class="cierre-row-key">Ventas Contado</span>
-                <span class="cierre-row-val">
-                    $<?php echo number_format($ventas_contado_puro, 0, ',', '.'); ?>
-                </span>
+                <span class="cierre-row-val">$<?php echo number_format($ventas_contado_puro, 0, ',', '.'); ?></span>
             </div>
-
             <?php if ($abonos_dia > 0): ?>
             <div class="cierre-sec-row">
                 <span class="cierre-row-key">Abonos Recibidos</span>
-                <span class="cierre-row-val color-green">
-                    $<?php echo number_format($abonos_dia, 0, ',', '.'); ?>
-                </span>
+                <span class="cierre-row-val" style="color: #10b981;">+$<?php echo number_format($abonos_dia, 0, ',', '.'); ?></span>
             </div>
             <?php endif; ?>
-
             <div class="cierre-sec-row">
                 <span class="cierre-row-key">Ventas Crédito</span>
-                <span class="cierre-row-val">
-                    $<?php echo number_format($cierre['total_credito'], 0, ',', '.'); ?>
-                </span>
+                <span class="cierre-row-val">$<?php echo number_format($cierre['total_credito'], 0, ',', '.'); ?></span>
             </div>
-
             <div class="cierre-divider"></div>
-
-            <div class="cierre-sec-row cierre-total-row">
-                <span class="cierre-total-key">Total Recaudado</span>
-                <span class="cierre-total-val">
-                    $<?php echo number_format($cierre['total_general'], 0, ',', '.'); ?>
-                </span>
+            <div class="cierre-sec-row" style="margin-top: 10px;">
+                <span style="font-weight: 800; font-size: 14px; color: #0F1623;">Total Recaudado</span>
+                <span style="font-weight: 800; font-size: 18px; color: #1855CF;">$<?php echo number_format($cierre['total_general'], 0, ',', '.'); ?></span>
             </div>
         </div>
 
         <?php if (!empty($lista_abonos)): ?>
         <div class="cierre-divider"></div>
-
-        <!-- Detalle de Abonos -->
         <div class="cierre-seccion">
-            <div class="cierre-sec-label">DETALLE DE ABONOS RECIBIDOS</div>
+            <div class="cierre-sec-label">DETALLE DE ABONOS</div>
             <?php foreach ($lista_abonos as $ab): ?>
             <div class="cierre-sec-row" style="padding: 4px 0;">
                 <div style="display: flex; flex-direction: column;">
-                    <span style="font-size: 13px; font-weight: 600; color: #0F1623;">
-                        <?php echo htmlspecialchars($ab['cliente']); ?>
-                    </span>
-                    <span style="font-size: 10px; color: #64748B;">
-                        Venta #<?php echo $ab['id_venta']; ?> 
-                        (<?php echo $ab['fecha_venta'] === $cierre['fecha'] ? 'Hoy' : date('d/m/y', strtotime($ab['fecha_venta'])); ?>)
-                    </span>
+                    <span style="font-size: 13px; font-weight: 600; color: #0F1623;"><?php echo htmlspecialchars($ab['cliente']); ?></span>
+                    <span style="font-size: 10px; color: #64748B;">Venta #<?php echo $ab['id_venta']; ?></span>
                 </div>
-                <span class="cierre-row-val color-green" style="font-size: 13px;">
-                    +$<?php echo number_format($ab['monto'], 0, ',', '.'); ?>
-                </span>
+                <span style="color: #10b981; font-weight: 600; font-size: 13px;">+$<?php echo number_format($ab['monto'], 0, ',', '.'); ?></span>
             </div>
             <?php endforeach; ?>
         </div>
         <?php endif; ?>
 
-        <!-- Código de barras decorativo -->
-        <div class="cierre-barcode">
-            <div class="barcode-lines">
-                <?php
-                // Generar líneas decorativas variadas
-                $widths = [2,1,3,1,2,1,1,3,1,2,1,3,2,1,1,2,3,1,2,1,1,3,1,2];
-                foreach ($widths as $w): ?>
-                <div class="barcode-line" style="width:<?php echo $w; ?>px;"></div>
-                <?php endforeach; ?>
+        <div class="cierre-barcode" style="margin-top: 20px; opacity: 0.5;">
+            <div class="barcode-lines" style="display: flex; justify-content: center; gap: 2px; height: 30px;">
+                <?php for($i=0; $i<20; $i++): ?>
+                <div style="background: #000; width: <?php echo rand(1, 3); ?>px; height: 100%;"></div>
+                <?php endfor; ?>
             </div>
         </div>
-
     </div>
-
-    <!-- Botón finalizar -->
-    <a href="dashboard.php" class="btn-finalizar-jornada">
-        <i class="bi bi-check2-all"></i> Finalizar Jornada
-    </a>
-
 </main>
-
-<?php require_once __DIR__ . '/partials/navbar.php'; ?>
 
 </body>
 </html>

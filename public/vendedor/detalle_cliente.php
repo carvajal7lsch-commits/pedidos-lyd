@@ -191,6 +191,7 @@ $dias_sin_compra = $stats['ultima_visita']
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <script src="../js/formatters.js?v=<?php echo filemtime('../js/formatters.js'); ?>"></script>
 </head>
 <body>
 
@@ -243,9 +244,9 @@ $dias_sin_compra = $stats['ultima_visita']
         <div class="cartera-monto">
             $<?php echo number_format($saldo_total, 0, ',', '.'); ?>
         </div>
-        <form method="POST">
+        <form method="POST" id="formPagarTodo">
             <input type="hidden" name="accion" value="pagar_todo">
-            <button type="submit" class="btn-pagar-todo">
+            <button type="button" class="btn-pagar-todo" onclick="abrirConfirmarTodo()">
                 <i class="bi bi-cash-coin"></i> Pagar todo
             </button>
         </form>
@@ -435,8 +436,9 @@ $dias_sin_compra = $stats['ultima_visita']
                     <div class="abono-campo-label">VALOR DEL ABONO</div>
                     <div class="abono-input-wrap">
                         <span class="abono-prefix">$</span>
-                        <input type="number" id="abonoMontoInput" name="monto_abono"
-                               placeholder="0" min="1" oninput="actualizarSaldoModal()">
+                        <input type="tel" id="abonoMontoInput" name="monto_abono_display"
+                               placeholder="0" oninput="formatCurrencyInput(this); actualizarSaldoModal()">
+                        <input type="hidden" name="monto_abono" id="abonoMontoReal">
                     </div>
                     <div class="saldo-restante-wrap" id="saldoRestanteModal" style="display:none;">
                         <span class="saldo-restante-label">Saldo restante:</span>
@@ -452,6 +454,42 @@ $dias_sin_compra = $stats['ultima_visita']
                 Cancelar
             </button>
         </form>
+    </div>
+</div>
+
+<!-- ══ MODAL CONFIRMAR PAGO TOTAL ══ -->
+<div class="modal-overlay" id="modalConfirmarTodo" style="display:none;">
+    <div class="bottom-sheet" id="sheetConfirmarTodo">
+        <div class="sheet-handle"></div>
+        <div class="sheet-header">
+            <h2 class="sheet-title">Confirmar Pago Total</h2>
+            <button class="sheet-cerrar" onclick="cerrarConfirmarTodo()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+
+        <div style="text-align: center; margin-bottom: 24px;">
+            <div style="font-size: 48px; color: #f59e0b; margin-bottom: 12px;">
+                <i class="bi bi-exclamation-triangle-fill"></i>
+            </div>
+            <p style="font-family: 'DM Sans', sans-serif; color: #475569; font-size: 15px; line-height: 1.5; margin: 0 0 16px 0;">
+                ¿Estás seguro de registrar el pago de <strong>todas</strong> las facturas de este cliente?<br>
+                Esta acción no se puede deshacer.
+            </p>
+            <div style="background: #f8fafc; padding: 16px; border-radius: 12px; border: 1px solid #e2e8f0;">
+                <div style="font-size: 11px; color: #94a3b8; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.5px;">Monto total a recaudar</div>
+                <div style="font-size: 24px; font-weight: 800; color: #1A2B6B; font-family: 'Sora', sans-serif;">
+                    $<?php echo number_format($saldo_total, 0, ',', '.'); ?>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="btn-confirmar-credito" onclick="confirmarPagoTodo()" style="background: #1A2B6B;">
+            Sí, registrar pagos
+        </button>
+        <button type="button" class="btn-cancelar-credito" onclick="cerrarConfirmarTodo()">
+            No, cancelar
+        </button>
     </div>
 </div>
 
@@ -483,7 +521,15 @@ function cerrarModalAbono() {
 }
 
 function actualizarSaldoModal() {
-    const monto   = parseFloat(document.getElementById('abonoMontoInput').value) || 0;
+    let monto     = getRawValue(document.getElementById('abonoMontoInput'));
+
+    // Limitar el abono al saldo pendiente
+    if (monto > abonoSaldoActual) {
+        monto = abonoSaldoActual;
+        const input = document.getElementById('abonoMontoInput');
+        input.value = new Intl.NumberFormat('es-CO').format(monto);
+    }
+
     const restante = Math.max(0, abonoSaldoActual - monto);
     const wrap    = document.getElementById('saldoRestanteModal');
 
@@ -491,27 +537,49 @@ function actualizarSaldoModal() {
         wrap.style.display = '';
         const el = document.getElementById('saldoRestanteModalVal');
         el.textContent = '$' + restante.toLocaleString('es-CO');
-        el.style.color = monto > abonoSaldoActual ? '#C03030' : '#15803d';
+        el.style.color = '#15803d';
     } else {
         wrap.style.display = 'none';
     }
 }
 
 function enviarAbono() {
-    const monto = parseFloat(document.getElementById('abonoMontoInput').value) || 0;
+    const monto = getRawValue(document.getElementById('abonoMontoInput'));
     if (monto <= 0) {
         alert('Ingresa un monto válido.');
         return;
     }
-    if (monto > abonoSaldoActual) {
-        alert('El abono no puede superar el saldo pendiente.');
-        return;
-    }
+    document.getElementById('abonoMontoReal').value = monto;
     document.getElementById('formAbono').submit();
 }
 
 document.getElementById('modalAbono').addEventListener('click', function(e) {
     if (e.target === this) cerrarModalAbono();
+});
+
+// ══ FUNCIONES PAGO TODO ══
+function abrirConfirmarTodo() {
+    document.getElementById('modalConfirmarTodo').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => {
+        document.getElementById('sheetConfirmarTodo').classList.add('sheet-open');
+    }, 10);
+}
+
+function cerrarConfirmarTodo() {
+    document.getElementById('sheetConfirmarTodo').classList.remove('sheet-open');
+    setTimeout(() => {
+        document.getElementById('modalConfirmarTodo').style.display = 'none';
+        document.body.style.overflow = '';
+    }, 280);
+}
+
+function confirmarPagoTodo() {
+    document.getElementById('formPagarTodo').submit();
+}
+
+document.getElementById('modalConfirmarTodo').addEventListener('click', function(e) {
+    if (e.target === this) cerrarConfirmarTodo();
 });
 </script>
 

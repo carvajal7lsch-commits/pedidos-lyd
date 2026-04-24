@@ -686,9 +686,9 @@ $tabs = [
                                     class="bi bi-chevron-expand sort-icon"></i></th>
                             <th class="num" onclick="sortTabla(3)">Crédito <i
                                     class="bi bi-chevron-expand sort-icon"></i></th>
-                            <th class="num" onclick="sortTabla(4)">Total <i class="bi bi-chevron-expand sort-icon"></i>
-                            </th>
+                            <th class="num" onclick="sortTabla(4)">Total <i class="bi bi-chevron-expand sort-icon"></i></th>
                             <th>Estado</th>
+                            <th style="text-align:right;">Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -716,6 +716,11 @@ $tabs = [
                                 <?php else: ?>
                                 <span class="badge-tipo badge-abierto"><i class="bi bi-clock"></i> Abierto</span>
                                 <?php endif; ?>
+                            </td>
+                            <td style="text-align:right;">
+                                <button type="button" onclick="verCierre(<?php echo $row['id_cierre']; ?>, '<?php echo $row['fecha']; ?>')" class="btn-sleek">
+                                    <i class="bi bi-file-earmark-text"></i> Ver Comprobante
+                                </button>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -858,9 +863,30 @@ $tabs = [
             overlay.classList.add('show');
             document.body.style.overflow = 'hidden';
 
-            // Usar setTimeout para permitir que el modal se anime antes de inyectar el iframe
             setTimeout(() => {
                 bodyContent.innerHTML = `<iframe src="comprobante_ticket.php?id=${id}&iframe=1" style="width: 100%; height: 100%; border: none; background: #fff;"></iframe>`;
+            }, 300);
+        }
+
+        function verCierre(id, fecha) {
+            const overlay = document.getElementById('modalFactura');
+            const bodyContent = document.getElementById('mfBodyContent');
+            const title = document.getElementById('mfIdFactura');
+
+            title.innerHTML = `<i class="bi bi-journal-check"></i> Comprobante de Cierre · ${fecha}`;
+            
+            bodyContent.innerHTML = `
+                <div class="loader-wrap" style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                    <div class="loader-spinner"></div>
+                    <div>Cargando comprobante...</div>
+                </div>
+            `;
+            
+            overlay.classList.add('show');
+            document.body.style.overflow = 'hidden';
+
+            setTimeout(() => {
+                bodyContent.innerHTML = `<iframe src="comprobante_cierre.php?id=${id}&iframe=1" style="width: 100%; height: 100%; border: none; background: #fff;"></iframe>`;
             }, 300);
         }
 

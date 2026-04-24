@@ -46,7 +46,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
     mysqli_stmt_execute($stmt);
     $ventas_credito = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
 
-    // Abonos iniciales de créditos de hoy
+    // Todos los abonos recaudados hoy por el vendedor (sin importar fecha de venta)
+    $stmt = mysqli_prepare($conexion,
+        "SELECT COALESCE(SUM(monto), 0) AS total
+         FROM abono WHERE id_vendedor = ? AND fecha = ?"
+    );
+    mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
+    mysqli_stmt_execute($stmt);
+    $abonos_totales_hoy = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
+
+    // Para el cálculo de crédito pendiente hoy, solo necesitamos los abonos de ventas de hoy
     $stmt = mysqli_prepare($conexion,
         "SELECT COALESCE(SUM(a.monto), 0) AS total
          FROM abono a
@@ -55,10 +64,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
     );
     mysqli_stmt_bind_param($stmt, 'iss', $id_vendedor, $hoy, $hoy);
     mysqli_stmt_execute($stmt);
-    $abonos_credito_hoy = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
+    $abonos_ventas_hoy = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
 
-    $total_contado = $ventas_contado + $abonos_credito_hoy;
-    $credito_pendiente = $ventas_credito - $abonos_credito_hoy;
+    $total_contado = $ventas_contado + $abonos_totales_hoy;
+    $credito_pendiente = $ventas_credito - $abonos_ventas_hoy;
     $total_general = $total_contado + $credito_pendiente;
 
     mysqli_begin_transaction($conexion);
@@ -112,7 +121,29 @@ mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
 mysqli_stmt_execute($stmt);
 $res_credito = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
 
-// Abonos iniciales de créditos de hoy
+// Todos los abonos recaudados hoy por el vendedor (sin importar fecha de venta)
+$stmt = mysqli_prepare($conexion,
+    "SELECT COALESCE(SUM(monto), 0) AS total
+     FROM abono WHERE id_vendedor = ? AND fecha = ?"
+);
+mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
+mysqli_stmt_execute($stmt);
+$abonos_totales_hoy = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
+
+// Abonos detallados para mostrar
+$stmt = mysqli_prepare($conexion,
+    "SELECT a.monto, c.nombre AS cliente, v.id_venta, v.fecha AS fecha_venta
+     FROM abono a
+     JOIN venta v ON v.id_venta = a.id_venta
+     JOIN cliente c ON v.id_cliente = c.id_cliente
+     WHERE a.id_vendedor = ? AND a.fecha = ?
+     ORDER BY a.id_abono DESC"
+);
+mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
+mysqli_stmt_execute($stmt);
+$lista_abonos = mysqli_fetch_all(mysqli_stmt_get_result($stmt), MYSQLI_ASSOC);
+
+// Abonos de ventas de hoy para cálculo de crédito pendiente
 $stmt = mysqli_prepare($conexion,
     "SELECT COALESCE(SUM(a.monto), 0) AS total
      FROM abono a
@@ -121,11 +152,11 @@ $stmt = mysqli_prepare($conexion,
 );
 mysqli_stmt_bind_param($stmt, 'iss', $id_vendedor, $hoy, $hoy);
 mysqli_stmt_execute($stmt);
-$abonos_credito_hoy = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
+$abonos_ventas_hoy = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['total'];
 
-$total_contado = (float)$res_contado['total'] + $abonos_credito_hoy;
+$total_contado = (float)$res_contado['total'] + $abonos_totales_hoy;
 $total_credito = (float)$res_credito['total'];
-$credito_pendiente = $total_credito - $abonos_credito_hoy;
+$credito_pendiente = $total_credito - $abonos_ventas_hoy;
 $total_general = $total_contado + $credito_pendiente;
 
 // Inventario restante (máximo 3 para preview)
@@ -208,30 +239,64 @@ $preview_inv      = array_slice($inventario, 0, 3);
     <!-- Desglose contado / crédito -->
     <div class="desglose-grid">
         <div class="desglose-card">
-            <div class="desglose-label">Ventas Contado</div>
+            <div class="desglose-label">Dinero en Efectivo</div>
             <div class="desglose-monto contado">
-                $<?php echo number_format((float)$res_contado['total'], 0, ',', '.'); ?>
+                $<?php echo number_format($total_contado, 0, ',', '.'); ?>
             </div>
-            <?php if ($abonos_credito_hoy > 0): ?>
+            <?php if ($abonos_totales_hoy > 0): ?>
             <div class="desglose-extra">
-                + $<?php echo number_format($abonos_credito_hoy, 0, ',', '.'); ?> abonos
+                Incluye $<?php echo number_format($abonos_totales_hoy, 0, ',', '.'); ?> en abonos
             </div>
             <?php endif; ?>
             <div class="desglose-bar bar-contado"></div>
         </div>
         <div class="desglose-card">
-            <div class="desglose-label">Crédito Pendiente</div>
+            <div class="desglose-label">Crédito Nuevo</div>
             <div class="desglose-monto credito">
                 $<?php echo number_format($credito_pendiente, 0, ',', '.'); ?>
             </div>
-            <?php if ($abonos_credito_hoy > 0): ?>
+            <?php if ($total_credito > 0): ?>
             <div class="desglose-extra">
-                De $<?php echo number_format($total_credito, 0, ',', '.'); ?> en créditos
+                De $<?php echo number_format($total_credito, 0, ',', '.'); ?> vendidos hoy
             </div>
             <?php endif; ?>
             <div class="desglose-bar bar-credito"></div>
         </div>
     </div>
+
+    <!-- Detalle de Cobranza (Abonos) -->
+    <div class="seccion-label" style="margin-top:4px;">
+        DETALLE DE COBRANZA
+        <span class="seccion-moneda"><?php echo count($lista_abonos); ?> pagos</span>
+    </div>
+
+    <?php if (empty($lista_abonos)): ?>
+    <div class="cobranza-vacia">
+        <i class="bi bi-wallet2"></i>
+        <span>No se recibieron abonos hoy</span>
+    </div>
+    <?php else: ?>
+    <div class="cobranza-lista">
+        <?php foreach ($lista_abonos as $ab): 
+            $es_hoy = ($ab['fecha_venta'] === $hoy);
+        ?>
+        <div class="cobranza-item">
+            <div class="cobranza-info">
+                <div class="cobranza-cliente"><?php echo htmlspecialchars($ab['cliente']); ?></div>
+                <div class="cobranza-meta">
+                    <span class="badge-venta <?php echo $es_hoy ? 'badge-hoy' : 'badge-pasada'; ?>">
+                        <?php echo $es_hoy ? 'Venta de hoy' : 'Deuda anterior (' . date('d/m/y', strtotime($ab['fecha_venta'])) . ')'; ?>
+                    </span>
+                    <span class="cobranza-id">#<?php echo $ab['id_venta']; ?></span>
+                </div>
+            </div>
+            <div class="cobranza-monto">
+                +$<?php echo number_format($ab['monto'], 0, ',', '.'); ?>
+            </div>
+        </div>
+        <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
 
     <!-- Inventario restante -->
     <div class="seccion-label" style="margin-top:4px;">

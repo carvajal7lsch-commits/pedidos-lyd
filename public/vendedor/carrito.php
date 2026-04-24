@@ -179,6 +179,7 @@ foreach ($prods_camion as $p) {
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+    <script src="../js/formatters.js?v=<?php echo filemtime('../js/formatters.js'); ?>"></script>
 </head>
 <body>
 
@@ -285,8 +286,8 @@ foreach ($prods_camion as $p) {
                 <div class="abono-campo-label">VALOR DEL ABONO</div>
                 <div class="abono-input-wrap">
                     <span class="abono-prefix">$</span>
-                    <input type="number" id="inputAbonoVal" placeholder="0"
-                           min="0" oninput="actualizarSaldo()">
+                    <input type="tel" id="inputAbonoVal" placeholder="0"
+                           oninput="formatCurrencyInput(this); actualizarSaldo()">
                 </div>
                 <div class="saldo-restante-wrap" id="saldoRestanteWrap">
                     <span class="saldo-restante-label">Saldo restante:</span>
@@ -502,7 +503,15 @@ function toggleAbono() {
 
 function actualizarSaldo() {
     const total  = calcularTotal();
-    const abono  = parseFloat(document.getElementById('inputAbonoVal').value) || 0;
+    let abono    = getRawValue(document.getElementById('inputAbonoVal'));
+
+    // Limitar el abono al total de la venta
+    if (abono > total) {
+        abono = total;
+        const input = document.getElementById('inputAbonoVal');
+        input.value = new Intl.NumberFormat('es-CO').format(abono);
+    }
+
     const saldo  = Math.max(0, total - abono);
     const wrap   = document.getElementById('saldoRestanteWrap');
 
@@ -510,8 +519,7 @@ function actualizarSaldo() {
         wrap.style.display = '';
         document.getElementById('saldoRestanteVal').textContent =
             '$' + saldo.toLocaleString('es-CO');
-        document.getElementById('saldoRestanteVal').style.color =
-            abono > total ? '#C03030' : '#15803d';
+        document.getElementById('saldoRestanteVal').style.color = '#15803d';
     } else {
         wrap.style.display = 'none';
     }
@@ -524,13 +532,9 @@ function confirmarCredito() {
     let   abono  = 0;
 
     if (activo) {
-        abono = parseFloat(document.getElementById('inputAbonoVal').value) || 0;
+        abono = getRawValue(document.getElementById('inputAbonoVal'));
         if (abono <= 0) {
             alert('Ingresa un valor de abono mayor a $0.');
-            return;
-        }
-        if (abono > total) {
-            alert('El abono no puede superar el total de la venta.');
             return;
         }
     }

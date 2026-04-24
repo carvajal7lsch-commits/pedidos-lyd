@@ -159,7 +159,7 @@ if ($cierres_realizados > 0) {
     $mensaje  = $cierres_realizados === 1
         ? 'Se cerró automáticamente 1 jornada pendiente.'
         : "Se cerraron automáticamente $cierres_realizados jornadas pendientes.";
-    $tipo_msg = 'success';
+    $tipo_msg = 'info';
 }
 
 ?>
@@ -212,7 +212,7 @@ if ($cierres_realizados > 0) {
 
     <?php if (!empty($mensaje)): ?>
     <div class="alerta alerta-<?php echo $tipo_msg; ?>" style="margin:1rem;">
-        <i class="bi bi-exclamation-circle-fill"></i>
+        <i class="bi bi-<?php echo ($tipo_msg === 'info' ? 'info-circle-fill' : 'check-circle-fill'); ?>"></i>
         <?php echo $mensaje; ?>
     </div>
     <?php endif; ?>
