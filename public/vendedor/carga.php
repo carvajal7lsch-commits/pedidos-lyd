@@ -89,14 +89,16 @@ if (isset($_GET['exito'])) {
 }
 
 // ── Productos del catálogo ───────────────────
-$productos = mysqli_fetch_all(mysqli_query($conexion,
+$stmt = mysqli_prepare($conexion,
     "SELECT p.id_producto, p.nombre, p.imagen,
             c.nombre AS categoria
      FROM productos p
      JOIN categorias c ON c.id_categoria = p.id_categoria
      WHERE p.estado = 1
      ORDER BY c.nombre ASC, p.nombre ASC"
-), MYSQLI_ASSOC);
+);
+mysqli_stmt_execute($stmt);
+$productos = mysqli_fetch_all(mysqli_stmt_get_result($stmt), MYSQLI_ASSOC);
 
 // ── Inventario restante del último cargue ──
 $stmt_restante = mysqli_prepare($conexion,

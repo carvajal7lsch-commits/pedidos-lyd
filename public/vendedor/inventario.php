@@ -9,18 +9,21 @@ $id_vendedor = $_SESSION['id_usuario'];
 $hoy         = date('Y-m-d');
 
 // ── Inventario del camión hoy ────────────────
-$inventario = mysqli_fetch_all(mysqli_query($conexion,
+$stmt = mysqli_prepare($conexion,
     "SELECT p.nombre, p.imagen,
             ic.cantidad_cargada     AS ini,
             ic.cantidad_disponible  AS rest,
             (ic.cantidad_cargada - ic.cantidad_disponible) AS ven
      FROM inventariocamion ic
      JOIN productos p ON p.id_producto = ic.id_producto
-     WHERE ic.id_vendedor = $id_vendedor
-       AND ic.fecha_cargue = '$hoy'
+     WHERE ic.id_vendedor = ?
+       AND ic.fecha_cargue = ?
        AND ic.estado = 1
      ORDER BY p.nombre ASC"
-), MYSQLI_ASSOC);
+);
+mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
+mysqli_stmt_execute($stmt);
+$inventario = mysqli_fetch_all(mysqli_stmt_get_result($stmt), MYSQLI_ASSOC);
 
 // Totales resumen
 $total_productos   = count($inventario);

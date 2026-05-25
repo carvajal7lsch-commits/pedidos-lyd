@@ -143,16 +143,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion'])) {
 }
 
 // ── Productos del camión hoy (para validar stock) ─
-$prods_camion = mysqli_fetch_all(mysqli_query($conexion,
+$stmt = mysqli_prepare($conexion,
     "SELECT p.id_producto, p.nombre, p.precio, p.imagen,
             ic.cantidad_disponible AS stock
      FROM inventariocamion ic
      JOIN productos p ON p.id_producto = ic.id_producto
-     WHERE ic.id_vendedor = $id_vendedor
-       AND ic.fecha_cargue = '$hoy'
+     WHERE ic.id_vendedor = ?
+       AND ic.fecha_cargue = ?
        AND ic.estado = 1
        AND ic.cantidad_disponible > 0"
-), MYSQLI_ASSOC);
+);
+mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
+mysqli_stmt_execute($stmt);
+$prods_camion = mysqli_fetch_all(mysqli_stmt_get_result($stmt), MYSQLI_ASSOC);
 
 // Indexar por id para JS
 $prods_map = [];

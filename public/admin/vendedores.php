@@ -258,6 +258,7 @@ $abrir_modal_editar = ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'edi
         </div>
         <div class="modal-body">
             <form method="POST" action="?accion=crear">
+                <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                 <div class="campo">
                     <label>Nombre completo</label>
                     <input type="text" name="nombre" placeholder="Ej. Roberto Gómez"
@@ -303,6 +304,7 @@ $abrir_modal_editar = ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'edi
         </div>
         <div class="modal-body">
             <form method="POST" id="formEditar" action="">
+                <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
                 <div class="campo">
                     <label>Nombre completo</label>
                     <input type="text" id="editNombre" name="nombre" maxlength="100" required>

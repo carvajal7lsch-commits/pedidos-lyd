@@ -27,6 +27,10 @@ $mensaje  = '';
 $tipo_msg = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['accion'] === 'generar_cierre') {
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+        $mensaje  = 'Error de seguridad (CSRF). Intenta de nuevo.';
+        $tipo_msg = 'error';
+    } else {
 
     // Ventas contado del día
     $stmt = mysqli_prepare($conexion,
@@ -99,6 +103,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['accion']) && $_POST['
         $mensaje  = 'Error al generar el cierre. Intenta de nuevo.';
         $tipo_msg = 'error';
     }
+    }
 }
 
 // ── Datos del día para mostrar ───────────────
@@ -160,14 +165,17 @@ $credito_pendiente = $total_credito - $abonos_ventas_hoy;
 $total_general = $total_contado + $credito_pendiente;
 
 // Inventario restante (máximo 3 para preview)
-$inventario = mysqli_fetch_all(mysqli_query($conexion,
+$stmt = mysqli_prepare($conexion,
     "SELECT p.nombre, p.imagen, ic.cantidad_disponible
      FROM inventariocamion ic
      JOIN productos p ON p.id_producto = ic.id_producto
-     WHERE ic.id_vendedor = $id_vendedor AND ic.fecha_cargue = '$hoy'
+     WHERE ic.id_vendedor = ? AND ic.fecha_cargue = ?
        AND ic.estado = 1 AND ic.cantidad_disponible > 0
      ORDER BY ic.cantidad_disponible DESC"
-), MYSQLI_ASSOC);
+);
+mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
+mysqli_stmt_execute($stmt);
+$inventario = mysqli_fetch_all(mysqli_stmt_get_result($stmt), MYSQLI_ASSOC);
 
 $total_inventario = count($inventario);
 $preview_inv      = array_slice($inventario, 0, 3);
@@ -352,6 +360,7 @@ $preview_inv      = array_slice($inventario, 0, 3);
     <!-- Botón generar cierre -->
     <form method="POST" id="formCierre">
         <input type="hidden" name="accion" value="generar_cierre">
+        <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
         <button type="button" class="btn-generar-cierre" onclick="confirmarCierre()">
             <i class="bi bi-cloud-upload-fill"></i> Generar Cierre
         </button>

@@ -29,30 +29,40 @@ $diasPrevios = (int) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['cnt'];
 $jornada_activa = $hoyCierre === 0;
 $dia_ruta       = $diasPrevios + 1;
 
-$total_clientes = (int) mysqli_fetch_assoc(mysqli_query($conexion,
-    "SELECT COUNT(*) AS c FROM cliente WHERE estado = 1"
-))['c'];
-
-$total_productos = (int) mysqli_fetch_assoc(mysqli_query($conexion,
+$stmt = mysqli_prepare($conexion,
     "SELECT COUNT(*) AS c FROM inventariocamion
-     WHERE id_vendedor = $id_vendedor AND fecha_cargue = '$hoy'
+     WHERE id_vendedor = ? AND fecha_cargue = ?
        AND estado = 1 AND cantidad_disponible > 0"
-))['c'];
+);
+mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
+mysqli_stmt_execute($stmt);
+$total_productos = (int) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['c'];
+
+// Total clientes (para el grid)
+$stmt = mysqli_prepare($conexion, "SELECT COUNT(*) AS c FROM cliente WHERE estado = 1");
+mysqli_stmt_execute($stmt);
+$total_clientes = (int) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt))['c'];
 
 // Ventas y pedidos hoy
-$hoyVentas = mysqli_fetch_assoc(mysqli_query($conexion,
+$stmt = mysqli_prepare($conexion,
     "SELECT COALESCE(SUM(total),0) AS total, COUNT(*) AS pedidos
-     FROM venta WHERE id_vendedor = $id_vendedor AND fecha = '$hoy'"
-));
+     FROM venta WHERE id_vendedor = ? AND fecha = ?"
+);
+mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
+mysqli_stmt_execute($stmt);
+$hoyVentas = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
 
 $total_ventas_hoy = (float)$hoyVentas['total'];
 $pedidos_hoy      = (int)$hoyVentas['pedidos'];
 
 // Ventas ayer para delta
-$ayerVentas = mysqli_fetch_assoc(mysqli_query($conexion,
+$stmt = mysqli_prepare($conexion,
     "SELECT COALESCE(SUM(total),0) AS total
-     FROM venta WHERE id_vendedor = $id_vendedor AND fecha = '$ayer'"
-));
+     FROM venta WHERE id_vendedor = ? AND fecha = ?"
+);
+mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $ayer);
+mysqli_stmt_execute($stmt);
+$ayerVentas = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
 
 $total_ayer = (float)$ayerVentas['total'];
 if ($total_ayer > 0) {

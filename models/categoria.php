@@ -11,11 +11,13 @@ require_once __DIR__ . '/../config/conexion.php';
 // ---------------------------------------------
 function obtenerTodasCategorias() {
     global $conexion;
-    $resultado = mysqli_query($conexion,
+    $stmt = mysqli_prepare($conexion,
         "SELECT id_categoria, nombre, estado
          FROM categorias
          ORDER BY id_categoria DESC"
     );
+    mysqli_stmt_execute($stmt);
+    $resultado = mysqli_stmt_get_result($stmt);
     return mysqli_fetch_all($resultado, MYSQLI_ASSOC);
 }
 

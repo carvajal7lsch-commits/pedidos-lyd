@@ -11,11 +11,13 @@ require_once __DIR__ . '/../config/conexion.php';
 // ---------------------------------------------
 function obtenerUsuarios() {
     global $conexion;
-    $resultado = mysqli_query($conexion,
+    $stmt = mysqli_prepare($conexion,
         "SELECT id_usuario, nombre, correo, rol, estado
          FROM usuario
          ORDER BY id_usuario DESC"
     );
+    mysqli_stmt_execute($stmt);
+    $resultado = mysqli_stmt_get_result($stmt);
     return mysqli_fetch_all($resultado, MYSQLI_ASSOC);
 }
 
@@ -54,11 +56,12 @@ function existeCorreo($correo, $excluir_id = 0) {
 function crearUsuario($nombre, $correo, $contrasena) {
     global $conexion;
     $rol  = 'vendedor';
+    $hash = password_hash($contrasena, PASSWORD_BCRYPT);
     $stmt = mysqli_prepare($conexion,
         "INSERT INTO usuario (nombre, correo, contrasena, rol, estado)
          VALUES (?, ?, ?, ?, 1)"
     );
-    mysqli_stmt_bind_param($stmt, 'ssss', $nombre, $correo, $contrasena, $rol);
+    mysqli_stmt_bind_param($stmt, 'ssss', $nombre, $correo, $hash, $rol);
     return mysqli_stmt_execute($stmt);
 }
 
@@ -80,10 +83,11 @@ function editarUsuario($id, $nombre, $correo) {
 // ---------------------------------------------
 function cambiarContrasena($id, $contrasena) {
     global $conexion;
+    $hash = password_hash($contrasena, PASSWORD_BCRYPT);
     $stmt = mysqli_prepare($conexion,
         "UPDATE usuario SET contrasena = ? WHERE id_usuario = ?"
     );
-    mysqli_stmt_bind_param($stmt, 'si', $contrasena, $id);
+    mysqli_stmt_bind_param($stmt, 'si', $hash, $id);
     return mysqli_stmt_execute($stmt);
 }
 

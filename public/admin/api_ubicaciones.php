@@ -11,7 +11,7 @@ require_once __DIR__ . '/../../config/conexion.php';
 
 header('Content-Type: application/json');
 
-$resultado = mysqli_query($conexion,
+$stmt = mysqli_prepare($conexion,
     "SELECT u.id_usuario, u.nombre,
             uv.latitud, uv.longitud,
             uv.actualizado_en,
@@ -22,6 +22,8 @@ $resultado = mysqli_query($conexion,
        AND uv.actualizado_en >= NOW() - INTERVAL 60 MINUTE
      ORDER BY uv.actualizado_en DESC"
 );
+mysqli_stmt_execute($stmt);
+$resultado = mysqli_stmt_get_result($stmt);
 
 $vendedores = mysqli_fetch_all($resultado, MYSQLI_ASSOC);
 echo json_encode($vendedores);

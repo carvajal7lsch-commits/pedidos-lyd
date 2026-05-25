@@ -9,16 +9,21 @@ require_once __DIR__ . '/../config/conexion.php';
 // ── 1. VENTAS POR VENDEDOR ────────────────────────────────
 function getVentasPorVendedor($conexion, $desde = null, $hasta = null) {
     $where = '';
+    $params = [];
+    $types = '';
+
     if ($desde && $hasta) {
-        $desde = mysqli_real_escape_string($conexion, $desde);
-        $hasta = mysqli_real_escape_string($conexion, $hasta);
-        $where = "AND v.fecha BETWEEN '$desde' AND '$hasta'";
+        $where = "AND v.fecha BETWEEN ? AND ?";
+        $params = [$desde, $hasta];
+        $types = 'ss';
     } elseif ($desde) {
-        $desde = mysqli_real_escape_string($conexion, $desde);
-        $where = "AND v.fecha >= '$desde'";
+        $where = "AND v.fecha >= ?";
+        $params = [$desde];
+        $types = 's';
     } elseif ($hasta) {
-        $hasta = mysqli_real_escape_string($conexion, $hasta);
-        $where = "AND v.fecha <= '$hasta'";
+        $where = "AND v.fecha <= ?";
+        $params = [$hasta];
+        $types = 's';
     }
 
     $sql = "
@@ -37,7 +42,13 @@ function getVentasPorVendedor($conexion, $desde = null, $hasta = null) {
         GROUP BY u.id_usuario, u.nombre
         ORDER BY total_general DESC
     ";
-    $result = mysqli_query($conexion, $sql);
+
+    $stmt = mysqli_prepare($conexion, $sql);
+    if (!empty($params)) {
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
+    }
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
     $rows = [];
     while ($r = mysqli_fetch_assoc($result)) $rows[] = $r;
     return $rows;
@@ -46,16 +57,21 @@ function getVentasPorVendedor($conexion, $desde = null, $hasta = null) {
 // ── 2. VENTAS POR PERÍODO ─────────────────────────────────
 function getVentasPorPeriodo($conexion, $agrupacion = 'dia', $desde = null, $hasta = null) {
     $where = '';
+    $params = [];
+    $types = '';
+
     if ($desde && $hasta) {
-        $desde_esc = mysqli_real_escape_string($conexion, $desde);
-        $hasta_esc = mysqli_real_escape_string($conexion, $hasta);
-        $where = "WHERE v.fecha BETWEEN '$desde_esc' AND '$hasta_esc'";
+        $where = "WHERE v.fecha BETWEEN ? AND ?";
+        $params = [$desde, $hasta];
+        $types = 'ss';
     } elseif ($desde) {
-        $desde_esc = mysqli_real_escape_string($conexion, $desde);
-        $where = "WHERE v.fecha >= '$desde_esc'";
+        $where = "WHERE v.fecha >= ?";
+        $params = [$desde];
+        $types = 's';
     } elseif ($hasta) {
-        $hasta_esc = mysqli_real_escape_string($conexion, $hasta);
-        $where = "WHERE v.fecha <= '$hasta_esc'";
+        $where = "WHERE v.fecha <= ?";
+        $params = [$hasta];
+        $types = 's';
     }
 
     switch ($agrupacion) {
@@ -85,7 +101,13 @@ function getVentasPorPeriodo($conexion, $agrupacion = 'dia', $desde = null, $has
         GROUP BY periodo_key, periodo_label
         ORDER BY periodo_key ASC
     ";
-    $result = mysqli_query($conexion, $sql);
+    
+    $stmt = mysqli_prepare($conexion, $sql);
+    if (!empty($params)) {
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
+    }
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
     $rows = [];
     while ($r = mysqli_fetch_assoc($result)) $rows[] = $r;
     return $rows;
@@ -94,16 +116,21 @@ function getVentasPorPeriodo($conexion, $agrupacion = 'dia', $desde = null, $has
 // ── 3. PRODUCTOS MÁS VENDIDOS ─────────────────────────────
 function getProductosMasVendidos($conexion, $desde = null, $hasta = null, $limite = 20) {
     $where = '';
+    $params = [];
+    $types = '';
+
     if ($desde && $hasta) {
-        $desde = mysqli_real_escape_string($conexion, $desde);
-        $hasta = mysqli_real_escape_string($conexion, $hasta);
-        $where = "AND v.fecha BETWEEN '$desde' AND '$hasta'";
+        $where = "AND v.fecha BETWEEN ? AND ?";
+        $params = [$desde, $hasta];
+        $types = 'ss';
     } elseif ($desde) {
-        $desde = mysqli_real_escape_string($conexion, $desde);
-        $where = "AND v.fecha >= '$desde'";
+        $where = "AND v.fecha >= ?";
+        $params = [$desde];
+        $types = 's';
     } elseif ($hasta) {
-        $hasta = mysqli_real_escape_string($conexion, $hasta);
-        $where = "AND v.fecha <= '$hasta'";
+        $where = "AND v.fecha <= ?";
+        $params = [$hasta];
+        $types = 's';
     }
 
     $limite = (int) $limite;
@@ -125,7 +152,13 @@ function getProductosMasVendidos($conexion, $desde = null, $hasta = null, $limit
         ORDER BY unidades_vendidas DESC
         LIMIT $limite
     ";
-    $result = mysqli_query($conexion, $sql);
+    
+    $stmt = mysqli_prepare($conexion, $sql);
+    if (!empty($params)) {
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
+    }
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
     $rows = [];
     while ($r = mysqli_fetch_assoc($result)) $rows[] = $r;
     return $rows;
@@ -134,16 +167,21 @@ function getProductosMasVendidos($conexion, $desde = null, $hasta = null, $limit
 // ── 4. CLIENTES CON DEUDA ─────────────────────────────────
 function getClientesConDeuda($conexion, $desde = null, $hasta = null) {
     $where = '';
+    $params = [];
+    $types = '';
+
     if ($desde && $hasta) {
-        $desde = mysqli_real_escape_string($conexion, $desde);
-        $hasta = mysqli_real_escape_string($conexion, $hasta);
-        $where = " AND v.fecha BETWEEN '$desde' AND '$hasta'";
+        $where = " AND v.fecha BETWEEN ? AND ?";
+        $params = [$desde, $hasta];
+        $types = 'ss';
     } elseif ($desde) {
-        $desde = mysqli_real_escape_string($conexion, $desde);
-        $where = " AND v.fecha >= '$desde'";
+        $where = " AND v.fecha >= ?";
+        $params = [$desde];
+        $types = 's';
     } elseif ($hasta) {
-        $hasta = mysqli_real_escape_string($conexion, $hasta);
-        $where = " AND v.fecha <= '$hasta'";
+        $where = " AND v.fecha <= ?";
+        $params = [$hasta];
+        $types = 's';
     }
 
     $sql = "
@@ -168,7 +206,13 @@ function getClientesConDeuda($conexion, $desde = null, $hasta = null) {
         HAVING saldo_pendiente > 0
         ORDER BY saldo_pendiente DESC
     ";
-    $result = mysqli_query($conexion, $sql);
+    
+    $stmt = mysqli_prepare($conexion, $sql);
+    if (!empty($params)) {
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
+    }
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
     $rows = [];
     while ($r = mysqli_fetch_assoc($result)) $rows[] = $r;
     return $rows;
@@ -177,16 +221,21 @@ function getClientesConDeuda($conexion, $desde = null, $hasta = null) {
 // ── 5. CIERRES DIARIOS ───────────────────────────────────
 function getCierresDiarios($conexion, $desde = null, $hasta = null) {
     $where = '';
+    $params = [];
+    $types = '';
+
     if ($desde && $hasta) {
-        $desde = mysqli_real_escape_string($conexion, $desde);
-        $hasta = mysqli_real_escape_string($conexion, $hasta);
-        $where = "AND cd.fecha BETWEEN '$desde' AND '$hasta'";
+        $where = "AND cd.fecha BETWEEN ? AND ?";
+        $params = [$desde, $hasta];
+        $types = 'ss';
     } elseif ($desde) {
-        $desde = mysqli_real_escape_string($conexion, $desde);
-        $where = "AND cd.fecha >= '$desde'";
+        $where = "AND cd.fecha >= ?";
+        $params = [$desde];
+        $types = 's';
     } elseif ($hasta) {
-        $hasta = mysqli_real_escape_string($conexion, $hasta);
-        $where = "AND cd.fecha <= '$hasta'";
+        $where = "AND cd.fecha <= ?";
+        $params = [$hasta];
+        $types = 's';
     }
 
     $sql = "
@@ -203,7 +252,13 @@ function getCierresDiarios($conexion, $desde = null, $hasta = null) {
         WHERE 1=1 $where
         ORDER BY cd.fecha DESC, u.nombre ASC
     ";
-    $result = mysqli_query($conexion, $sql);
+    
+    $stmt = mysqli_prepare($conexion, $sql);
+    if (!empty($params)) {
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
+    }
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
     $rows = [];
     while ($r = mysqli_fetch_assoc($result)) $rows[] = $r;
     return $rows;
@@ -212,14 +267,19 @@ function getCierresDiarios($conexion, $desde = null, $hasta = null) {
 // ── 6. DETALLE DE FACTURAS ──────────────────────────────
 function getDetalleFacturas($conexion, $id_vendedor = null, $desde = null, $hasta = null) {
     $where = '';
+    $params = [];
+    $types = '';
+
     if ($id_vendedor) {
-        $id_vendedor = (int) $id_vendedor;
-        $where .= " AND v.id_vendedor = $id_vendedor";
+        $where .= " AND v.id_vendedor = ?";
+        $params[] = (int)$id_vendedor;
+        $types .= 'i';
     }
     if ($desde && $hasta) {
-        $desde = mysqli_real_escape_string($conexion, $desde);
-        $hasta = mysqli_real_escape_string($conexion, $hasta);
-        $where .= " AND v.fecha BETWEEN '$desde' AND '$hasta'";
+        $where .= " AND v.fecha BETWEEN ? AND ?";
+        $params[] = $desde;
+        $params[] = $hasta;
+        $types .= 'ss';
     }
 
     $sql = "
@@ -240,7 +300,13 @@ function getDetalleFacturas($conexion, $id_vendedor = null, $desde = null, $hast
         WHERE 1=1 $where
         ORDER BY v.id_venta DESC
     ";
-    $result = mysqli_query($conexion, $sql);
+    
+    $stmt = mysqli_prepare($conexion, $sql);
+    if (!empty($params)) {
+        mysqli_stmt_bind_param($stmt, $types, ...$params);
+    }
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
     $rows = [];
     while ($r = mysqli_fetch_assoc($result)) $rows[] = $r;
     return $rows;
@@ -249,7 +315,9 @@ function getDetalleFacturas($conexion, $id_vendedor = null, $desde = null, $hast
 // ── 7. LISTADO DE VENDEDORES ─────────────────────────────
 function getVendedoresActivos($conexion) {
     $sql = "SELECT id_usuario, nombre FROM usuario WHERE rol = 'vendedor' AND estado = 1 ORDER BY nombre ASC";
-    $result = mysqli_query($conexion, $sql);
+    $stmt = mysqli_prepare($conexion, $sql);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
     $rows = [];
     while ($r = mysqli_fetch_assoc($result)) $rows[] = $r;
     return $rows;

@@ -19,7 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     require_once __DIR__ . '/../controllers/UsuarioController.php';
     $resultado = login(
         trim($_POST['usuario']     ?? ''),
-        trim($_POST['contrasena'] ?? '')
+        trim($_POST['contrasena'] ?? ''),
+        $_POST['csrf_token']      ?? ''
     );
     // Si llega aquí es porque hubo error (si no, ya redirigió)
     if (isset($resultado['error'])) {
@@ -126,6 +127,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <i class="bi bi-exclamation-circle-fill"></i>
                     <span id="alertaMsg"></span>
                 </div>
+
+                <input type="hidden" name="csrf_token" value="<?php echo generate_csrf_token(); ?>">
 
                 <div class="inputs">
                     <div class="user field-wrap" id="wrapUsuario">

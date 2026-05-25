@@ -23,7 +23,10 @@ function etiquetarCliente($c) {
     $fecha_reg_str = $c['fecha_registro'] ?? null;
     if (!$fecha_reg_str) {
         // Fallback en caso de que no se haya seleccionado fecha_registro en la consulta original
-        $res_freg = mysqli_query($conexion, "SELECT fecha_registro FROM cliente WHERE id_cliente = $id LIMIT 1");
+        $stmt_freg = mysqli_prepare($conexion, "SELECT fecha_registro FROM cliente WHERE id_cliente = ? LIMIT 1");
+        mysqli_stmt_bind_param($stmt_freg, 'i', $id);
+        mysqli_stmt_execute($stmt_freg);
+        $res_freg = mysqli_stmt_get_result($stmt_freg);
         $row_freg = $res_freg ? mysqli_fetch_row($res_freg) : null;
         $fecha_reg_str = $row_freg ? $row_freg[0] : null;
     }
@@ -87,21 +90,30 @@ function etiquetarCliente($c) {
     $vol_total = (float) mysqli_fetch_assoc(mysqli_stmt_get_result($stmt4))['volumen_total'];
 
     // Percentil 80 del volumen total
-    $p80_row = mysqli_fetch_row(mysqli_query($conexion,
+    $stmt_p80 = mysqli_prepare($conexion,
         "SELECT COALESCE(SUM(total), 0) AS v FROM venta GROUP BY id_cliente ORDER BY v DESC"
-    ));
+    );
+    mysqli_stmt_execute($stmt_p80);
+    $p80_row = mysqli_fetch_row(mysqli_stmt_get_result($stmt_p80));
+
     // Calculamos el total de clientes activos para el umbral VIP
-    $total_cli_res = mysqli_query($conexion, "SELECT COUNT(*) FROM cliente WHERE estado = 1");
+    $stmt_total_cli = mysqli_prepare($conexion, "SELECT COUNT(*) FROM cliente WHERE estado = 1");
+    mysqli_stmt_execute($stmt_total_cli);
+    $total_cli_res = mysqli_stmt_get_result($stmt_total_cli);
     $total_cli = $total_cli_res ? (int)mysqli_fetch_row($total_cli_res)[0] : 0;
 
     // Calculamos el umbral VIP con una subconsulta
-    $vip_stmt = mysqli_query($conexion,
+    $offset = max(0, (int)($total_cli * 0.2) - 1);
+    $vip_stmt_prep = mysqli_prepare($conexion,
         "SELECT vol FROM (
             SELECT id_cliente, COALESCE(SUM(total),0) AS vol
             FROM venta GROUP BY id_cliente
-         ) t ORDER BY vol DESC LIMIT 1 OFFSET " . max(0, (int)($total_cli * 0.2) - 1)
+         ) t ORDER BY vol DESC LIMIT 1 OFFSET ?"
     );
-    $vip_row   = mysqli_fetch_row($vip_stmt);
+    mysqli_stmt_bind_param($vip_stmt_prep, 'i', $offset);
+    mysqli_stmt_execute($vip_stmt_prep);
+    $vip_res = mysqli_stmt_get_result($vip_stmt_prep);
+    $vip_row   = mysqli_fetch_row($vip_res);
     $umbral_vip = $vip_row ? (float)$vip_row[0] : PHP_INT_MAX;
 
     if ($vol_total > 0 && $vol_total >= $umbral_vip && !in_array('nuevo', array_column($tags, 'clave'))) {
@@ -129,11 +141,13 @@ function renderEtiquetas(array $tags): string {
 // ---------------------------------------------
 function obtenerClientes() {
     global $conexion;
-    $resultado = mysqli_query($conexion,
+    $stmt = mysqli_prepare($conexion,
         "SELECT id_cliente, nombre, telefono, direccion, estado
          FROM cliente
          ORDER BY id_cliente DESC"
     );
+    mysqli_stmt_execute($stmt);
+    $resultado = mysqli_stmt_get_result($stmt);
     return mysqli_fetch_all($resultado, MYSQLI_ASSOC);
 }
 

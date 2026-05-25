@@ -7,13 +7,18 @@ require_once __DIR__ . '/../config/conexion.php';
 require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/../models/usuario.php';
 
-function login($usuario, $contrasena) {
+function login($usuario, $contrasena, $csrf_token = '') {
     global $conexion;
+
+    if (!verify_csrf_token($csrf_token)) {
+        return ['error' => true, 'mensaje' => 'Error de seguridad (CSRF). Intenta de nuevo.'];
+    }
 
     if (empty($usuario) || empty($contrasena)) {
         return ['error' => true, 'mensaje' => 'Por favor completa todos los campos.'];
     }
 
+    // Buscar el usuario
     $sql = "SELECT * FROM usuario 
             WHERE (nombre = ? OR correo = ?) 
             AND estado = 1 
@@ -29,11 +34,37 @@ function login($usuario, $contrasena) {
         return ['error' => true, 'mensaje' => 'Usuario o contraseña incorrectos.'];
     }
 
-    if ($contrasena !== $user['contrasena']) {
+    // Verificar si el usuario está bloqueado temporalmente (ej. 15 minutos)
+    if ($user['intentos_fallidos'] >= 5) {
+        $ultimo = strtotime($user['ultimo_intento']);
+        if (time() - $ultimo < 900) { // 15 minutos
+            $restante = ceil((900 - (time() - $ultimo)) / 60);
+            return ['error' => true, 'mensaje' => "Demasiados intentos fallidos. Intenta en $restante minutos."];
+        } else {
+            // Resetear intentos si ya pasó el tiempo
+            $stmt_reset = mysqli_prepare($conexion, "UPDATE usuario SET intentos_fallidos = 0 WHERE id_usuario = ?");
+            mysqli_stmt_bind_param($stmt_reset, 'i', $user['id_usuario']);
+            mysqli_stmt_execute($stmt_reset);
+        }
+    }
+
+    if (!password_verify($contrasena, $user['contrasena'])) {
+        // Registrar intento fallido
+        $stmt_fail = mysqli_prepare($conexion, "UPDATE usuario SET intentos_fallidos = intentos_fallidos + 1, ultimo_intento = NOW() WHERE id_usuario = ?");
+        mysqli_stmt_bind_param($stmt_fail, 'i', $user['id_usuario']);
+        mysqli_stmt_execute($stmt_fail);
+
         return ['error' => true, 'mensaje' => 'Usuario o contraseña incorrectos.'];
     }
 
-    session_start();
+    // Login exitoso: Resetear intentos y regenerar sesión
+    $stmt_success = mysqli_prepare($conexion, "UPDATE usuario SET intentos_fallidos = 0, ultimo_intento = NULL WHERE id_usuario = ?");
+    mysqli_stmt_bind_param($stmt_success, 'i', $user['id_usuario']);
+    mysqli_stmt_execute($stmt_success);
+
+    if (session_status() === PHP_SESSION_NONE) session_start();
+    session_regenerate_id(true);
+
     $_SESSION['id_usuario'] = $user['id_usuario'];
     $_SESSION['nombre']     = $user['nombre'];
     $_SESSION['rol']        = $user['rol'];
@@ -58,6 +89,9 @@ function logout() {
 // =============================================
 
 function procesarCrearUsuario() {
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+        return ['error' => true, 'errores' => ['Error de seguridad (CSRF). Intenta de nuevo.']];
+    }
     $errores = validarFormularioUsuario();
     if (!empty($errores)) {
         return ['error' => true, 'errores' => $errores];
@@ -79,6 +113,9 @@ function procesarCrearUsuario() {
 }
 
 function procesarEditarUsuario($id) {
+    if (!verify_csrf_token($_POST['csrf_token'] ?? '')) {
+        return ['error' => true, 'errores' => ['Error de seguridad (CSRF). Intenta de nuevo.']];
+    }
     $errores = validarFormularioUsuario(false);
     if (!empty($errores)) {
         return ['error' => true, 'errores' => $errores];

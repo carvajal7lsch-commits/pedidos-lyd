@@ -6,13 +6,22 @@ require_once __DIR__ . '/../../config/config.php';
 require_once __DIR__ . '/../../config/conexion.php';
 
 // ── Métricas ──────────────────────────────────────────────
-$total_clientes  = mysqli_fetch_row(mysqli_query($conexion, "SELECT COUNT(*) FROM cliente"))[0]            ?? 0;
-$activos_cli     = mysqli_fetch_row(mysqli_query($conexion, "SELECT COUNT(*) FROM cliente WHERE estado=1"))[0] ?? 0;
+// Helper para conteos rápidos (Admin Dashboard)
+function countRows($conexion, $sql) {
+    $stmt = mysqli_prepare($conexion, $sql);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    $row = mysqli_fetch_row($res);
+    return $row ? (int)$row[0] : 0;
+}
+
+$total_clientes  = countRows($conexion, "SELECT COUNT(*) FROM cliente");
+$activos_cli     = countRows($conexion, "SELECT COUNT(*) FROM cliente WHERE estado=1");
 $inactivos_cli   = $total_clientes - $activos_cli;
-$total_productos = mysqli_fetch_row(mysqli_query($conexion, "SELECT COUNT(*) FROM productos"))[0]           ?? 0;
-$activos_prod    = mysqli_fetch_row(mysqli_query($conexion, "SELECT COUNT(*) FROM productos WHERE estado=1"))[0] ?? 0;
-$total_categ     = mysqli_fetch_row(mysqli_query($conexion, "SELECT COUNT(*) FROM categorias WHERE estado=1"))[0] ?? 0;
-$total_usuarios  = mysqli_fetch_row(mysqli_query($conexion, "SELECT COUNT(*) FROM usuario"))[0]             ?? 0;
+$total_productos = countRows($conexion, "SELECT COUNT(*) FROM productos");
+$activos_prod    = countRows($conexion, "SELECT COUNT(*) FROM productos WHERE estado=1");
+$total_categ     = countRows($conexion, "SELECT COUNT(*) FROM categorias WHERE estado=1");
+$total_usuarios  = countRows($conexion, "SELECT COUNT(*) FROM usuario");
 
 $pct_activos  = $total_clientes > 0 ? round(($activos_cli / $total_clientes) * 100) : 0;
 // Ring r=54 → C = 2π×54 ≈ 339
@@ -20,13 +29,19 @@ $ring_offset  = round(339 - (339 * $pct_activos / 100));
 
 // ── Actividad reciente ────────────────────────────────────
 $actividad = [];
-$r1 = mysqli_query($conexion,
-    "SELECT id_cliente AS id, nombre, 'tl-cli' AS tipo FROM cliente ORDER BY id_cliente DESC LIMIT 4");
-while ($r = mysqli_fetch_assoc($r1)) $actividad[] = $r;
+$stmt_r1 = mysqli_prepare($conexion,
+    "SELECT id_cliente AS id, nombre, 'tl-cli' AS tipo FROM cliente ORDER BY id_cliente DESC LIMIT 4"
+);
+mysqli_stmt_execute($stmt_r1);
+$res_r1 = mysqli_stmt_get_result($stmt_r1);
+while ($r = mysqli_fetch_assoc($res_r1)) $actividad[] = $r;
 
-$r2 = mysqli_query($conexion,
-    "SELECT id_producto AS id, nombre, 'tl-prod' AS tipo FROM productos ORDER BY id_producto DESC LIMIT 4");
-while ($r = mysqli_fetch_assoc($r2)) $actividad[] = $r;
+$stmt_r2 = mysqli_prepare($conexion,
+    "SELECT id_producto AS id, nombre, 'tl-prod' AS tipo FROM productos ORDER BY id_producto DESC LIMIT 4"
+);
+mysqli_stmt_execute($stmt_r2);
+$res_r2 = mysqli_stmt_get_result($stmt_r2);
+while ($r = mysqli_fetch_assoc($res_r2)) $actividad[] = $r;
 
 usort($actividad, fn($a,$b) => $b['id'] - $a['id']);
 $actividad = array_slice($actividad, 0, 6);

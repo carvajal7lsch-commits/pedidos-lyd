@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $accion === 'crear') {
 $abrir_modal = ($_SERVER['REQUEST_METHOD'] === 'POST' && $tipo_msg === 'error');
 
 // ── Obtener clientes con saldo, última visita y producto favorito ─
-$clientes = mysqli_fetch_all(mysqli_query($conexion,
+$stmt = mysqli_prepare($conexion,
     "SELECT c.id_cliente, c.nombre, c.telefono, c.direccion, c.estado,
             COALESCE((
                 SELECT SUM(v.total - COALESCE((SELECT SUM(a.monto) FROM abono a WHERE a.id_venta = v.id_venta), 0))
@@ -65,7 +65,9 @@ $clientes = mysqli_fetch_all(mysqli_query($conexion,
      FROM cliente c
      WHERE c.estado = 1
      ORDER BY c.nombre ASC"
-), MYSQLI_ASSOC);
+);
+mysqli_stmt_execute($stmt);
+$clientes = mysqli_fetch_all(mysqli_stmt_get_result($stmt), MYSQLI_ASSOC);
 
 // Calcular etiquetas y días sin comprar para cada cliente
 foreach ($clientes as &$c) {

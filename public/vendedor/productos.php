@@ -40,12 +40,14 @@ if ($id_cliente) {
 }
 
 // ── Categorías activas ───────────────────────
-$cats = mysqli_fetch_all(mysqli_query($conexion,
+$stmt = mysqli_prepare($conexion,
     "SELECT id_categoria, nombre FROM categorias WHERE estado = 1 ORDER BY nombre ASC"
-), MYSQLI_ASSOC);
+);
+mysqli_stmt_execute($stmt);
+$cats = mysqli_fetch_all(mysqli_stmt_get_result($stmt), MYSQLI_ASSOC);
 
 // ── Productos con stock del camión ───────────
-$productos = mysqli_fetch_all(mysqli_query($conexion,
+$stmt = mysqli_prepare($conexion,
     "SELECT p.id_producto, p.nombre, p.precio, p.imagen,
             p.id_categoria, c.nombre AS categoria,
             COALESCE(ic.cantidad_disponible, 0) AS stock_camion
@@ -53,12 +55,15 @@ $productos = mysqli_fetch_all(mysqli_query($conexion,
      JOIN categorias c ON c.id_categoria = p.id_categoria
      LEFT JOIN inventariocamion ic
             ON ic.id_producto = p.id_producto
-           AND ic.id_vendedor = $id_vendedor
-           AND ic.fecha_cargue = '$hoy'
+           AND ic.id_vendedor = ?
+           AND ic.fecha_cargue = ?
            AND ic.estado = 1
      WHERE p.estado = 1
      ORDER BY c.nombre ASC, p.nombre ASC"
-), MYSQLI_ASSOC);
+);
+mysqli_stmt_bind_param($stmt, 'is', $id_vendedor, $hoy);
+mysqli_stmt_execute($stmt);
+$productos = mysqli_fetch_all(mysqli_stmt_get_result($stmt), MYSQLI_ASSOC);
 ?>
 <!DOCTYPE html>
 <html lang="es">
