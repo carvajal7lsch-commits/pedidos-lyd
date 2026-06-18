@@ -3,9 +3,9 @@
 # =============================================
 
 # ── Configuración sensible ───────────────────
-# El archivo real de conexión NO va al repo.
-# Usa conexion.example.php como plantilla.
-config/conexion.php
+# El archivo de entorno con contraseñas NO va al repo.
+# Usa .env.example como plantilla.
+.env
 
 # ── Uploads de usuarios ──────────────────────
 # Las imágenes de productos subidas en producción

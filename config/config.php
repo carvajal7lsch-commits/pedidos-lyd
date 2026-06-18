@@ -3,6 +3,13 @@
 // Variables globales del sistema
 // =============================================
 
+// Parámetros seguros para cookies de sesión (debe ir antes de session_start)
+session_set_cookie_params([
+    'secure' => true,      // Solo transmitir sobre HTTPS
+    'httponly' => true,    // Inaccesible vía JavaScript
+    'samesite' => 'Strict' // Previene ataques CSRF intersitio
+]);
+
 // Zona horaria Colombia (UTC-5)
 date_default_timezone_set('America/Bogota');
 

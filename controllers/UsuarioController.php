@@ -166,8 +166,19 @@ function validarFormularioUsuario($validar_contrasena = true) {
     if (empty($_POST['correo']) || !filter_var($_POST['correo'], FILTER_VALIDATE_EMAIL)) {
         $errores[] = 'Ingresa un correo electrónico válido.';
     }
-    if ($validar_contrasena && empty(trim($_POST['contrasena'] ?? ''))) {
-        $errores[] = 'La contraseña es obligatoria.';
+
+    $contrasena = trim($_POST['contrasena'] ?? '');
+
+    if ($validar_contrasena) {
+        if (empty($contrasena)) {
+            $errores[] = 'La contraseña es obligatoria.';
+        } elseif (strlen($contrasena) < 8) {
+            $errores[] = 'La contraseña debe tener al menos 8 caracteres.';
+        }
+    } elseif (!empty($contrasena)) {
+        if (strlen($contrasena) < 8) {
+            $errores[] = 'La nueva contraseña debe tener al menos 8 caracteres.';
+        }
     }
 
     return $errores;

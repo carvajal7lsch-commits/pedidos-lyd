@@ -114,10 +114,10 @@ mysql -u root pedidos_lyd < database/BD
 
 **4. Configurar la conexión**
 ```bash
-# Copiar la plantilla
-cp config/conexion.example.php config/conexion.php
+# Renombrar la plantilla de configuración
+cp .env.example .env
 
-# Editar con tus credenciales si es necesario
+# Editar el archivo .env con tus credenciales de base de datos
 # Por defecto usa root sin contraseña (XAMPP estándar)
 ```
 
