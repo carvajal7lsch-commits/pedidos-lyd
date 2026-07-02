@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Base de datos MySQL automatizada
+  db:
+    image: mysql:8.0
+    container_name: pedidos_lyd_db
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-pedidos_lyd}
+      MYSQL_USER: ${DB_USER:-u631215701_lyd}
+      MYSQL_PASSWORD: ${DB_PASS:-Pedidoslyd2026}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASS:-RootPedidos2026}
+    volumes:
+      # Persistencia de datos de MySQL
+      - db_data:/var/lib/mysql
+      # Auto-importación del archivo SQL al iniciar el contenedor por primera vez
+      - ./database/BD:/docker-entrypoint-initdb.d/01_init.sql:ro
+    networks:
+      - pedidos_net
+
+  # Aplicación Web PHP (Pedidos LYD)
+  pedidos-lyd:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pedidos_lyd_app
+    restart: unless-stopped
+    ports:
+      # Puerto libre asignado en el VPS: 8081
+      - "8081:80"
+    depends_on:
+      - db
+    env_file:
+      - .env
+    volumes:
+      # Persistencia de imágenes subidas
+      - ./public/uploads:/var/www/html/public/uploads
+    networks:
+      - pedidos_net
+
+networks:
+  pedidos_net:
+    driver: bridge
+
+volumes:
+  db_data:

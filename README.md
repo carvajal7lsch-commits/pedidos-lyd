@@ -142,6 +142,64 @@ http://localhost/Pedidos_LYD/public/login.php
 
 ---
 
+## 🐳 Despliegue en VPS (`srv1757722`) con Docker
+
+Este proyecto está preparado para ejecutarse mediante **Docker Compose** asignado al puerto libre **`8081`** de tu servidor VPS.
+
+### 1. Clonar o subir el proyecto al VPS
+```bash
+git clone https://github.com/tu-usuario/pedidos-lyd.git /home/dani/pedidos-lyd
+cd /home/dani/pedidos-lyd
+```
+
+### 2. Configurar el archivo `.env`
+Crea el archivo `.env` tomando como base la plantilla:
+```bash
+cp .env.example .env
+```
+*(Por defecto, `.env.example` ya viene listo con `DB_HOST=db` para conectarse al contenedor automático de MySQL).*
+
+### 3. Iniciar el contenedor con Docker Compose (¡Zero-Setup Manual!)
+```bash
+docker compose up -d --build
+```
+✨ **¡No necesitas crear la base de datos ni importar tablas manualmente!**  
+Docker Compose levantará automáticamente el servicio de MySQL, creará la base de datos `pedidos_lyd` e importará las tablas y datos del archivo `database/BD` en su primera ejecución.
+
+El servicio quedará escuchando públicamente en el puerto **`8081`**.
+
+
+---
+
+## 🌐 Configuración de Dominio con Nginx Reverse Proxy (HTTPS para PWA)
+
+Como la PWA requiere **HTTPS**, se recomienda configurar Nginx en el VPS para apuntar tu dominio al puerto `8081`:
+
+### 1. Crear configuración en Nginx (`/etc/nginx/sites-available/pedidos.tudominio.com`)
+```nginx
+server {
+    server_name pedidos.tudominio.com; # Cambia por tu dominio real
+
+    location / {
+        proxy_pass http://127.0.0.1:8081;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+### 2. Activar el sitio y solicitar certificado SSL (Let's Encrypt)
+```bash
+sudo ln -s /etc/nginx/sites-available/pedidos.tudominio.com /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+sudo certbot --nginx -d pedidos.tudominio.com
+```
+
+---
+
+
 ## 📱 PWA e instalación móvil
 
 1. Abrir el panel del vendedor en **Chrome para Android**
@@ -166,7 +224,14 @@ http://localhost/Pedidos_LYD/public/login.php
 
 ## 📋 Changelog
 
-## v2.0.0 — 2026-03-25
+### v2.1.0 — 2026-06-18
+- 🔒 **Seguridad y Estabilidad**
+  - Implementación de variables de entorno (`.env`) para credenciales de base de datos.
+  - Habilitación de reporte estricto de errores de conexión (`mysqli_report` y `try-catch`).
+  - Configuración de cookies de sesión seguras (`Secure`, `HttpOnly`, `SameSite=Strict`).
+  - Validación de complejidad en contraseñas (mínimo 8 caracteres).
+
+### v2.0.0 — 2026-03-25
 - 🔴 Cambios importantes
 - Eliminación completa del modo offline
 - Eliminados Service Worker, IndexedDB y sincronización local

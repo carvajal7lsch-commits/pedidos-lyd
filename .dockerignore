@@ -1,0 +1,11 @@
+.git
+.gitignore
+.dockerignore
+.env
+.vscode
+*.md
+*.html
+!index.html
+!manual.html
+!FICHA_TECNICA.html
+!FICHA_TECNICA.md
